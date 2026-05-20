@@ -17,11 +17,7 @@ Write your discussion here. Furthermore, give an outlook on what could be added 
 Obviously, this structure is flexible, but in general this is how not only a thesis but also papers and in general great research work is strucutred.
 
 ## Page limit
-The page limit remains at:
-- 40 pages for the single-column mode;
-- 35 pages for the double-column mode.
-
-Page count starts at the introduction, and does not include references or appendix.
+The page limit is at 35 pages. Page count starts at the introduction, and does not include references or appendix.
 
 **Important notes:**
 
