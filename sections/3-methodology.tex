@@ -65,7 +65,7 @@ Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API d
 \begin{figure}[h]
 \centering
 \includegraphics[width=\linewidth]{media/benchmark_pipeline_thesis_v4.pdf}
-\caption{End-to-end benchmark pipeline. A synthesis agent reads documentation and produces an MCP server; a separate evaluation agent attempts tasks against it; a judge scores each attempt.}
+\caption{End-to-end benchmark pipeline. A synthesis agent (``Tool-Maker'') reads documentation and produces an MCP server; a separate evaluation agent (``Agent'') attempts tasks against it; a judge scores each attempt.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -207,10 +207,10 @@ capability. Model comparison results are presented in Section~\ref{sec:rq1}.
 
 \begin{table}[ht]
 \centering
-\footnotesize
+\scriptsize
 \caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; n.d.\ = not disclosed by provider. For Qwen3, 3B act.\ denotes activated parameters per token (mixture-of-experts architecture).}
 \label{tab:models}
-\setlength{\tabcolsep}{3.5pt}
+\setlength{\tabcolsep}{2.7pt}
 \begin{tabular}{lllrr}
 \toprule
 \textbf{Model} & \textbf{Family} & \textbf{Access} & \textbf{Params} & \textbf{Context} \\
@@ -220,8 +220,8 @@ GPT-5.4              & OpenAI GPT-5    & Azure API            & n.d.  & 1.05M  \
 Sonnet~4.6           & Anthropic Claude & GCP API             & n.d.  & 1M     \\
 Haiku~4.5            & Anthropic Claude & GCP API             & n.d.  & 200K   \\
 Gemini~3.1~Pro       & Google Gemini   & GCP API              & n.d.  & 1M     \\
-Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & ---    \\
-Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & ---    \\
+Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & 262.144    \\
+Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 262.144    \\
 \bottomrule
 \end{tabular}
 % n.d. = not disclosed by provider
@@ -331,7 +331,7 @@ they count neither as pass nor fail, because they reflect the evaluation agent's
 \begin{equation}
   \text{PASS}
   = \frac{\#\,\textsc{pass}}
-    {\#\,\textsc{pass} + \#\,\textsc{fail}_{\text{tool}}}
+    {\#\,\textsc{pass} + \#\,\textsc{fail}_{\text{tool}}},
   \label{eq:pass}
 \end{equation}
 %
