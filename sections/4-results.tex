@@ -228,7 +228,7 @@ Taken together, these results validate SYNTH as a leading indicator: measuring s
 
 \textbf{How does synthesis model capability affect agent pass rate?}
 
-To isolate model effects from API-specific variation, we evaluate seven synthesis models on a common three-API set (GitHub, Stripe, Zulip) selected to span low, medium, and high familiarity. Table~\ref{tab:model_comparison} reports PASS for all seven models across all three APIs and conditions; absent results are synthesis failures and score as 0\%. Figure~\ref{fig:model_capability} summarises the per-model distributions.
+To isolate model effects from API-specific variation, we evaluate eight synthesis models on a common three-API set (GitHub, Stripe, Zulip) selected to span low, medium, and high familiarity. Table~\ref{tab:model_comparison} reports PASS for all models across all three APIs and conditions; absent conditions are synthesis failures (no runnable server produced) and score as 0\%. Figure~\ref{fig:model_capability} summarises the per-model distributions. Qwen3-Coder-Next-Base has very sparse coverage on this set --- GitHub produced no valid server in any condition, and only single conditions were evaluated for Stripe and Zulip --- reflecting the limits of a base model without instruction tuning.
 
 Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2, GPT-5.4, and Haiku~4.5 form a competitive mid-tier, though with distinct failure modes: GPT-5.4 produces broken tool stubs for Stripe docs (8\%) --- a synthesis-level failure confirmed by SYNTH=48\% --- while Haiku~4.5 collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1 Pro is broadly competitive at mid-tier for GitHub and Zulip but weaker on Stripe.
 
@@ -256,19 +256,22 @@ This model-level variation in adherence is a confound when interpreting the aggr
     \textbf{Model} & & D & N & M & D & N & M & D & N & M \\
     \midrule
     \rowcolor{gray!10}
-    GPT-5.4-mini & & 38 & 32 & 30 & 14 & \cellcolor{red!12}0 & 19 & 40 & 14 & 29 \\
+    GPT-5.4-mini          & & 38 & 32 & 30 & 14 & \cellcolor{red!12}0 & 19 & 40 & 14 & 29 \\
     \rowcolor{gray!10}
-    Qwen3-Coder-Next & & 58 & 60 & 57 & \cellcolor{red!12}0 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 64 \\
-    Gemini~3.1 Pro & & \textbf{78} & 71 & 36 & 47 & 50 & 59 & 76 & \textbf{84} & 62 \\
-    GPT-5.2 & & 62 & 83 & 76 & \textbf{72} & 62 & 57 & \textbf{80} & 60 & 62 \\
-    GPT-5.4 & & 58 & \textbf{89} & 73 & 8 & 62 & 12 & \textbf{90} & 85 & 71 \\
-    Haiku~4.5 & & \textbf{95} & 90 & \textbf{86} & 57 & \textbf{75} & \textbf{86} & 55 & 36 & 26 \\
-    Sonnet~4.6 & & 90 & \textbf{100} & \textbf{100} & 77 & \textbf{100} & \textbf{100} & \textbf{100} & 43 & \cellcolor{red!12}0 \\
+    Qwen3-Coder-Next-Base & & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 56 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 \\
+    \rowcolor{gray!10}
+    Qwen3-Coder-Next      & & 58 & 60 & 57 & \cellcolor{red!12}0 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 64 \\
+    Gemini~3.1 Pro        & & \textbf{78} & 71 & 36 & 47 & 50 & 59 & 76 & \textbf{84} & 62 \\
+    GPT-5.2               & & 62 & 83 & 76 & \textbf{72} & 62 & 57 & \textbf{80} & 60 & 62 \\
+    GPT-5.4               & & 58 & \textbf{89} & 73 & 8 & 62 & 12 & \textbf{90} & 85 & 71 \\
+    Haiku~4.5             & & \textbf{95} & 90 & \textbf{86} & 57 & \textbf{75} & \textbf{86} & 55 & 36 & 26 \\
+    Sonnet~4.6            & & 90 & \textbf{100} & \textbf{100} & 77 & \textbf{100} & \textbf{100} & \textbf{100} & 43 & \cellcolor{red!12}0 \\
     \bottomrule
   \end{tabular}
   \par\smallskip
   \raggedright\scriptsize D = docs, N = nodocs, M = mutated.
-  Bold = highest per column.
+  Bold = highest per column. Shaded rows = weakest models.
+  Qwen3-Coder-Next-Base GitHub: no server.py produced; Stripe/Zulip: only one condition evaluated.
   Sonnet~4.6 Zulip mutated: synthesis stream error on all attempts.
 \end{table}
 
