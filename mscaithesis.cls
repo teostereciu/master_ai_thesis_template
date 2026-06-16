@@ -2,7 +2,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{mscaithesis}
 
-\LoadClass[10pt]{book}
+\LoadClass[10pt,openany]{book}
 
 \newif\if@license{\@licensefalse}
 \DeclareOption{license}{\@licensetrue}
@@ -16,7 +16,8 @@
 
 \RequirePackage[colorlinks=true,
                 citecolor=blue,
-                linkcolor=black]{hyperref}
+                linkcolor=black,
+                bookmarksdepth=3]{hyperref}
 \RequirePackage[dvipsnames]{xcolor}
 \RequirePackage{changepage}
 \RequirePackage{etoolbox}
