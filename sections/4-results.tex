@@ -37,6 +37,8 @@ synthesizers rely on parametric knowledge and when this affects downstream
 performance. Section~\ref{sec:rq4} examines the effect of documentation
 availability. Section~\ref{sec:rq5} quantifies the relationship between
 synthesis quality and agent pass rate.
+Section~\ref{sec:model_comparison} extends the analysis to seven synthesis models
+on a common three-API evaluation set.
 
 % ------------------------------------------------------------
 \section{RQ1: Synthesis Feasibility}
@@ -69,6 +71,50 @@ Grounding analysis shows that synthesizers consistently anchor tools to
 real documentation sources: citation validity is 86--100\% across datasets
 (every \texttt{grounding.json} entry points to an existing file with a
 syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Agent pass rate (PASS, \%) per API and synthesis condition.
+    Rows sorted by mean PASS descending. \textbf{Bold} marks the highest
+    value in each row. \colorbox{red!12}{Red} cells indicate PASS $< 50\%$.
+    PASS = agent pass rate on scoreable tasks. Heatmap (Fig.~\ref{fig:heatmap}) shows SYNTH alongside PASS.}
+  \label{tab:pass_results}
+  \setlength{\tabcolsep}{5pt}
+  \small
+  \begin{tabular}{lrrr}
+    \toprule
+    \textbf{Dataset} & \textbf{With docs} & \textbf{No docs} & \textbf{Mutated params} \\
+    \midrule
+    Mastodon         & \textbf{100} & \textbf{100} & \textbf{100} \\
+    OpenWeatherMap   & \textbf{100} &           86 & \textbf{100} \\
+    Spoonacular      & \textbf{100} &           90 &           78 \\
+    Notion           &           78 & \textbf{100} & \textbf{100} \\
+    Confluence       &           92 &           93 & \textbf{91}  \\
+    Alphavantage     &           86 &           90 & \textbf{88}  \\
+    eBay Commerce    & \textbf{100} &           89 &           55 \\
+    Shopify          &           87 & \textbf{92}  &           62 \\
+    GitHub           &           62 & \textbf{83}  &           76 \\
+    eBay Buy         &           73 &           67 & \textbf{80}  \\
+    Zulip            & \textbf{80}  &           60 &           62 \\
+    Stripe           & \textbf{72}  &           62 &           57 \\
+    eBay Sell        &           38 & \textbf{50}  & \cellcolor{red!12}43 \\
+    Jira             & \textbf{50}  & \cellcolor{red!12}25 & \textbf{50} \\
+    \midrule
+    \textit{Median}  &           80 &           86 &           77 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{media/fig8_api_complexity.pdf}
+  \caption{Endpoint documentation file count (log scale) vs.\ agent pass rate
+    (docs condition). Marker size encodes synthesis input token volume.
+    Dashed line is a log-linear fit. Larger APIs with denser documentation
+    systematically yield lower PASS, driven by coverage gaps rather than
+    server errors.}
+  \label{fig:complexity}
+\end{figure}
 
 \begin{figure}[htbp]
   \centering
@@ -110,9 +156,9 @@ On GitHub, the community MCP server scores 65\% PASS. Synthesized servers with d
 
 \textbf{To what extent do synthesizers rely on parametric knowledge rather than documentation, and does this affect performance?}
 
-The mutated-docs condition directly operationalises this question: if a synthesizer adopts the renamed parameter names, it is reading the documentation; if it does not, it is writing from memory. Figure~\ref{fig:adherence} (left) shows mutation adherence rates across APIs. GitHub, Stripe, Shopify, Zulip, and Jira all show near-zero HTTP adoption --- the synthesis model completely ignores parameter mutations and produces a server reflecting its training-time knowledge of the API. Mastodon and Alphavantage exhibit full adoption (100\%), indicating the synthesizer follows the provided documentation faithfully.
+The mutated-docs condition directly operationalises this question: if a synthesizer adopts the renamed parameter names, it is reading the documentation; if it does not, it is writing from memory. Figure~\ref{fig:adherence} shows the PASS delta (mutated $-$ docs) per API alongside the interface-layer adherence rate (diamond markers). GitHub, Stripe, Shopify, Zulip, and Jira show near-zero adherence --- the synthesizer ignores mutations entirely and writes from training-time knowledge. Mastodon and Alphavantage reach full adherence, indicating the model follows provided documentation faithfully for less-familiar APIs.
 
-The right panel of Figure~\ref{fig:adherence} tests whether low adherence predicts nodocs winning (the hypothesis being that strong parametric knowledge makes documentation unnecessary or even harmful). The relationship is weak and noisy. GitHub fits the hypothesis: zero adherence, nodocs wins by 21 percentage points. Stripe does not: also zero adherence, but docs still yield 10 percentage points higher PASS. This shows that parametric reliance at the synthesis stage does not cleanly propagate to agent performance.
+The bar lengths directly test whether low adherence implies immunity to mutation. GitHub fits: near-zero adherence, bar near zero ($-$14 pp, offset by nodocs improvements visible in Fig.~\ref{fig:docs_effect}). Stripe does not: also near-zero adherence, yet mutation still costs 15 pp. This confirms that parametric reliance at synthesis does not cleanly propagate to agent performance.
 
 The mechanism behind this is that the effect of parametric reliance depends on whether the synthesis model and the evaluation agent share the same prior. When both ignore mutations and operate from training-time knowledge --- as for GitHub --- the mutation is invisible to the whole pipeline and performance is unaffected. When the synthesizer adopts mutations faithfully (high adherence) but the evaluation agent's prior does not anticipate the renamed parameters, performance degrades. The contamination is only detectable as a problem when the two components have mismatched priors.
 
@@ -163,7 +209,7 @@ Figure~\ref{fig:scatter} plots SYNTH against PASS for all 42 API--condition pair
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.72\linewidth]{fig4_synth_scatter.pdf}
+  \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
   \caption{SYNTH vs.\ PASS across all 42 API--condition pairs
     ($r = 0.895$). Shape encodes synthesis condition;
     colour encodes API category.
@@ -174,3 +220,42 @@ Figure~\ref{fig:scatter} plots SYNTH against PASS for all 42 API--condition pair
 The points near or above the diagonal represent cases where the agent performs at or above what synthesis quality would predict --- most commonly when the agent compensates for minor coverage gaps with general reasoning (Spoonacular: SYNTH=75\%, PASS=100\% in the docs condition). Points well below the diagonal (eBay Commerce mutated: SYNTH=54\%, PASS=55\%) confirm that when synthesis fails to cover the task space, agent performance cannot recover. The Jira no-docs outlier (SYNTH=44\%, PASS=25\%) represents the most severe case of synthesis-induced failure in the benchmark.
 
 Taken together, these results validate SYNTH as a leading indicator: measuring synthesis sufficiency before running the full evaluation pipeline gives a reliable estimate of whether agent task completion will succeed.
+
+% ------------------------------------------------------------
+\section{Model Comparison}
+\label{sec:model_comparison}
+% ------------------------------------------------------------
+
+\textbf{How does synthesis model capability affect agent pass rate?}
+
+To isolate model effects from API-specific variation, we evaluate seven synthesis models on a common three-API set (GitHub, Stripe, Zulip) selected to span low, medium, and high familiarity. Figure~\ref{fig:model_capability} summarises per-model PASS distributions across this common set.
+
+Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2 and GPT-5.4 perform comparably, with GPT-5.4 showing an anomalous result on Stripe in the docs condition (8\% PASS) attributable to synthesis-level failure: the generated server contains broken tool stubs that prevent the agent from executing any tasks, rather than agent reasoning failures. This distinction is detectable via SYNTH: the Stripe SYNTH score for that run is also low, confirming the bottleneck is at synthesis.
+
+Synthesis reliability --- the fraction of runs producing a scoreable (non-NaN) result --- scales with model capability. Qwen3-Coder and GPT-5.4-mini produce frequent synthesis crashes on harder APIs (Stripe, GitHub), inflating apparent failure rates and making per-API comparisons unreliable for those models. Larger models (Sonnet~4.6, GPT-5.2, GPT-5.4) show near-complete reliability across all three APIs.
+
+The nodocs advantage observed in RQ4 is strongest for larger models. Sonnet~4.6 and GPT-5.2 improve or hold steady on GitHub when documentation is removed, consistent with strong parametric priors overriding documentation noise. Qwen3-Coder, by contrast, shows higher adherence in the mutated condition ($\sim$60--100\%), indicating it relies more heavily on in-context documentation and is correspondingly more sensitive to documentation quality.
+
+This model-level variation in adherence is a confound when interpreting the aggregate adherence results in Section~\ref{sec:rq3}: the near-zero aggregate adherence for GitHub reflects a mixture of high-capability models ignoring mutations (parametric dominance) and lower-capability models failing to parse the mutated documentation correctly. Cross-model disaggregation is therefore necessary for a clean interpretation of the RQ3 findings.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{media/fig9_model_capability.pdf}
+  \caption{PASS distributions for six synthesis models on the common
+    three-API evaluation set (GitHub, Stripe, Zulip). Models ordered
+    by capability (left to right). Box shows interquartile range;
+    whiskers extend to full range. Synthesis reliability (fraction of
+    non-NaN runs) is annotated above each box.}
+  \label{fig:model_capability}
+\end{figure}
+
+\begin{figure*}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{media/fig3_model_comparison.pdf}
+  \caption{Per-API, per-model PASS breakdown across all synthesis conditions
+    (docs, nodocs, mutated) for the common three-API set. Each group of bars
+    corresponds to one API; colours distinguish synthesis models. Gaps indicate
+    runs with synthesis failures (NaN PASS). The GPT-5.4 Stripe anomaly
+    (8\% docs) is the leftmost bar in the Stripe group.}
+  \label{fig:model_comparison}
+\end{figure*}
