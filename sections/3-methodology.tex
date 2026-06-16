@@ -1,5 +1,5 @@
 \chapter{Methodology}
-\label{ch:method}
+\label{sec:methodology}
 % Focus on what you add to the existing method. Explain what you will do and why (and how). Do not forget to characterize your research design. There should be a sub-section on the evaluation. 
 %For DS students, this normally means using manually labelled or ground truth data. For IS students, it is not always needed to have a separate methodology section. You can also integrate the approach with the results in one section. It depends on your type of research what is best fitting.
 %Write about your methodology here. Focus on your own contribution. Indicate exactly how you will assess your work in terms of evaluation.
@@ -199,8 +199,9 @@ Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) are run across a
 representative subset of APIs, offering a strong/efficient tradeoff within the
 same model family. Gemini~3.1~Pro provides a third model family for
 comparison. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
-run locally via a vLLM inference server, allowing comparison of instruction-tuned
-versus base model synthesis behaviour. These span a range of training
+served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
+80\,GB GPUs (160\,GB total VRAM, CUDA~12.2), allowing comparison of
+instruction-tuned versus base model synthesis behaviour. These span a range of training
 corpora, post-training regimes, and context window sizes, allowing us to
 assess whether synthesis quality is model-specific or reflects a more general
 capability. Model comparison results are presented in Section~\ref{sec:rq1}.
@@ -221,8 +222,8 @@ GPT-5.4              & OpenAI GPT-5    & Azure API     & All 14 APIs, all condit
 Sonnet~4.6           & Anthropic Claude & GCP API      & Subset, all conditions \\
 Haiku~4.5            & Anthropic Claude & GCP API      & Subset, all conditions \\
 Gemini~3.1~Pro       & Google Gemini   & GCP API       & Subset, all conditions \\
-Qwen3-Coder-Next     & Qwen3           & vLLM (local) & Subset, all conditions \\
-Qwen3-Coder-Next-Base & Qwen3          & vLLM (local) & Subset, all conditions \\
+Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & Subset, all conditions \\
+Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & Subset, all conditions \\
 \bottomrule
 \end{tabular}
 \end{table}
