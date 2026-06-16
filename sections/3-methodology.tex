@@ -190,25 +190,17 @@ Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-co
 
 \subsection{Synthesis Models}
 
-We evaluate seven synthesis models spanning four model families and two
+We evaluate eight synthesis models spanning four model families and two
 inference backends. Table~\ref{tab:models} summarises their key properties.
-All models are run across all 14 APIs and all three conditions where synthesis
-succeeds; where results are missing, this reflects synthesis failures rather
-than intentional subset selection. GPT-5.2 serves as the primary baseline.
-GPT-5.4 is run as a more recent OpenAI baseline. Sonnet~4.6 and Haiku~4.5
-(both Anthropic Claude) offer a strong/efficient tradeoff within the same
-model family. Gemini~3.1~Pro provides a third model family for comparison. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
+GPT-5.2 serves as the primary baseline across all 14 APIs and all three conditions.
+GPT-5.4 and GPT-5.4-mini are evaluated as more recent OpenAI baselines; GPT-5.4-mini was run on a pilot three-API set (GitHub, Stripe, Zulip) and aborted after confirming uniformly weak results across all conditions. Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) offer a strong/efficient tradeoff within the same model family. Gemini~3.1~Pro provides a third model family. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
 served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
-80\,GB GPUs (160\,GB total VRAM, CUDA~12.2), allowing comparison of
-instruction-tuned versus base model synthesis behaviour. These span a range of training
-corpora, post-training regimes, and context window sizes, allowing us to
-assess whether synthesis quality is model-specific or reflects a more general
-capability. Model comparison results are presented in Section~\ref{sec:rq1}.
+80\,GB GPUs (160\,GB total VRAM, CUDA~12.2). Where results are missing, this reflects synthesis failures rather than intentional subset selection. Model comparison results are presented in Section~\ref{sec:model_comparison}.
 
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; n.d.\ = not disclosed by provider. For Qwen3, 3B act.\ denotes activated parameters per token (mixture-of-experts architecture).}
+\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; n.d.\ = not disclosed by provider. For Qwen3, 3B act.\ denotes activated parameters per token (mixture-of-experts architecture). GPT-5.4-mini was evaluated on GitHub, Stripe, and Zulip only.}
 \label{tab:models}
 \setlength{\tabcolsep}{2.7pt}
 \begin{tabular}{lllrr}
@@ -217,11 +209,12 @@ capability. Model comparison results are presented in Section~\ref{sec:rq1}.
 \midrule
 GPT-5.2              & OpenAI GPT-5    & Azure API            & n.d.  & 400K   \\
 GPT-5.4              & OpenAI GPT-5    & Azure API            & n.d.  & 1.05M  \\
+GPT-5.4-mini         & OpenAI GPT-5    & Azure API            & n.d.  & 1.05M  \\
 Sonnet~4.6           & Anthropic Claude & GCP API             & n.d.  & 1M     \\
 Haiku~4.5            & Anthropic Claude & GCP API             & n.d.  & 200K   \\
 Gemini~3.1~Pro       & Google Gemini   & GCP API              & n.d.  & 1M     \\
-Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & 262.144    \\
-Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 262.144    \\
+Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
+Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
 \bottomrule
 \end{tabular}
 % n.d. = not disclosed by provider

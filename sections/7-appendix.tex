@@ -1,18 +1,268 @@
 % You can choose whether you prefer a single or double column appendix.
 % Whatever you choose, you will need to stick to it throughout the appendix.
-% \onecolumn
+\onecolumn
 
-\chapter{First Appendix}
+\chapter{Supplementary Results}
 \label{sec:apx:first_appendix}
 
-Put your appendices here. Remember that a work and thesis should be readable and understandable \emph{even without} reading the Appendix. Treat it as a ``if you want to know more, read this'' part.
+% ------------------------------------------------------------
+\section{Full Per-Model Results Table}
+\label{sec:apx:full_results}
+% ------------------------------------------------------------
 
-\section{Appendix section}
-        \subsection{Appendix subsection}
-                \subsubsection{Appendix subsubsection}
-                        \paragraph{Appendix paragraph} Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-                        tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-                        cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-                        proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, API, and condition evaluated in this thesis. Models that failed to produce a runnable server are recorded as 0\%. ``---'' indicates the condition was never attempted. GPT-4.1, Gemini~2.5 Pro, and Gemini~3.5 Flash produced no valid servers across any condition and are omitted; their failure modes are documented in Section~\ref{sec:methodology}. Alphavantage results for Sonnet~4.6 and Haiku~4.5 are omitted due to API rate-limit exhaustion during evaluation (ENVIRONMENT errors on all tasks).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Agent PASS (\%) across all synthesis models, APIs, and conditions.
+    0 = synthesis crash or complete tool-coverage failure.
+    \colorbox{red!12}{Red} = below 25\%. --- = not evaluated.
+    D = docs, N = nodocs, M = mutated.}
+  \label{tab:apx:full_results}
+  \setlength{\tabcolsep}{3pt}
+  \scriptsize
+  \begin{tabular}{l rrr rrr rrr rrr rrr rrr rrr}
+    \toprule
+    & \multicolumn{3}{c}{\textbf{GPT-5.4-mini}} & \multicolumn{3}{c}{\textbf{Qwen3-Coder}} & \multicolumn{3}{c}{\textbf{Gem~3.1 Pro}} & \multicolumn{3}{c}{\textbf{GPT-5.2}} & \multicolumn{3}{c}{\textbf{GPT-5.4}} & \multicolumn{3}{c}{\textbf{Haiku~4.5}} & \multicolumn{3}{c}{\textbf{Sonnet~4.6}} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}\cmidrule(lr){14-16}\cmidrule(lr){17-19}\cmidrule(lr){20-22}
+    \textbf{API} & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M \\
+    \midrule
+    GitHub         & 38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & 58 & 60 & 57 & 78 & 71 & 36 & 62 & 83 & 76 & 58 & 89 & 73 & 95 & 90 & 86 & 90 & 100 & 100 \\
+    Stripe         & 14 & \cellcolor{red!12}0  & 19 & \cellcolor{red!12}0  & 62 & \cellcolor{red!12}0  & 47 & 50 & 59 & 72 & 62 & 57 &  8 & 62 & 12 & 57 & 75 & 86 & 77 & 100 & 100 \\
+    Zulip          & 40 & 14 & \cellcolor{red!12}29 & \cellcolor{red!12}0  & \cellcolor{red!12}0  & 64 & 76 & 84 & 62 & 80 & 60 & 62 & 90 & 85 & 71 & 55 & 36 & \cellcolor{red!12}26 & 100 & 43 & \cellcolor{red!12}0  \\
+    \midrule
+    Alphavantage   & --- & --- & --- & --- & --- & --- & 100 & 100 & 90 & 86 & 90 & 88 & 80 & 92 & 78 & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ \\
+    Confluence     & 83$^b$ & 40$^b$ & \cellcolor{red!12}0 & 39 & 100$^c$ & 50 & \cellcolor{red!12}0 & 100 & 100 & 92 & 93 & 91 & 69 & 100 & 85 & 80 & 33 & 33 & \cellcolor{red!12}0 & 94 & 47 \\
+    eBay Buy       & --- & --- & --- & 12 & 80 & \cellcolor{red!12}6 & 90 & 67 & \cellcolor{red!12}0 & 73 & 67 & 80 & 69 & 92 & 100 & 80 & 67 & 100 & \cellcolor{red!12}0 & 79 & 33 \\
+    eBay Commerce  & --- & --- & --- & 100 & \cellcolor{red!12}0 & 11 & 83 & 44 & 45 & 100 & 89 & 55 & 88 & 40 & 62 & 30 & 10 & 50 & 100 & \cellcolor{red!12}0 & --- \\
+    eBay Sell      & --- & --- & --- & 100$^c$ & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & 38 & 50 & 43 & \cellcolor{red!12}29 & 45 & 44 & 17 & \cellcolor{red!12}9 & 36 & \cellcolor{red!12}0 & 73 & --- \\
+    Jira           & --- & --- & --- & 71 & \cellcolor{red!12}0 & 42 & 58 & 44 & 31 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 62 & \cellcolor{red!12}7 & 64 & 73 & 58 & 79 \\
+    Mastodon       & --- & --- & --- & 87 & 80 & 54 & 100 & 92 & 87 & 100 & 100 & 100 & 91 & 90 & 100 & 93 & 40 & 86 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 92 \\
+    Notion         & --- & --- & --- & 69 & \cellcolor{red!12}5 & \cellcolor{red!12}0 & 94 & 94 & 100 & 78 & 100 & 100 & 62 & 100 & \cellcolor{red!12}0 & 56 & \cellcolor{red!12}5 & 50 & 100 & 87 & 85 \\
+    OpenWeatherMap & --- & --- & --- & 100 & 86 & 100 & 85 & 90 & 95 & 100 & 86 & 100 & 100 & 95 & 100 & 95 & 65 & 60 & \cellcolor{red!12}0 & 100 & \cellcolor{red!12}0 \\
+    Shopify        & --- & --- & --- & 94 & 82 & 67 & 80 & 70 & 93 & 87 & 92 & 62 & 83 & 92 & 53 & 93 & 75 & 94 & 100 & \cellcolor{red!12}0 & --- \\
+    Spoonacular    & --- & --- & --- & --- & --- & --- & 83 & 91 & 90 & 100 & 90 & 78 & 80 & 82 & 60 & ---$^d$ & 79 & 86 & 93 & \cellcolor{red!12}0 & 92 \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  \raggedright\scriptsize
+  $^a$ Rate-limited; shared 25\,req/day key exhausted.
+  $^b$ GPT-5.4-mini full matrix aborted after 26/112 evals; only confluence nodocs/mutated returned non-zero.
+  $^c$ Tiny scoreable N ($\leq$3 due to ENVIRONMENT errors); treat with caution.
+  $^d$ Haiku spoonacular docs pending at time of writing.
+\end{table}
+
+% ------------------------------------------------------------
+\section{Synthesis Variance Study}
+\label{sec:apx:variance}
+% ------------------------------------------------------------
+
+To quantify synthesis stochasticity, we ran GPT-5.2 five times on each of three APIs and all three conditions, holding all other variables fixed. Tables~\ref{tab:apx:var_shopify}--\ref{tab:apx:var_github} report per-run PASS and SYNTH; Table~\ref{tab:apx:var_summary} summarises key statistics.
+
+\paragraph{Shopify.}
+The nodocs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): SYNTH locks at 94\% on every run (σ=0), and CURRENT ranges 80--94\% (mean 90\%, σ≈6\,pp). Docs condition is high-variance (Table~\ref{tab:apx:var_shopify_d}): CURRENT 59--93\% (σ≈13\,pp), with no degeneracy but large differences between small (131-line, 93\%) and large (538-line, 75\%) servers. Mutated (Table~\ref{tab:apx:var_shopify_m}) has one startup crash and CURRENT 67--92\% across non-crash runs; mutation adherence is perfectly stable (0\% HTTP / 20\% iface on every run).
+
+\begin{table}[htbp]
+  \centering
+  \caption{Shopify docs variance (5 runs, GPT-5.2). Lines = server.py line count.}
+  \label{tab:apx:var_shopify_d}
+  \small
+  \begin{tabular}{lrrrr}
+    \toprule
+    Run & Lines & PASS & SYNTH & Notes \\
+    \midrule
+    Reference & 552 & 87\% & 89\% & — \\
+    1 & 131 & 93\% & 94\% & — \\
+    2 & 143 & 93\% & 94\% & Optional (discounts only) \\
+    3 & 522 & 79\% & 83\% & — \\
+    4 & 538 & 75\% & 83\% & — \\
+    5 & 112 & 59\% & 61\% & — \\
+    \midrule
+    \multicolumn{2}{l}{Range} & 59--93\% & 61--94\% & σ(PASS)≈13\,pp \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Shopify nodocs variance (5 runs, GPT-5.2).}
+  \label{tab:apx:var_shopify_nd}
+  \small
+  \begin{tabular}{lrrrr}
+    \toprule
+    Run & Lines & PASS & SYNTH & Notes \\
+    \midrule
+    Reference & large & 92\% & 94\% & — \\
+    1 & 186 & 92\% & 94\% & — \\
+    2 & 230 & 94\% & 94\% & — \\
+    3 & 109 & 93\% & 94\% & — \\
+    4 & 115 & 80\% & 94\% & — \\
+    5 & 151 & 93\% & 94\% & VPN drop re-run \\
+    \midrule
+    \multicolumn{2}{l}{Range} & 80--94\% & 94\% & σ(SYNTH)=0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Shopify mutated variance (5 runs, GPT-5.2, patched). HTTP~Adh / Iface~Adh stable across all runs.}
+  \label{tab:apx:var_shopify_m}
+  \small
+  \begin{tabular}{lrrrr}
+    \toprule
+    Run & Lines & PASS & SYNTH & HTTP / Iface \\
+    \midrule
+    Reference & large & 62\% & 61\% & 0\% / 20\% \\
+    1 & 142 & 67\% & 72\% & 0\% / 20\% \\
+    2 & 121 & 0\% (crash) & --- & 0\% / 20\% \\
+    3 & 172 & 92\% & 94\% & 0\% / 20\% \\
+    4 & 174 & 80\% & 83\% & 0\% / 20\% \\
+    5 & 134 & 79\% & 83\% & 0\% / 20\% \\
+    \midrule
+    \multicolumn{2}{l}{Range (excl.\ crash)} & 67--92\% & 72--94\% & σ(adh)=0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{GitHub.}
+Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 runs produce stub servers with 1--5 tools instead of the 46--61 tools in valid runs. Valid runs score 62--67\%, tight with the human MCP reference (65\%). Nodocs degeneracy rate drops to 0/3; all runs outperform the reference (81--90\%). Mutated is universally degenerate (7/7 runs, 0--6 tools); the mutation context consistently destabilises GitHub synthesis for this model.
+
+\begin{table}[htbp]
+  \centering
+  \caption{GitHub docs variance (6 runs) and nodocs variance (3 runs). Human reference shown for comparison.}
+  \label{tab:apx:var_github}
+  \small
+  \begin{tabular}{llrrrl}
+    \toprule
+    Cond & Run & Tools & PASS & SYNTH & Status \\
+    \midrule
+    — & Human ref & — & 65\% & 65\% & — \\
+    \midrule
+    docs & Reference & 53 & 62\% & 61\% & — \\
+    docs & 1 & 46 & 67\% & 70\% & — \\
+    docs & 2 & 2 & --- & --- & Degenerate \\
+    docs & 3 & 3 & --- & --- & Degenerate \\
+    docs & 4 & 5 & 0\% & --- & Degenerate \\
+    docs & 5 & 61 & 64\% & 57\% & — \\
+    docs & 6 & 1 & --- & --- & Degenerate \\
+    \midrule
+    nodocs & Reference & — & 83\% & 87\% & — \\
+    nodocs & 1 & 63 & 86\% & 87\% & — \\
+    nodocs & 2 & 61 & 90\% & 91\% & — \\
+    nodocs & 3 & 63 & 81\% & 83\% & — \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Stripe.}
+Docs and nodocs each have 1/5 degeneracy (startup crash). Valid docs runs score 46--67\% (ref 72\%); the bottleneck is AGENT\_REASONING (8--14 failures per run), not tool coverage. Nodocs valid runs score 38--62\% (ref 62\%), with lower SYNTH (57--73\%) reflecting weaker parametric knowledge of Stripe's API surface. Mutated shows the widest variance (20--69\% across 4 non-degenerate runs); adherence itself varies run-to-run (0--20\% HTTP), in contrast to Shopify's perfectly stable adherence.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Stripe variance summary across all three conditions (5 runs each, GPT-5.2).}
+  \label{tab:apx:var_stripe}
+  \small
+  \begin{tabular}{lrrrl}
+    \toprule
+    Condition & PASS range & SYNTH range & Degeneracy & Bottleneck \\
+    \midrule
+    docs & 46--67\% & 68--77\% & 1/5 (crash) & AGENT\_REASONING \\
+    nodocs & 38--62\% & 57--73\% & 1/5 (crash) & TOOL\_COVERAGE \\
+    mutated & 20--69\% & 45--77\% & 1/5 (crash) & Mixed \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Variance summary statistics across all APIs and conditions. Nodocs is the most
+    reliable condition; docs and mutated show higher variance and degeneracy.}
+  \label{tab:apx:var_summary}
+  \small
+  \begin{tabular}{lrrl}
+    \toprule
+    Condition & PASS σ (mean) & Degeneracy rate & Primary failure mode \\
+    \midrule
+    Shopify docs    & ≈13\,pp & 0/5  & Server size variance \\
+    Shopify nodocs  & ≈6\,pp  & 0/5  & Stable (SYNTH fixed) \\
+    Shopify mutated & ≈11\,pp & 1/5  & Crash, adherence stable \\
+    GitHub docs     & high    & 4/6  & Degenerate stubs \\
+    GitHub nodocs   & ≈4\,pp  & 0/3  & Stable, beats reference \\
+    GitHub mutated  & ---     & 7/7  & Universal degeneracy \\
+    Stripe docs     & ≈9\,pp  & 1/5  & AGENT\_REASONING \\
+    Stripe nodocs   & ≈9\,pp  & 1/5  & TOOL\_COVERAGE \\
+    Stripe mutated  & ≈17\,pp & 1/5  & Adherence variance \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+% ------------------------------------------------------------
+\section{Judge Sensitivity Study}
+\label{sec:apx:judge}
+% ------------------------------------------------------------
+
+To assess whether results depend on the choice of judge model, we re-ran evaluation of five APIs under all three conditions using four different judge LLMs while holding the synthesis server and agent run fixed. Table~\ref{tab:apx:judge} reports per-judge PASS; Table~\ref{tab:apx:judge_summary} summarises key patterns.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Judge sensitivity study: PASS (\%) per judge model across 5 APIs and 3 conditions.
+    AR = AGENT\_REASONING undefined count (high AR = judge over-classifies agent answers as incomplete).
+    Baseline judge is Gemini~3~Flash.}
+  \label{tab:apx:judge}
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \begin{tabular}{llrrrr}
+    \toprule
+    \textbf{API} & \textbf{Cond} & \textbf{Gem~3~Flash} & \textbf{GPT-4.1} & \textbf{GPT-5.4-mini} & \textbf{Gem~2.5~Flash} \\
+    \midrule
+    GitHub & docs    & 62\% (AR=2) & 72\% (AR=5) & 40\% (AR=13) & 63\% (AR=4) \\
+    GitHub & nodocs  & 83\% (AR=0) & 90\% (AR=3) & 82\% (AR=12) & 79\% (AR=4) \\
+    GitHub & mutated & 19\% (AR=2) & 14\% (AR=2) &  6\% (AR=7)  & 27\% (AR=1) \\
+    \midrule
+    Stripe & docs    & 72\% (AR=6) & 82\% (AR=5) & 71\% (AR=8)  & 71\% (AR=5) \\
+    Stripe & nodocs  & 62\% (AR=3) & 60\% (AR=7) & 77\% (AR=9)  & 63\% (AR=3) \\
+    Stripe & mutated & 57\% (AR=4) & 75\% (AR=6) & 77\% (AR=9)  & 64\% (AR=8) \\
+    \midrule
+    Zulip  & docs    & 80\% (AR=3) & 74\% (AR=2) & 76\% (AR=7)  & 75\% (AR=5) \\
+    Zulip  & nodocs$^\dagger$ & 60\% (AR=0) & 48\% (AR=2) & 43\% (AR=2) & 50\% (AR=5) \\
+    Zulip  & mutated & 62\% (AR=3) & 62\% (AR=4) & 90\% (AR=13) & 61\% (AR=2) \\
+    \midrule
+    Shopify & docs   & 87\% (AR=1) & 80\% (AR=3) & 78\% (AR=9)  & 80\% (AR=2) \\
+    Shopify & nodocs & 92\% (AR=1) & 85\% (AR=5) & 62\% (AR=10) & 77\% (AR=4) \\
+    Shopify & mutated& 62\% (AR=2) & 69\% (AR=2) & 62\% (AR=5)  & 54\% (AR=4) \\
+    \midrule
+    Confluence & docs    & 92\% (AR=5) & 94\% (AR=5) & 90\% (AR=11) & 69\% (AR=5) \\
+    Confluence & nodocs  & 93\% (AR=5) & 86\% (AR=7) & 67\% (AR=12) & 83\% (AR=13) \\
+    Confluence & mutated & 91\% (AR=4) & 79\% (AR=2) & 64\% (AR=10) & 91\% (AR=9) \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  \raggedright\small $^\dagger$ Zulip nodocs: May~21 synth degenerate (1 tool); all judges run on May~12 synth.
+\end{table}
+
+\paragraph{Key findings.}
+Gemini~3~Flash and GPT-4.1 agree within $\pm$12\,pp on the majority of conditions. Gemini~2.5~Flash is also broadly consistent, with one outlier (Confluence docs: 69\% vs.\ 92--94\% for the other three judges) attributable to stricter handling of partial-output responses.
+
+GPT-5.4-mini is a systematic outlier: it produces 7--13 AGENT\_REASONING undefined verdicts per run (compared to 0--5 for the other judges), artificially deflating its PASS scores by classifying correct agent answers as incomplete. Manual review of six disputed GitHub docs tasks confirmed that Gemini~3~Flash verdicts were correct in all six cases --- GPT-5.4-mini classified clearly present information (issue numbers, PR counts, CI run SHAs) as missing.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Judge agreement summary. Mean absolute deviation from the Gemini~3~Flash baseline across 15 conditions. GPT-5.4-mini deviates most due to systematic AGENT\_REASONING over-classification.}
+  \label{tab:apx:judge_summary}
+  \small
+  \begin{tabular}{lrl}
+    \toprule
+    \textbf{Judge} & \textbf{Mean |Δ| from baseline} & \textbf{Notes} \\
+    \midrule
+    GPT-4.1         & 8\,pp & Broadly consistent; slight positive bias \\
+    Gemini~2.5~Flash & 7\,pp & Consistent; Confluence docs outlier (−23\,pp) \\
+    GPT-5.4-mini    & 14\,pp & Systematic under-scoring; high AR counts \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+The GitHub mutated condition originally showed the largest inter-judge gap (Gemini~3~Flash 76\% vs.\ 6--27\% for others). Re-runs confirmed this was a one-off evaluation artefact: the re-run baseline (Gemini~3~Flash 19\%, GPT-4.1 14\%) agrees with the other judges. The original run used a different agent session state that happened to pass the few scoreable tasks. All results in the main thesis use the re-run values.
+
+\paragraph{Conclusion.}
+Gemini~3~Flash is a reliable judge. Its scores are consistent with GPT-4.1 and Gemini~2.5~Flash within normal sampling variance. GPT-5.4-mini is not suitable as a judge for this task due to reading-comprehension failures that produce systematically inflated AGENT\_REASONING undefined counts.

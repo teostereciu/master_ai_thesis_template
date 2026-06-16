@@ -228,24 +228,57 @@ Taken together, these results validate SYNTH as a leading indicator: measuring s
 
 \textbf{How does synthesis model capability affect agent pass rate?}
 
-To isolate model effects from API-specific variation, we evaluate seven synthesis models on a common three-API set (GitHub, Stripe, Zulip) selected to span low, medium, and high familiarity. Figure~\ref{fig:model_capability} summarises per-model PASS distributions across this common set.
+To isolate model effects from API-specific variation, we evaluate seven synthesis models on a common three-API set (GitHub, Stripe, Zulip) selected to span low, medium, and high familiarity. Table~\ref{tab:model_comparison} reports PASS for all seven models across all three APIs and conditions; absent results are synthesis failures and score as 0\%. Figure~\ref{fig:model_capability} summarises the per-model distributions.
 
-Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2 and GPT-5.4 perform comparably, with GPT-5.4 showing an anomalous result on Stripe in the docs condition (8\% PASS) attributable to synthesis-level failure: the generated server contains broken tool stubs that prevent the agent from executing any tasks, rather than agent reasoning failures. This distinction is detectable via SYNTH: the Stripe SYNTH score for that run is also low, confirming the bottleneck is at synthesis.
+Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2, GPT-5.4, and Haiku~4.5 form a competitive mid-tier, though with distinct failure modes: GPT-5.4 produces broken tool stubs for Stripe docs (8\%) --- a synthesis-level failure confirmed by SYNTH=48\% --- while Haiku~4.5 collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1 Pro is broadly competitive at mid-tier for GitHub and Zulip but weaker on Stripe.
 
-Synthesis reliability --- the fraction of runs producing a scoreable (non-NaN) result --- scales with model capability. Qwen3-Coder and GPT-5.4-mini produce frequent synthesis crashes on harder APIs (Stripe, GitHub), inflating apparent failure rates and making per-API comparisons unreliable for those models. Larger models (Sonnet~4.6, GPT-5.2, GPT-5.4) show near-complete reliability across all three APIs.
+The two weakest models show qualitatively different failure patterns. GPT-5.4-mini consistently produces shallow servers with too few relevant tools (TOOL\_COVERAGE dominates across all nine conditions, −43\,pp below GPT-5.2 on average). Qwen3-Coder-Next has high crash rates --- Stripe docs and mutated, and Zulip docs and nodocs all produce servers that fail on startup --- but achieves competitive results on the conditions where synthesis succeeds (GitHub: 57--60\%, Zulip mutated: 64\%, Stripe nodocs: 62\%).
 
-The nodocs advantage observed in RQ4 is strongest for larger models. Sonnet~4.6 and GPT-5.2 improve or hold steady on GitHub when documentation is removed, consistent with strong parametric priors overriding documentation noise. Qwen3-Coder, by contrast, shows higher adherence in the mutated condition ($\sim$60--100\%), indicating it relies more heavily on in-context documentation and is correspondingly more sensitive to documentation quality.
+Synthesis reliability --- the fraction of conditions producing a runnable server --- scales with model tier. Sonnet~4.6, GPT-5.2, and Gemini~3.1 Pro achieve near-complete reliability across all nine conditions. Qwen3-Coder-Next fails on four of nine; GPT-5.4-mini produces a server for all nine but with coverage too thin to be useful (SYNTH 14--48\%).
 
-This model-level variation in adherence is a confound when interpreting the aggregate adherence results in Section~\ref{sec:rq3}: the near-zero aggregate adherence for GitHub reflects a mixture of high-capability models ignoring mutations (parametric dominance) and lower-capability models failing to parse the mutated documentation correctly. Cross-model disaggregation is therefore necessary for a clean interpretation of the RQ3 findings.
+The nodocs advantage observed in RQ4 is strongest for larger models. Sonnet~4.6 and GPT-5.2 improve or hold steady on GitHub when documentation is removed, consistent with strong parametric priors overriding documentation noise. Qwen3-Coder-Next, by contrast, shows 60\% interface-layer adherence on GitHub and Stripe (though 0\% HTTP adherence --- the renamed parameters are reflected in Python signatures but not in outbound API calls), indicating it reads documentation more literally but does not fully propagate renames to execution.
+
+This model-level variation in adherence is a confound when interpreting the aggregate adherence results in Section~\ref{sec:rq3}: the near-zero aggregate adherence for GitHub reflects a mixture of high-capability models ignoring mutations entirely (parametric dominance) and lower-capability models adopting renames at the interface level but not the HTTP level. The full per-model adherence breakdown is reported in Appendix~\ref{sec:apx:full_results}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{PASS (\%) on the common three-API set by synthesis model and condition.
+    Models ordered by approximate capability (ascending left to right).
+    0\% cells marked \colorbox{red!12}{red} include both true zeros and synthesis crashes.
+    Shaded rows are the two weakest models.}
+  \label{tab:model_comparison}
+  \setlength{\tabcolsep}{3.5pt}
+  \scriptsize
+  \begin{tabular}{ll rrr rrr rrr}
+    \toprule
+    & & \multicolumn{3}{c}{\textbf{GitHub}} & \multicolumn{3}{c}{\textbf{Stripe}} & \multicolumn{3}{c}{\textbf{Zulip}} \\
+    \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}
+    \textbf{Model} & & D & N & M & D & N & M & D & N & M \\
+    \midrule
+    \rowcolor{gray!10}
+    GPT-5.4-mini & & 38 & 32 & 30 & 14 & \cellcolor{red!12}0 & 19 & 40 & 14 & 29 \\
+    \rowcolor{gray!10}
+    Qwen3-Coder & & 58 & 60 & 57 & \cellcolor{red!12}0 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 64 \\
+    Gemini~3.1 Pro & & \textbf{78} & 71 & 36 & 47 & 50 & 59 & 76 & \textbf{84} & 62 \\
+    GPT-5.2 & & 62 & 83 & 76 & \textbf{72} & 62 & 57 & \textbf{80} & 60 & 62 \\
+    GPT-5.4 & & 58 & \textbf{89} & 73 & 8 & 62 & 12 & \textbf{90} & 85 & 71 \\
+    Haiku~4.5 & & \textbf{95} & 90 & \textbf{86} & 57 & \textbf{75} & \textbf{86} & 55 & 36 & 26 \\
+    Sonnet~4.6 & & 90 & \textbf{100} & \textbf{100} & 77 & \textbf{100} & \textbf{100} & \textbf{100} & 43 & \cellcolor{red!12}0 \\
+    \bottomrule
+  \end{tabular}
+  \par\smallskip
+  \raggedright\scriptsize D = docs, N = nodocs, M = mutated.
+  Bold = highest per column.
+  Sonnet~4.6 Zulip mutated: synthesis stream error on all attempts.
+\end{table}
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig9_model_capability.pdf}
-  \caption{PASS distributions for six synthesis models on the common
-    three-API evaluation set (GitHub, Stripe, Zulip). Models ordered
-    by capability (left to right). Box shows interquartile range;
-    whiskers extend to full range. Synthesis reliability (fraction of
-    non-NaN runs) is annotated above each box.}
+  \caption{PASS distributions for seven synthesis models on the common
+    three-API set (GitHub, Stripe, Zulip), ordered by approximate capability.
+    Each box shows nine data points (3 APIs $\times$ 3 conditions);
+    crash/failure conditions count as 0\%.}
   \label{fig:model_capability}
 \end{figure}
 
@@ -254,8 +287,8 @@ This model-level variation in adherence is a confound when interpreting the aggr
   \includegraphics[width=\linewidth]{media/fig3_model_comparison.pdf}
   \caption{Per-API, per-model PASS breakdown across all synthesis conditions
     (docs, nodocs, mutated) for the common three-API set. Each group of bars
-    corresponds to one API; colours distinguish synthesis models. Gaps indicate
-    runs with synthesis failures (NaN PASS). The GPT-5.4 Stripe anomaly
-    (8\% docs) is the leftmost bar in the Stripe group.}
+    corresponds to one API; colours distinguish synthesis models.
+    Zero-height bars indicate synthesis crashes or complete tool-coverage failure.
+    The GPT-5.4 Stripe docs bar (8\%) reflects broken tool stubs, not agent failure.}
   \label{fig:model_comparison}
 \end{figure*}
