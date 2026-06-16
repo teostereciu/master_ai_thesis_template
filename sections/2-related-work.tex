@@ -14,12 +14,21 @@ This section reviews and compares the literature across relevant domains to grou
 \section{Tool Use and Tool Synthesis}
 
 The ability of language models to call external functions has been studied extensively. Early work established that models can be prompted or fine-tuned to select tools and format arguments from natural-language instructions~\citep{schick2023toolformer,qin2023toolbench}. More recent evaluation suites have scaled this substantially: MCP-Universe~\citep{mcpuniverse2025}
-evaluates agents against hundreds of real-world MCP servers spanning diverse domains, and MCPAgentBench~\citep{mcpagentbench2024} introduces protocol-specific evaluation within the MCP ecosystem. Common to all of these is the assumption that tools already exist: the benchmark provides a pre-built function library and evaluates how well the agent navigates it. Our work removes this assumption.
+evaluates agents against eleven real-world MCP servers spanning six domains;
+MCP-Bench~\citep{mcpbench2025} scales this to 250 tools across twenty APIs
+and twenty evaluated models; and MCPAgentBench~\citep{mcpagentbench2024}
+benchmarks agent efficiency in tool selection and invocation within the
+Model Context Protocol (MCP) ecosystem. Common to all of these
+is the assumption that tools already exist: the benchmark provides a pre-built function library and evaluates how well the agent navigates it. Our work removes this assumption.
 
 The closest prior work to ours is the \emph{LLM as Tool Maker} (LATM) framework of \cite{cai2023latm}, in which a powerful model generates reusable Python tool implementations that a lighter ``tool user'' model subsequently invokes. The key insight is a separation of concerns: tool creation is expensive (large model, done once per task class) while tool use is cheap (smaller model, done many times). Our work extends this separation to the more demanding setting of REST API integration, where generated tools must satisfy strict interface contracts enforced by live
-external services. LATM evaluates generated tools through code review and synthetic unit tests; we evaluate through end-to-end task execution against real sandboxed APIs, which catches failures that static analysis cannot --- such as HTTP parameter mismatches or authentication schema errors.
+external services. LATM evaluates generated tools through auto-generated unit tests on a small
+validation sample; we evaluate through end-to-end task execution against
+real sandboxed APIs, which catches failures that static analysis cannot ---
+such as HTTP parameter mismatches or authentication schema errors.
 
-Concurrent work has begun to close this gap. ToolFactory~\citep{toolfactory2025} proposes a pipeline that parses REST API documentation and generates callable tool stubs, with a focus on structured OpenAPI inputs. Doc2Agent~\citep{doc2agent2025} scales a similar idea to MCP-deployed agents, demonstrating that LLMs can produce usable tool servers from Markdown documentation across dozens of APIs --- the closest parallel to our synthesis pipeline. Where these works
+Concurrent work has begun to close this gap. ToolFactory~\citep{toolfactory2025} proposes a pipeline that parses heterogeneous, unstructured REST API documentation and generates callable tool stubs --- explicitly targeting the
+setting where formal OpenAPI schemas are unavailable. Doc2Agent~\citep{doc2agent2025} scales a similar idea, demonstrating that LLMs can produce usable tool implementations from unstructured documentation across dozens of APIs --- the closest parallel to our synthesis pipeline. Where these works
 focus primarily on synthesis coverage, we additionally evaluate the synthesized servers end-to-end through agent task execution, measure documentation grounding, and systematically probe the effect of parametric knowledge through controlled ablations.
 
 A complementary challenge arises when APIs evolve after the synthesis stage. Recent work on evolving tool use~\citep{evolvingtoolsiclr2025} employs Monte Carlo Tree Search to adapt tool invocations when API signatures change at inference time, framing API evolution as a planning problem. This is
@@ -50,9 +59,11 @@ APIs and synthesis conditions?
 In-context learning (ICL), the ability of large language models to adapt to new inputs from examples or instructions in the prompt, was systematically characterised by \cite{brown2020gpt3}. A common assumption in the software engineering community is that supplying live API documentation in the context window grounds the model's output, ensuring that generated code reflects the current API specification rather than stale parametric
 memory. Subsequent work has complicated this assumption in several ways.
 
-\cite{liu2023lostmiddle} demonstrated that models systematically
-under-attend to information placed in the middle of long contexts, with effective recall degrading as a function of position. For tool synthesis over long documentation files, this implies that endpoints described far from the beginning or end of a document may be systematically under-represented in the
-generated server --- a structural bias independent of parametric knowledge effects. More recent work on disentangling recall and reasoning in long contexts~\cite{disentanglerecall2025} distinguishes between a model's ability to retrieve information from the context window and its ability to reason over that information; the two can fail independently. In our setting, synthesis failures attributable to missed documentation (low SYNTH on large APIs) may reflect retrieval limitations rather than reasoning failures.
+Liu et al.~\cite{liu2023lostmiddle} demonstrated that recall follows a
+U-shaped curve across context position: performance is highest for information
+near the beginning or end of the context and lowest for information placed in
+the middle. For tool synthesis over long documentation files, this implies that endpoints described far from the beginning or end of a document may be systematically under-represented in the
+generated server --- a structural bias independent of parametric knowledge effects. More recent work on disentangling recall and reasoning in long contexts~\cite{disentanglerecall2025} distinguishes between a model's ability to retrieve information from the context window and its ability to reason over that information; the two can fail independently. In our setting, synthesis failures attributable to missed documentation may reflect retrieval limitations rather than reasoning failures.
 
 More directly relevant is work on how models handle context that explicitly contradicts their parametric priors. \cite{xie2023adaptive} showed that models can be steered by stated premises even when those premises are false, while other studies have found the opposite --- models ignoring contradictory context when their parametric prior is strong. Our mutation design sits at this intersection: by introducing deliberate conflicts between in-context documentation and training-time parameter names, we measure which signal dominates, and for which APIs, providing a controlled analogue to the natural conflicts that arise when API documentation evolves after a model's training cutoff.
 
@@ -66,15 +77,25 @@ for well-known APIs.
 A growing body of work examines how language models resolve conflicts between information encoded in their weights during pre-training and information provided in context at inference time. Studies have found that models exhibit a strong prior towards their training distribution, sometimes ignoring counter-factual evidence in the context~\citep{longpre2021entity}, and that this tendency grows stronger as the amount of training exposure to
 a topic increases~\citep{mallen2023knowns}.
 
-\cite{mallen2023knowns} provide perhaps the most directly
-relevant finding: the probability that a model correctly answers a factual question from parametric memory scales with the log-frequency of the corresponding entity in pre-training data. Rare entities are reliably retrieved from context; common entities are retrieved from weights even when context is available. For our setting, this predicts that no-docs synthesis quality should be highest for APIs heavily represented in pre-training
+Mallen et al.~\cite{mallen2023knowns} provide perhaps the most directly
+relevant finding: the probability that a model correctly answers a factual
+question from parametric memory scales with the log-popularity of the
+corresponding entity (measured via Wikipedia page views as a proxy for
+pre-training frequency). Rare entities are reliably retrieved from context;
+common entities are retrieved from weights even when context is available.
+For our setting, this predicts that no-docs synthesis quality should be highest for APIs heavily represented in pre-training
 corpora --- exactly what we observe for GitHub and Stripe.
 \cite{longpre2021entity} studied entity-based knowledge
 conflicts in question answering and found that models with stronger parametric priors are more likely to ignore contradictory context, providing a direct precursor to our mutation adherence measurement.
 
-This phenomenon has also been studied in retrieval-augmented generation (RAG) settings, where retrieved documents sometimes contradict model priors. Models fine-tuned with reinforcement learning from human feedback (RLHF) have been found to exhibit different susceptibility to context override than base
-models~\cite{neeman2022disentqa}, suggesting that training regime --- not just pre-training data frequency --- modulates the strength of parametric gravity. This is relevant to our synthesis model comparison, where models trained under different regimes (GPT-5.2, Sonnet~4.6, Qwen3-Coder-Next) exhibit
-markedly different adherence rates to mutated documentation.
+This phenomenon has also been studied in question answering settings where
+retrieved passages contradict model priors. Neeman et al.~\cite{neeman2022disentqa}
+introduce a counterfactual data augmentation approach that trains models to
+maintain separate predictions for parametric and contextual answers
+simultaneously, improving robustness to knowledge conflicts. The fact that
+a specialised training objective is needed to achieve this separation
+underscores how strongly parametric priors resist contextual override by
+default --- a resistance we observe directly in our mutation experiments.
 
 More recent work has sharpened the understanding of when parametric knowledge yields to context. JuICE~\citep{juice2025} introduces a controlled training objective that suppresses parametric interference during context-grounded generation, and demonstrates consistent accuracy gains on conflict-heavy QA benchmarks. Separately, studies on calibration in RAG pipelines~\cite{ragknowswrong2025} show that models often
 fail to signal uncertainty when their parametric prior conflicts with retrieved evidence, producing confident but incorrect outputs --- a pattern visible in our synthesis results for cases where the model silently reverts to training-time parameter names without any warning in its output.
@@ -104,7 +125,8 @@ residual stream at each layer to detect the point at which representations of mu
 
 The Model Context Protocol (MCP)~\citep{anthropic2024mcp} is an open standard that defines how agents discover and invoke tools exposed by external servers over a stdio transport. An MCP server exposes a \texttt{list\_tools()} endpoint that returns typed tool schemas and a \texttt{call\_tool()} endpoint for invocation. The protocol has seen rapid adoption across agent frameworks, making it a natural target for automated tool synthesis. Our benchmark uses MCP as the interface layer between the synthesized server and the evaluation agent.
 
-MCP-Universe~\cite{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\cite{doc2agent2025} goes a step further and synthesizes MCP servers from documentation at scale, demonstrating that automated server generation is practically viable. Our work builds on this direction by
+MCP-Universe~\cite{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\cite{doc2agent2025} goes a step further and synthesizes callable tool implementations from unstructured documentation at scale,
+demonstrating that automated tool generation is practically viable. Our work builds on this direction by
 introducing controlled ablations (no-docs, mutated) and grounding analysis, allowing us to separate the contribution of documentation from that of parametric knowledge --- a question neither MCP-Universe nor Doc2Agent addresses directly.
 
 \section{Summary}
@@ -135,6 +157,7 @@ GAIA / WebArena  & \checkmark &            &            &            & \\
 ToolFactory      &            & \checkmark &            & \checkmark & \\
 Doc2Agent        &            & \checkmark & \checkmark &            & \\
 WAPIIBench       & \checkmark &            & \checkmark & \checkmark & \\
+MCP-Bench        & \checkmark &            & \checkmark &            & \\
 \textbf{Ours}    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
