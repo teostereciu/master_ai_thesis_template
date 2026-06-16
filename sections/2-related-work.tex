@@ -52,14 +52,11 @@ APIs and synthesis conditions?
 In-context learning (ICL), the ability of large language models to adapt to new inputs from examples or instructions in the prompt, was systematically characterised by \cite{brown2020gpt3}. A common assumption in the software engineering community is that supplying live API documentation in the context window grounds the model's output, ensuring that generated code reflects the current API specification rather than stale parametric
 memory. Subsequent work has complicated this assumption in several ways.
 
-Liu et al.~\cite{liu2023lostmiddle} demonstrated that recall follows a U-shaped curve across context position: performance is highest for information near the beginning or end of the context and lowest for information placed in the middle. For tool synthesis over long documentation files, this implies that endpoints described far from the beginning or end of a document may be systematically under-represented in the generated server --- a structural bias independent of parametric knowledge effects. More recent work on disentangling recall and reasoning in long contexts~\cite{disentanglerecall2025} distinguishes between a model's ability to retrieve information from the context window and its ability to reason over that information; the two can fail independently. In our setting, synthesis failures attributable to missed documentation may reflect retrieval limitations rather than reasoning failures.
+~\cite{liu2023lostmiddle} demonstrated that recall follows a U-shaped curve across context position: performance is highest for information near the beginning or end of the context and lowest for information placed in the middle. For tool synthesis over long documentation files, this implies that endpoints described far from the beginning or end of a document may be systematically under-represented in the generated server --- a structural bias independent of parametric knowledge effects. More recent work on disentangling recall and reasoning in long contexts~\cite{disentanglerecall2025} distinguishes between a model's ability to retrieve information from the context window and its ability to reason over that information; the two can fail independently. In our setting, synthesis failures attributable to missed documentation may reflect retrieval limitations rather than reasoning failures.
 
 More directly relevant is work on how models handle context that explicitly contradicts their parametric priors. \cite{xie2023adaptive} showed that models can be steered by stated premises even when those premises are false, while other studies have found the opposite --- models ignoring contradictory context when their parametric prior is strong. Our mutation design sits at this intersection: by introducing deliberate conflicts between in-context documentation and training-time parameter names, we measure which signal dominates, and for which APIs, providing a controlled analogue to the natural conflicts that arise when API documentation evolves after a model's training cutoff.
 
-A recent study on task-dependent conflict resolution~\citep{taskmatters2025} finds that the degree to which a model defers to context versus its parametric prior depends not only on entity frequency but also on the nature of the downstream task: models are more likely to update on context when the task is procedural rather than factual. This is directly relevant to tool synthesis, where the model must not merely recall a parameter name but correctly propagate it through the generated
-code --- a procedural constraint that might be expected to promote
-context adherence, yet our results show this is often not the case
-for well-known APIs.
+A recent study on task-dependent conflict resolution~\citep{taskmatters2025} finds that the degree to which a model defers to context versus its parametric prior depends not only on entity frequency but also on the nature of the downstream task: models are more likely to update on context when the task is procedural rather than factual. This is directly relevant to tool synthesis, where the model must not merely recall a parameter name but correctly propagate it through the generated code --- a procedural constraint that might be expected to promote context adherence, yet our results show this is often not the case for well-known APIs.
 
 \section{Parametric Knowledge and Knowledge Conflicts}
 
@@ -86,8 +83,7 @@ The behavioural evidence from adherence rates raises a mechanistic question: at 
 that linear classifiers trained on intermediate layer representations reveal when and where concepts become linearly decodable across the network's depth, treating each layer's activation as a probe target. Applied to transformer
 language models, this technique has been used to track the emergence of syntactic and semantic structure across layers~\citep{tenney2019bert}.
 
-The logit lens~\citep{nostalgebraist2020logitlens} extends this idea directly: by projecting intermediate residual stream states through the model's unembedding matrix at each layer, it is possible to read off the model's evolving prediction, revealing how token probabilities develop from early to late layers. \cite{belrose2023tunedlens} refined this into the
-tuned lens, training a learned affine transformation per layer to improve the quality of intermediate predictions. These tools make it possible to detect at which layer a model's prediction transitions from an in-context representation to a parametric one.
+The logit lens~\citep{nostalgebraist2020logitlens} extends this idea directly: by projecting intermediate residual stream states through the model's unembedding matrix at each layer, it is possible to read off the model's evolving prediction, revealing how token probabilities develop from early to late layers. \cite{belrose2023tunedlens} refined this into the tuned lens, training a learned affine transformation per layer to improve the quality of intermediate predictions. These tools make it possible to detect at which layer a model's prediction transitions from an in-context representation to a parametric one.
 
 \cite{meng2022rome} localised factual recall in GPT-style models to specific middle-layer MLP modules, finding that factual associations are stored as a form of key-value memory in feed-forward layers. This provides a candidate mechanistic account of parametric gravity: in-context representations of mutated parameter names may compete with these stored associations at the feed-forward layer where the expected parameter name is ``looked up.''
 
@@ -100,28 +96,26 @@ residual stream at each layer to detect the point at which representations of mu
 
 \section{The Model Context Protocol}
 
-The Model Context Protocol (MCP)~\citep{anthropic2024mcp} is an open standard that defines how agents discover and invoke tools exposed by external servers over a stdio transport. An MCP server exposes a \texttt{list\_tools()} endpoint that returns typed tool schemas and a \texttt{call\_tool()} endpoint for invocation. The protocol has seen rapid adoption across agent frameworks, making it a natural target for automated tool synthesis. Our benchmark uses MCP as the interface layer between the synthesized server and the evaluation agent.
+The Model Context Protocol (MCP; ~\citeauthor{anthropic2024mcp}, \citeyear{anthropic2024mcp}) is an open standard that defines how agents discover and invoke tools exposed by external servers over a stdio transport. An MCP server exposes a \texttt{list\_tools()} endpoint that returns typed tool schemas and a \texttt{call\_tool()} endpoint for invocation. The protocol has seen rapid adoption across agent frameworks, making it a natural target for automated tool synthesis. Our benchmark uses MCP as the interface layer between the synthesized server and the evaluation agent.
 
-MCP-Universe~\cite{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\cite{doc2agent2025} goes a step further and synthesizes callable tool implementations from unstructured documentation at scale,
-demonstrating that automated tool generation is practically viable. Our work builds on this direction by
+MCP-Universe~\citep{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\citep{doc2agent2025} goes a step further and synthesizes callable tool implementations from unstructured documentation at scale, demonstrating that automated tool generation is practically viable. Our work builds on this direction by
 introducing controlled ablations (no-docs, mutated) and grounding analysis, allowing us to separate the contribution of documentation from that of parametric knowledge --- a question neither MCP-Universe nor Doc2Agent addresses directly.
 
 \section{Summary}
 
 Table~\ref{tab:related} summarises the positioning of our work relative to the benchmarks discussed above. The key distinguishing feature is that we evaluate the \emph{production} of tool infrastructure from documentation, combined with live API execution, rather than the \emph{use} of pre-existing tools or the generation of code evaluated against static tests.
 
-\begin{table*}[t]
+
+\begin{table}[h]
 \centering
-\small
-\caption{Positioning relative to prior benchmarks. \emph{Doc faithfulness}:
-measures whether generated output is grounded in provided documentation.
-\emph{Mech.\ analysis}: probes internal model representations to explain
-observed behaviour.}
+\scriptsize
+\caption{Positioning relative to prior benchmarks. Positioning relative to prior benchmarks. \emph{Tool synth.}: executable tool creation. \emph{Doc faith.}: output grounded in provided documentation. \emph{Mech. Analysis}: internal representation probing.}
 \label{tab:related}
+\setlength{\tabcolsep}{2.5pt}
 \begin{tabular}{lccccc}
 \toprule
-& \textbf{Tool use} & \textbf{Tool synthesis} & \textbf{Live API}
-& \textbf{Doc faithfulness} & \textbf{Mech.\ analysis} \\
+& \textbf{Tool use} & \textbf{Tool synth.} & \textbf{Live API}
+& \textbf{Doc faith.} & \textbf{Mech.\ analysis} \\
 \midrule
 ToolBench        & \checkmark &            &            &            & \\
 API-Bank         & \checkmark &            &            &            & \\
@@ -138,4 +132,4 @@ MCP-Bench        & \checkmark &            & \checkmark &            & \\
 \textbf{Ours}    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
-\end{table*}
+\end{table}
