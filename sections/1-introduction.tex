@@ -25,11 +25,7 @@ Formally, tool synthesis is an autoregressive generation process conditioned on 
 where $X = (x_1, \ldots, x_n)$ is the generated server implementation. We study three instantiations of the context $C$: the full documentation $C_{\text{docs}}$, the empty context $C_{\emptyset}$ (no documentation), and a counter-factually mutated context $C_{\text{mut}}$ in which core parameter
 names are renamed to conflict with training-time knowledge. Holding $T$ and $\theta$ fixed while varying $C$ isolates how much the output distribution depends on in-context evidence versus the parametric knowledge encoded in $\theta$.
 
-Beyond feasibility, we use the benchmark to investigate two further questions. First, to what extent do models rely on \emph{parametric knowledge}---facts absorbed during pre-training---rather than the documentation provided at inference time? We study this through three synthesis conditions corresponding to different values of $C$ in Equation~\ref{eq:synthesis}: with full documentation, without any documentation, and with documentation whose parameter names have been deliberately mutated to conflict with training-time knowledge. Mutation adherence is measured at two levels: the Python function signature (interface layer) and the outbound HTTP payload (network layer), allowing us to detect where parametric gravity asserts itself during generation. Second, does synthesis quality predict agent task performance?
-We measure synthesis sufficiency separately from end-to-end task execution,
-asking whether an LLM judge's assessment of the server --- without running
-any tasks --- is a reliable leading indicator of whether the agent will
-succeed downstream.
+Beyond feasibility, we use the benchmark to investigate two further questions. First, to what extent do models rely on \emph{parametric knowledge}---facts absorbed during pre-training---rather than the documentation provided at inference time? We study this through three synthesis conditions corresponding to different values of $C$ in Equation~\ref{eq:synthesis}: with full documentation, without any documentation, and with documentation whose parameter names have been deliberately mutated to conflict with training-time knowledge. Mutation adherence is measured at two levels: the Python function signature (interface layer) and the outbound HTTP payload (network layer), allowing us to detect where parametric gravity asserts itself during generation. Second, does synthesis quality predict agent task performance? We measure synthesis sufficiency separately from end-to-end task execution, asking whether an LLM judge's assessment of the server --- without running any tasks --- is a reliable leading indicator of whether the agent will succeed downstream.
 
 Existing software engineering benchmarks such as SWE-bench~\citep{jimenez2023swebench} evaluate agents as black boxes, measuring macro pass/fail rates without explaining where and why failures occur. Conversely, mechanistic work on parametric memory and context--memory conflict~\citep{mallen2023knowns,longpre2021entity,juice2025} is largely restricted to open-domain question-answering datasets, which do not capture the stateful, protocol-driven constraints of live API execution. This thesis bridges that gap empirically: we measure parametric influence through controlled documentation ablations and counterfactual mutations, using a live execution environment as the ground truth signal.
 
@@ -39,19 +35,12 @@ Beyond empirical analysis, we distil the findings into a set of practical design
 
 Our main findings are: (i)~synthesis is feasible for most APIs under the best conditions (median agent pass rate~80\%), and synthesized servers match or exceed human-authored reference implementations on GitHub and Zulip; (ii)~removing documentation does not degrade---and sometimes improves---performance on high-frequency APIs, because model weights already encode correct implementations and documentation adds context noise; (iii)~mutation adherence is near-zero for well-known public APIs, confirming that parametric knowledge dominates documentation for those APIs, and its effect on agent performance depends on whether both the synthesizer and the agent share the same prior about the API; (iv)~synthesis pass rate and agent pass rate are strongly correlated ($r = 0.921$), establishing synthesis quality as a reliable proxy for downstream utility. We additionally present a preliminary probing analysis connecting the observed parametric dominance to representational dynamics in the transformer residual stream, and derive a set of practical guidelines for robust synthesis system design.
 
-The remainder of this thesis is organised as follows.
-Chapter~\ref{ch:related} surveys related work on tool-use benchmarks,
-code generation, parametric knowledge, and autonomous agents.
-Chapter~\ref{ch:method} describes the benchmark construction, synthesis
-pipeline, evaluation harness, and experimental conditions.
-Chapter~\ref{ch:results} presents results structured around the five research
-questions.
-Chapter~\ref{ch:discussion} interprets the findings in light of prior work,
-discusses the parametric gravity mechanism and its practical consequences,
-and reflects on the limitations of the study.
-Chapter~\ref{ch:conclusion} answers each research question, states the
-contribution relative to the identified gap, and identifies directions for
-future work.
+The remainder of this thesis is organised as follows. 
+Chapter~\ref{sec:related_work} surveys related work on tool-use benchmarks, code generation, parametric knowledge, and autonomous agents.
+Chapter~\ref{sec:methodology} describes the benchmark construction, synthesis pipeline, evaluation harness, and experimental conditions.
+Chapter~\ref{sec:results} presents results structured around the five research questions.
+Chapter~\ref{sec:discussion} interprets the findings in light of prior work, discusses the parametric gravity mechanism and its practical consequences, and reflects on the limitations of the study.
+Chapter~\ref{sec:conclusion} answers each research question, states the contribution relative to the identified gap, and identifies directions for future work.
 
 % Mention scientific context/field, problem statement, research gap and (sub) research question(s). 
 %Write your introduction here. It should be immediately clear how your proposed contribution is scientifically relevant and fills the research gap.
