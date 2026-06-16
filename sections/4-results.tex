@@ -163,12 +163,13 @@ detectable as a problem when the two components have mismatched priors.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{results_adherence.png}
-  \caption{Left: mutation adherence rates (HTTP and interface adoption)
-    per API, sorted by HTTP adoption. Right: adherence vs.\ the
-    difference in PASS between docs and no-docs conditions.
-    Low adherence implies the synthesizer relied on parametric knowledge
-    rather than the provided documentation.}
+  \includegraphics[width=\linewidth]{fig6_mutation_sensitivity.pdf}
+  \caption{PASS delta (mutated $-$ docs, in percentage points) per API, sorted
+    ascending. Red bars indicate APIs hurt by parameter renaming; green bars
+    indicate APIs that benefit or are unaffected. Diamond markers (amber) show
+    the interface-layer mutation adherence rate: how many renamed parameters the
+    synthesizer adopted. Low adherence implies the synthesizer relied on
+    parametric knowledge rather than the provided documentation.}
   \label{fig:adherence}
 \end{figure}
 
