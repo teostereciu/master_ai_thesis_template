@@ -101,11 +101,6 @@ The Model Context Protocol (MCP; ~\citeauthor{anthropic2024mcp}, \citeyear{anthr
 MCP-Universe~\citep{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\citep{doc2agent2025} goes a step further and synthesizes callable tool implementations from unstructured documentation at scale, demonstrating that automated tool generation is practically viable. Our work builds on this direction by
 introducing controlled ablations (no-docs, mutated) and grounding analysis, allowing us to separate the contribution of documentation from that of parametric knowledge --- a question neither MCP-Universe nor Doc2Agent addresses directly.
 
-\section{Summary}
-
-Table~\ref{tab:related} summarises the positioning of our work relative to the benchmarks discussed above. The key distinguishing feature is that we evaluate the \emph{production} of tool infrastructure from documentation, combined with live API execution, rather than the \emph{use} of pre-existing tools or the generation of code evaluated against static tests.
-
-
 \begin{table}[h]
 \centering
 \scriptsize
@@ -133,3 +128,10 @@ MCP-Bench        & \checkmark &            & \checkmark &            & \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+
+\section{Summary}
+
+Table~\ref{tab:related} summarises the positioning of our work relative to the benchmarks discussed above. The key distinguishing feature is that we evaluate the \emph{production} of tool infrastructure from documentation, combined with live API execution, rather than the \emph{use} of pre-existing tools or the generation of code evaluated against static tests.
+
+
