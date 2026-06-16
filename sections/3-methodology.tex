@@ -76,13 +76,13 @@ This separation is the central design choice. In prior tool-use evaluations, the
 
 \subsection{API Selection}
 
-We select 14 REST APIs spanning five domains: developer tooling (GitHub), productivity and collaboration (Notion, Confluence, Jira), e-commerce (eBay Buy, eBay Commerce, eBay Sell, Shopify), communication (Mastodon, Zulip), and data and financial services (Stripe, Alphavantage, Spoonacular, OpenWeatherMap). Selection criteria were: (i)~availability of a sandboxed or resettable test environment with stable test credentials, (ii)~REST-based HTTP interface returning JSON, (iii)~public developer documentation available as HTML or Markdown, and (iv)~variation along the two primary experimental axes: \emph{familiarity} (the degree to which an API is likely well-represented in pre-training corpora) and \emph{complexity} (endpoint count, parameter density, and authentication complexity).
+We select 14 REST APIs spanning five domains: developer tooling (GitHub, Jira), productivity and collaboration (Notion, Confluence), e-commerce (eBay Buy, eBay Commerce, eBay Sell, Shopify), communication (Mastodon, Zulip), and data and financial services (Stripe, Alphavantage, Spoonacular, OpenWeatherMap). Selection criteria were: (i)~availability of a sandboxed or resettable test environment with stable test credentials, (ii)~REST-based HTTP interface returning JSON, (iii)~public developer documentation available as HTML or Markdown, and (iv)~variation along the two primary experimental axes: \emph{familiarity} (the degree to which an API is likely well-represented in pre-training corpora) and \emph{complexity} (endpoint count, parameter density, and authentication complexity).
 
-APIs range from high-familiarity, high-complexity (GitHub, Stripe) to low-familiarity, low-complexity (Alphavantage, OpenWeatherMap). The eBay suite provides three difficulty tiers within a single platform: the Buy, Commerce, and Sell sub-APIs differ substantially in documentation volume and endpoint coverage despite sharing the same host and OAuth model. Jira and the eBay Sell API represent the most challenging synthesis targets, with large hierarchical documentation and high parameter cardinality.
+APIs range from high-familiarity, high-complexity (GitHub, Stripe) to low-familiarity, low-complexity (Alphavantage). The eBay suite provides three difficulty tiers within a single platform: the Buy, Commerce, and Sell sub-APIs differ substantially in documentation volume and endpoint coverage despite sharing the same host and OAuth model. Jira and the eBay Sell API represent the most challenging synthesis targets, with large hierarchical documentation and high parameter cardinality.
 
 \subsection{Documentation Collection}
 
-For each API, we scrape the official developer documentation portal and convert it to Markdown using a DOM-to-Markdown pipeline. Depending on the API's documentation structure, this produces between 7 and 190 Markdown files per dataset (median approximately 35 files). Files range from single-endpoint reference pages to category-level overview pages covering multiple related endpoints. We do not post-process or selectively filter the scraped content beyond format normalisation; the synthesizer receives the documentation in the same form it appears online, including navigation artefacts, code samples in multiple languages, and pagination boilerplate.
+For each API, we scrape the official developer documentation portal and convert it to Markdown using a DOM-to-Markdown pipeline. Depending on the API's documentation structure, this produces between 4 and 190 Markdown files per dataset (median approximately 50 files). Files range from single-endpoint reference pages to category-level overview pages covering multiple related endpoints. We do not post-process or selectively filter the scraped content beyond format normalisation; the synthesizer receives the documentation in the same form it appears online, including navigation artefacts, code samples in multiple languages, and pagination boilerplate.
 
 This choice is deliberate: it reflects realistic synthesis conditions, where a practitioner points a synthesis agent at a raw documentation URL rather than a curated, cleaned API description. The resulting noise is part of the synthesis challenge the model must handle.
 
@@ -117,7 +117,7 @@ To enable fair PASS comparison across conditions, we apply a \emph{patch} step t
 
 \subsection{Task Specification}
 
-Each dataset includes a \texttt{TASK.md} file that provides the synthesis agent with all information needed to produce a functional server. The specification covers: the target implementation framework
+Each dataset includes a \texttt{INSTRUCTIONS.md} file that provides the synthesis agent with all information needed to produce a functional server. The specification covers: the target implementation framework
 (FastMCP\footnote{FastMCP is a high-level Python library that wraps the
 official MCP SDK, reducing server boilerplate to decorated Python functions.}
 for Python), the list of available documentation files and their location,
@@ -145,13 +145,13 @@ The grounding manifest enables two lightweight analyses. \emph{Citation validity
 
 The synthesis agent is a minimal scaffold: a fixed agentic loop exposing six file-system tools (\texttt{read\_file}, \texttt{write\_file}, \texttt{edit\_file}, \texttt{glob}, \texttt{grep}, \texttt{list\_directory}) into which different LLMs are slotted as the generative component. The scaffold provides the tool interface, manages the turn loop, and delivers the task specification and, depending on the synthesis condition, a populated documentation directory. The LLM iterates within this loop until it produces the required deliverables or reaches a maximum of 100 turns; no step-level guidance or chain-of-thought prompting is imposed beyond the task specification itself. Synthesis models are run at their provider defaults unless otherwise noted; sampling temperature is not explicitly fixed across all models. Each API--condition pair is synthesized in a single run; multiple runs are performed only for the variance study reported in Section~\ref{sec:rq1}. For APIs whose documentation corpora exceed a model's effective context window, the agent reads files selectively rather than receiving all documentation concatenated upfront; no corpus was artificially truncated.
 
-A typical synthesis run follows three phases. In the \emph{exploration} phase (turns 1--3), the agent reads \texttt{TASK.md}, lists the documentation directory, and reads a subset of files to understand the API's structure and authentication model. In the \emph{implementation} phase (turns 4--20), it writes tool modules and a shared HTTP client. In the \emph{finalisation} phase (last 2--3 turns), it assembles \texttt{server.py}, writes \texttt{grounding.json} and
+A typical synthesis run follows three phases. In the \emph{exploration} phase (turns 1--3), the agent reads \texttt{INSTRUCTIONS.md}, lists the documentation directory, and reads a subset of files to understand the API's structure and authentication model. In the \emph{implementation} phase (turns 4--20), it writes tool modules and a shared HTTP client. In the \emph{finalisation} phase (last 2--3 turns), it assembles \texttt{server.py}, writes \texttt{grounding.json} and
 \texttt{requirements.txt}, then performs a self-verification pass by
 rereading key files. Figure~\ref{fig:synth-trace} shows a representative trace.
 
 \begin{figure}[h]
 \begin{TraceBox}
-[turn 1]  read_file(TASK.md)
+[turn 1]  read_file(INSTRUCTIONS.md)
 [turn 1]  glob(docs/*.md)
 [turn 2]  read_file(docs/browse.md)
 [turn 2]  read_file(docs/item.md)
@@ -186,18 +186,18 @@ instantiations of the context $C$ in Equation~\ref{eq:synthesis}:
 \end{itemize}
 
 \noindent
-Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-condition runs typically require 15--25 agent turns, consuming 14K--2.4M input tokens (reflecting documentation corpus size, which ranges from 7 to 190 files). No-docs runs are substantially shorter: 14K--24K input tokens and approximately 1 minute wall time, since the agent skips document reads and writes directly from parametric memory.
+Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-condition runs typically require 15--25 agent turns, consuming 14K--2.4M input tokens (reflecting documentation corpus size, which ranges from 4 to 190 files). No-docs runs are substantially shorter: 14K--24K input tokens and approximately 1 minute wall time, since the agent skips document reads and writes directly from parametric memory.
 
 \subsection{Synthesis Models}
 
 We evaluate seven synthesis models spanning four model families and two
 inference backends. Table~\ref{tab:models} summarises their key properties.
-GPT-5.2 serves as the primary baseline, run across all 14 APIs and all three
-conditions. GPT-5.4 is run across all 14 APIs as a more recent baseline.
-Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) are run across a
-representative subset of APIs, offering a strong/efficient tradeoff within the
-same model family. Gemini~3.1~Pro provides a third model family for
-comparison. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
+All models are run across all 14 APIs and all three conditions where synthesis
+succeeds; where results are missing, this reflects synthesis failures rather
+than intentional subset selection. GPT-5.2 serves as the primary baseline.
+GPT-5.4 is run as a more recent OpenAI baseline. Sonnet~4.6 and Haiku~4.5
+(both Anthropic Claude) offer a strong/efficient tradeoff within the same
+model family. Gemini~3.1~Pro provides a third model family for comparison. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
 served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
 80\,GB GPUs (160\,GB total VRAM, CUDA~12.2), allowing comparison of
 instruction-tuned versus base model synthesis behaviour. These span a range of training
@@ -208,22 +208,23 @@ capability. Model comparison results are presented in Section~\ref{sec:rq1}.
 \begin{table}[ht]
 \centering
 \footnotesize
-\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference.}
+\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; n.d.\ = not disclosed by provider. For Qwen3, 3B act.\ denotes activated parameters per token (mixture-of-experts architecture).}
 \label{tab:models}
 \setlength{\tabcolsep}{3.5pt}
-\begin{tabular}{llll}
+\begin{tabular}{lllrr}
 \toprule
-\textbf{Model} & \textbf{Family} & \textbf{Access} \\
+\textbf{Model} & \textbf{Family} & \textbf{Access} & \textbf{Params} & \textbf{Context} \\
 \midrule
-GPT-5.2              & OpenAI GPT-5    & Azure API     \\
-GPT-5.4              & OpenAI GPT-5    & Azure API     \\
-Sonnet~4.6           & Anthropic Claude & GCP API      \\
-Haiku~4.5            & Anthropic Claude & GCP API      \\
-Gemini~3.1~Pro       & Google Gemini   & GCP API       &\\
-Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) \\
-Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) \\
+GPT-5.2              & OpenAI GPT-5    & Azure API            & n.d.  & 400K   \\
+GPT-5.4              & OpenAI GPT-5    & Azure API            & n.d.  & 1.05M  \\
+Sonnet~4.6           & Anthropic Claude & GCP API             & n.d.  & 1M     \\
+Haiku~4.5            & Anthropic Claude & GCP API             & n.d.  & 200K   \\
+Gemini~3.1~Pro       & Google Gemini   & GCP API              & n.d.  & 1M     \\
+Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & ---    \\
+Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & ---    \\
 \bottomrule
 \end{tabular}
+% n.d. = not disclosed by provider
 \end{table}
 
 \noindent
@@ -278,7 +279,7 @@ The agent's system prompt instructs it to always call at least one tool before a
 The evaluation harness speaks only MCP: it calls \texttt{list\_tools()} to discover available tools and \texttt{call\_tool(name, args)} to invoke them.
 No other protocol or API client is provided. All HTTP logic --- authentication, request construction, token refresh, error handling --- executes inside the synthesized server process and is invisible to both the harness and the evaluation agent. The evaluation agent's performance therefore depends entirely on the interface quality and implementation correctness of the synthesized server.
 
-The harness launches the synthesized server as a subprocess via stdio transport and waits up to 30 seconds for a successful \texttt{list\_tools()} response before marking the run as an \textsc{environment} failure. Each task is subject to a per-task wall-time cap of 5 minutes; tool calls that hang beyond this limit are terminated and scored as \textsc{environment}. Write tasks are isolated by the naming prefix convention and cleaned up after each run to prevent state leakage between tasks.
+The harness launches the synthesized server as a subprocess via stdio transport and waits up to 30 seconds for a successful \texttt{list\_tools()} response before marking the run as a \verdict{environment} failure. Each task is subject to a per-task wall-time cap of 5 minutes; tool calls that hang beyond this limit are terminated and scored as \verdict{environment}. Write tasks are isolated by the naming prefix convention and cleaned up after each run to prevent state leakage between tasks.
 
 \subsection{Judge}
 
@@ -286,23 +287,23 @@ Task outcomes are assessed by a separate LLM judge (Gemini~3~Flash) that does no
 
 \begin{enumerate}
   \item \textbf{OUTCOME}: Did the agent complete the task correctly?
-    (\textsc{pass} / \textsc{fail})
-  \item \textbf{FAILURE\_CAUSE}: If \textsc{fail}, what was the primary cause?
+    (\verdict{pass} / \verdict{fail})
+  \item \textbf{FAILURE\_CAUSE}: If \verdict{fail}, what was the primary cause?
     One of eight codes:
-    \textsc{tool\_coverage} (required tool absent from server),
-    \textsc{tool\_documentation} (tool present but name or description
+    \verdict{tool\_coverage} (required tool absent from server),
+    \verdict{tool\_documentation} (tool present but name or description
     prevented the agent from identifying it),
-    \textsc{tool\_schema} (tool present but parameters incorrectly typed
+    \verdict{tool\_schema} (tool present but parameters incorrectly typed
     or named),
-    \textsc{tool\_implementation} (tool called correctly but returned wrong
+    \verdict{tool\_implementation} (tool called correctly but returned wrong
     or malformed data),
-    \textsc{agent\_reasoning} (tools were sufficient but agent misused them),
-    \textsc{task\_ambiguous} (task wording unclear or contradictory),
-    \textsc{environment} (server crash, network error, credential failure),
-    \textsc{none} (used when \textsc{outcome} is \textsc{pass}).
+    \verdict{agent\_reasoning} (tools were sufficient but agent misused them),
+    \verdict{task\_ambiguous} (task wording unclear or contradictory),
+    \verdict{environment} (server crash, network error, credential failure),
+    \verdict{none} (used when \textbf{OUTCOME} is \verdict{pass}).
   \item \textbf{SERVER\_SUFFICIENT}: Setting aside what the agent did,
     did the synthesized server provide all tools needed to complete the task?
-    (\textsc{yes} / \textsc{no} / \textsc{unknown})
+    (\verdict{yes} / \verdict{no} / \verdict{unknown})
 \end{enumerate}
 
 \noindent
@@ -316,15 +317,15 @@ REASON: The agent correctly identified the search tool, applied the right filter
 \end{JudgeBox}
 
 \noindent
-The \textsc{tool\_documentation} category distinguishes a missing tool (coverage gap) from a present-but-undiscoverable tool (documentation gap): when the server implements the correct endpoint but gives it a misleading name or description, the agent fails not because the tool is absent but because it cannot identify it. This distinction is absent from most prior tool-use benchmarks and matters for understanding where synthesis quality breaks down independent of coverage.
+The \verdict{tool\_documentation} category distinguishes a missing tool (coverage gap) from a present-but-undiscoverable tool (documentation gap): when the server implements the correct endpoint but gives it a misleading name or description, the agent fails not because the tool is absent but because it cannot identify it. This distinction is absent from most prior tool-use benchmarks and matters for understanding where synthesis quality breaks down independent of coverage.
 
 \subsection{Metrics}
 \label{sec:metrics}
 
 We report two primary metrics derived from the judge's structured output.
 
-\textbf{PASS} is the fraction of task attempts scored \textsc{pass} out of all \emph{scoreable} attempts. A task attempt is excluded from the denominator if it is attributed to \textsc{environment} (external infrastructure failure unrelated to synthesis quality) or \textsc{task\_ambiguous} (measurement
-confound). Failures attributed to \textsc{agent\_reasoning} are also excluded:
+\textbf{PASS} is the fraction of task attempts scored \verdict{pass} out of all \emph{scoreable} attempts. A task attempt is excluded from the denominator if it is attributed to \verdict{environment} (external infrastructure failure unrelated to synthesis quality) or \verdict{task\_ambiguous} (measurement
+confound). Failures attributed to \verdict{agent\_reasoning} are also excluded:
 they count neither as pass nor fail, because they reflect the evaluation agent's behaviour rather than the synthesized server. PASS is thus a clean signal about tool infrastructure quality:
 %
 \begin{equation}
@@ -335,14 +336,14 @@ they count neither as pass nor fail, because they reflect the evaluation agent's
 \end{equation}
 %
 where $\#\,\textsc{fail}_{\text{tool}}$ counts failures attributed to
-\textsc{tool\_coverage}, \textsc{tool\_documentation},
-\textsc{tool\_schema}, or \textsc{tool\_implementation}.
-For example, given 10 tasks with 7~\textsc{pass}, 2~\textsc{tool\_coverage},
-and 1~\textsc{agent\_reasoning}, PASS $= 7/9 = 0.78$; the
-\textsc{agent\_reasoning} failure is excluded from both numerator and
+\verdict{tool\_coverage}, \verdict{tool\_documentation},
+\verdict{tool\_schema}, or \verdict{tool\_implementation}.
+For example, given 10 tasks with 7~\verdict{pass}, 2~\verdict{tool\_coverage},
+and 1~\verdict{agent\_reasoning}, PASS $= 7/9 = 0.78$; the
+\verdict{agent\_reasoning} failure is excluded from both numerator and
 denominator.
 
-\textbf{SYNTH} (synthesis sufficiency) is derived from the \textsc{server\_sufficient} verdict: it is the fraction of tasks for which the judge found the server sufficient regardless of whether the agent succeeded. SYNTH measures synthesis quality independently of the evaluation
-agent, and is computed only for tasks where the judge returned a non-\textsc{unknown} verdict. When SYNTH is high but PASS is low, the bottleneck is agent reasoning; when both are low, the bottleneck is synthesis.
+\textbf{SYNTH} (synthesis sufficiency) is derived from the \textbf{SERVER\_SUFFICIENT} verdict: it is the fraction of tasks for which the judge found the server sufficient regardless of whether the agent succeeded. SYNTH measures synthesis quality independently of the evaluation
+agent, and is computed only for tasks where the judge returned a non-\verdict{unknown} verdict. When SYNTH is high but PASS is low, the bottleneck is agent reasoning; when both are low, the bottleneck is synthesis.
 
 Together, the two metrics place each API--condition data point in one of three regimes: \emph{synthesis-limited} (low SYNTH, low PASS), \emph{agent-limited} (high SYNTH, lower PASS), or \emph{ceiling} (high SYNTH, high PASS). The scatter plot of SYNTH against PASS (Section~\ref{sec:rq5}) visualises this decomposition across all 42 API--condition pairs in the primary evaluation.
