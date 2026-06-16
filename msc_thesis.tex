@@ -21,17 +21,53 @@
 \usepackage{booktabs} %%%%%% ADDED BY ME
 
 \usepackage{xcolor}
-\usepackage{fancyvrb}
-% Styled verbatim environments for code/trace excerpts
-\DefineVerbatimEnvironment{TraceBox}{Verbatim}{%
-  frame=leftline, fillcolor=\color{gray!8}, rulecolor=\color{gray!50},%
-  fontsize=\small, framesep=5pt, xleftmargin=8pt}
-\DefineVerbatimEnvironment{YamlBox}{Verbatim}{%
-  frame=leftline, fillcolor=\color{cyan!5}, rulecolor=\color{cyan!45},%
-  fontsize=\small, framesep=5pt, xleftmargin=8pt}
-\DefineVerbatimEnvironment{JudgeBox}{Verbatim}{%
-  frame=leftline, fillcolor=\color{orange!5}, rulecolor=\color{orange!40},%
-  fontsize=\small, framesep=5pt, xleftmargin=8pt}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable, listings}
+
+% Shared listing style: small monospace, no syntax highlighting
+\lstset{basicstyle=\small\ttfamily, breaklines=true, breakatwhitespace=false}
+
+% Synthesis agent trace (gray/slate)
+\newtcblisting{TraceBox}{
+  enhanced, breakable, listing only,
+  colback=gray!7, colframe=gray!40,
+  listing options={basicstyle=\small\ttfamily},
+  sharp corners,
+  title={\small\sffamily\bfseries Synthesis trace},
+  coltitle=white,
+  attach boxed title to top left={xshift=6pt, yshift=-\tcboxedtitleheight/2},
+  boxed title style={colback=gray!55, colframe=gray!55, sharp corners,
+                     left=5pt, right=5pt, top=2pt, bottom=2pt},
+  left=4pt, right=4pt, top=10pt, bottom=4pt,
+}
+
+% Task specification YAML (blue)
+\newtcblisting{YamlBox}{
+  enhanced, breakable, listing only,
+  colback=blue!5, colframe=blue!35,
+  listing options={basicstyle=\small\ttfamily},
+  sharp corners,
+  title={\small\sffamily\bfseries Task specification},
+  coltitle=white,
+  attach boxed title to top left={xshift=6pt, yshift=-\tcboxedtitleheight/2},
+  boxed title style={colback=blue!50, colframe=blue!50, sharp corners,
+                     left=5pt, right=5pt, top=2pt, bottom=2pt},
+  left=4pt, right=4pt, top=10pt, bottom=4pt,
+}
+
+% Judge structured output (teal)
+\newtcblisting{JudgeBox}{
+  enhanced, breakable, listing only,
+  colback=teal!5, colframe=teal!40,
+  listing options={basicstyle=\small\ttfamily},
+  sharp corners,
+  title={\small\sffamily\bfseries Judge output},
+  coltitle=white,
+  attach boxed title to top left={xshift=6pt, yshift=-\tcboxedtitleheight/2},
+  boxed title style={colback=teal!55, colframe=teal!55, sharp corners,
+                     left=5pt, right=5pt, top=2pt, bottom=2pt},
+  left=4pt, right=4pt, top=10pt, bottom=4pt,
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DOCUMENT METADATA
