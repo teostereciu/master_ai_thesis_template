@@ -226,6 +226,23 @@ Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) \\
 \end{tabular}
 \end{table}
 
+\noindent
+Several additional models were evaluated as synthesis candidates but excluded
+from the primary comparison due to systematic failures. GPT-4.1 produced
+non-functional servers across all tested datasets because it generates FastMCP
+code using an older class-based API (\texttt{register\_tool},
+\texttt{StripeMCPServer()}) that no longer exists in the version installed in
+the evaluation environment --- a training-cutoff artefact. GPT-5.4 mini
+consistently collapsed tool coverage by flattening all endpoints into a single
+shallow implementation file, resulting in near-zero pass rates on all but the
+simplest APIs. Gemini~2.5~Pro and Gemini~3.5~Flash both exhibited an
+edit-loop failure: the synthesis agent satisfied itself with a partial
+implementation and terminated before writing a top-level \texttt{server.py},
+producing unusable outputs across all tested datasets. These models are
+excluded from the comparative analysis; their failure modes are noted here as
+they illustrate the sensitivity of synthesis quality to model instruction-following
+behaviour and training-data recency.
+
 \section{Evaluation Framework}
 
 \subsection{Evaluation Tasks}
