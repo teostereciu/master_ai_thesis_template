@@ -69,17 +69,16 @@ a topic increases~\citep{mallen2023knowns}.
 ~\cite{mallen2023knowns} provide perhaps the most directly
 relevant finding: the probability that a model correctly answers a factual question from parametric memory scales with the log-popularity of the corresponding entity (measured via Wikipedia page views as a proxy for pre-training frequency). Rare entities are reliably retrieved from context; common entities are retrieved from weights even when context is available.
 For our setting, this predicts that no-docs synthesis quality should be highest for APIs heavily represented in pre-training
-corpora --- exactly what we observe for GitHub and Stripe.
+corpora, which motivates stratifying APIs by familiarity in our benchmark design.
 \cite{longpre2021entity} studied entity-based knowledge
-conflicts in question answering and found that models with stronger parametric priors are more likely to ignore contradictory context, providing a direct precursor to our mutation adherence measurement.
+conflicts in question answering and found that models with stronger parametric priors are more likely to ignore contradictory context --- a pattern directly relevant to the counterfactual design we adopt.
 
-This phenomenon has also been studied in question answering settings where retrieved passages contradict model priors. ~\cite{neeman2022disentqa} introduce a counterfactual data augmentation approach that trains models to maintain separate predictions for parametric and contextual answers simultaneously, improving robustness to knowledge conflicts. The fact that a specialised training objective is needed to achieve this separation underscores how strongly parametric priors resist contextual override by default --- a resistance we observe directly in our mutation experiments.
+This phenomenon has also been studied in question answering settings where retrieved passages contradict model priors. Neeman et al.~\cite{neeman2022disentqa} introduce a counterfactual data augmentation approach that trains models to maintain separate predictions for parametric and contextual answers simultaneously, improving robustness to knowledge conflicts. The fact that a specialised training objective is needed to achieve this separation underscores how strongly parametric priors resist contextual override by default.
 
 More recent work has sharpened the understanding of when parametric knowledge yields to context. JuICE~\citep{juice2025} introduces a controlled training objective that suppresses parametric interference during context-grounded generation, and demonstrates consistent accuracy gains on conflict-heavy QA benchmarks. Separately, studies on calibration in RAG pipelines~\cite{ragknowswrong2025} show that models often
-fail to signal uncertainty when their parametric prior conflicts with retrieved evidence, producing confident but incorrect outputs --- a pattern visible in our synthesis results for cases where the model silently reverts to training-time parameter names without any warning in its output.
+fail to signal uncertainty when their parametric prior conflicts with retrieved evidence, producing confident but incorrect outputs without any warning.
 
-In the tool synthesis setting, parametric gravity creates a measurable tension: popular APIs such as GitHub and Stripe are extensively represented in training corpora, so a model may produce a correct wrapper from memory alone --- or may resist correcting that wrapper when the documentation specifies something different. We operationalise this tension through
-deliberate parameter-name mutations and measure adherence rates at two levels: the Python interface signature and the outbound HTTP payload.
+In the tool synthesis setting, parametric gravity creates a measurable tension: popular APIs such as GitHub and Stripe are extensively represented in training corpora, so a model may produce a correct wrapper from memory alone --- or may resist updating that wrapper when documentation specifies something different. We build on this line of work to study how this tension plays out in a live API execution setting.
 
 \section{Mechanistic Interpretability and Probing}
 
