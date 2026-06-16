@@ -1,5 +1,5 @@
 \chapter{Methodology}
-\label{sec:methodology}
+\label{ch:method}
 % Focus on what you add to the existing method. Explain what you will do and why (and how). Do not forget to characterize your research design. There should be a sub-section on the evaluation. 
 %For DS students, this normally means using manually labelled or ground truth data. For IS students, it is not always needed to have a separate methodology section. You can also integrate the approach with the results in one section. It depends on your type of research what is best fitting.
 %Write about your methodology here. Focus on your own contribution. Indicate exactly how you will assess your work in terms of evaluation.
@@ -88,7 +88,7 @@ This choice is deliberate: it reflects realistic synthesis conditions, where a p
 
 \subsection{Human Reference Servers}
 
-For two APIs --- GitHub and Zulip --- publicly available, community-maintained MCP servers exist and can be evaluated against the same task suite. The GitHub MCP server is the official implementation maintained by GitHub; the Zulip server is a community-contributed open-source project. Both are written in TypeScript using the official MCP SDK and expose a subset of the respective APIs as tools. We run both reference servers against the same evaluation agent and judge pipeline used for the synthesized servers, without any modification.
+For two APIs --- GitHub and Zulip --- publicly available, community-maintained MCP servers exist and can be evaluated against the same task suite. The GitHub MCP server is the official implementation maintained by GitHub, written in Go.\footnote{\url{https://github.com/github/github-mcp-server}} The Zulip server is a community-contributed open-source project written in TypeScript.\footnote{\url{https://github.com/akougkas/zulipchat-mcp}} Both expose a subset of the respective APIs as tools. We run both reference servers against the same evaluation agent and judge pipeline used for the synthesized servers, without any modification.
 
 These human-authored servers serve as a practical baseline: they represent what a developer with API familiarity and access to the official documentation would produce without time pressure from an automated benchmark. Crucially, neither server was constructed with our specific evaluation tasks in mind, so coverage gaps reflect genuine tool-design choices rather than benchmark overfitting. Comparing synthesized server PASS rates against these baselines directly answers whether automated synthesis can match or exceed hand-crafted implementations (Section~\ref{sec:rq2}).
 
@@ -117,19 +117,25 @@ To enable fair PASS comparison across conditions, we apply a \emph{patch} step t
 
 \subsection{Task Specification}
 
-Each dataset includes a \texttt{TASK.md} file that provides the synthesis agent with all information needed to produce a functional server. The
-specification covers: the target implementation framework (FastMCP for Python,
-or the official \texttt{@modelcontextprotocol/sdk} for TypeScript), the list of available documentation files and their location, required environment variables (API keys, OAuth credentials, sandbox flags), authentication flow (typically OAuth~2.0 client credentials or a static API key), coverage expectations (broad CRUD on core resource types, support for multi-step workflows), and required deliverables.
+Each dataset includes a \texttt{TASK.md} file that provides the synthesis agent with all information needed to produce a functional server. The specification covers: the target implementation framework
+(FastMCP\footnote{FastMCP is a high-level Python library that wraps the
+official MCP SDK, reducing server boilerplate to decorated Python functions.}
+for Python), the list of available documentation files and their location,
+required environment variables (API keys, OAuth credentials, sandbox flags),
+authentication flow (typically OAuth~2.0 client credentials or a static API
+key), coverage expectations (broad CRUD on core resource types, support for
+multi-step workflows), and required deliverables.
 
-Deliverables are uniform across all datasets and language choices:
+Deliverables are uniform across all datasets:
 \begin{itemize}
-  \item \texttt{server.py} (or \texttt{server.ts}): the MCP entry point that
-    registers all tools and starts the stdio server.
-  \item \texttt{requirements.txt} (or \texttt{package.json}): pinned
-    dependencies for reproducible installation.
+  \item \texttt{server.py}: the MCP entry point that registers all tools
+    and starts the stdio server.
+  \item \texttt{requirements.txt}: pinned dependencies for reproducible
+    installation.
   \item \texttt{grounding.json}: a manifest mapping every synthesized tool
     name to the source documentation file and HTTP endpoint it implements
-    (e.g.\ \path{\{"doc": "docs/browse.md", "endpoint": "GET /buy/browse/v1/item\_summary/search"\}}).
+    (e.g.\ \texttt{\{"doc": "docs/browse.md", "endpoint":
+    "GET /buy/browse/v1/item\_summary/search"\}}).
 \end{itemize}
 
 \noindent
@@ -139,8 +145,9 @@ The grounding manifest enables two lightweight analyses. \emph{Citation validity
 
 The synthesis agent operates in an agentic loop with access to a set of file-system tools. The primary synthesis models (GPT-5.2, GPT-5.4, and Qwen3-Coder-Next via vLLM) are provided six tools: \texttt{read\_file}, \texttt{write\_file}, \texttt{edit\_file}, \texttt{glob}, \texttt{grep}, and \texttt{list\_directory}. The agent receives the task specification and, depending on the synthesis condition, a populated documentation directory. It iterates freely until it produces the required deliverables.
 
-A typical synthesis run follows three phases. In the \emph{exploration} phase (turns 1--3), the agent reads \texttt{TASK.md}, lists the documentation directory, and reads a subset of files to understand the API's structure and authentication model. In the \emph{implementation} phase (turns 4--20), it writes tool modules and a shared HTTP client. In the \emph{finalisation} phase (last 2--3 turns), it assembles \texttt{server.py}, writes
-\texttt{grounding.json} and \texttt{requirements.txt}, then performs a self-verification pass by rereading key files. Figure~\ref{fig:synth-trace} shows a representative trace.
+A typical synthesis run follows three phases. In the \emph{exploration} phase (turns 1--3), the agent reads \texttt{TASK.md}, lists the documentation directory, and reads a subset of files to understand the API's structure and authentication model. In the \emph{implementation} phase (turns 4--20), it writes tool modules and a shared HTTP client. In the \emph{finalisation} phase (last 2--3 turns), it assembles \texttt{server.py}, writes \texttt{grounding.json} and
+\texttt{requirements.txt}, then performs a self-verification pass by
+rereading key files. Figure~\ref{fig:synth-trace} shows a representative trace.
 
 \begin{figure}[h]
 \centering
@@ -184,8 +191,36 @@ Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-co
 
 \subsection{Synthesis Models}
 
-We evaluate five synthesis models. GPT-5.2 serves as the primary baseline, run across all 14 APIs and all three conditions. GPT-5.4 is run across all 14 APIs as a more recent baseline. Sonnet~4.6 (Claude Sonnet) is run across a representative subset of APIs. Gemini~3.1~Pro provides a third model family for comparison. Qwen3-Coder-Next is run locally via a vLLM inference server. These span a range of training corpora, post-training regimes, and context window sizes, allowing us to assess whether synthesis quality is model-specific or reflects a more general capability. Model comparison results are presented
-in Section~\ref{sec:rq1}.
+We evaluate five synthesis models spanning three model families and two
+inference backends. Table~\ref{tab:models} summarises their key properties.
+GPT-5.2 serves as the primary baseline, run across all 14 APIs and all three
+conditions. GPT-5.4 is run across all 14 APIs as a more recent baseline.
+Sonnet~4.6 (Claude Sonnet) is run across a representative subset of APIs.
+Gemini~3.1~Pro provides a third model family for comparison. Qwen3-Coder-Next
+is run locally via a vLLM inference server. These span a range of training
+corpora, post-training regimes, and context window sizes, allowing us to
+assess whether synthesis quality is model-specific or reflects a more general
+capability. Model comparison results are presented in Section~\ref{sec:rq1}.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Synthesis models evaluated. \emph{Coverage}: datasets and conditions
+on which the model is run. \emph{Access}: API provider or local inference.}
+\label{tab:models}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llll}
+\toprule
+\textbf{Model} & \textbf{Family} & \textbf{Access} & \textbf{Coverage} \\
+\midrule
+GPT-5.2        & OpenAI GPT-5    & Azure API       & All 14 APIs, all conditions \\
+GPT-5.4        & OpenAI GPT-5    & Azure API       & All 14 APIs, all conditions \\
+Sonnet~4.6     & Anthropic Claude & GCP API        & Subset of APIs, all conditions \\
+Gemini~3.1~Pro & Google Gemini   & GCP API         & Subset of APIs, all conditions \\
+Qwen3-Coder-Next & Qwen3       & vLLM (local)    & Subset of APIs, all conditions \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Evaluation Framework}
 
@@ -281,6 +316,10 @@ they count neither as pass nor fail, because they reflect the evaluation agent's
 where $\#\,\textsc{fail}_{\text{tool}}$ counts failures attributed to
 \textsc{tool\_coverage}, \textsc{tool\_documentation},
 \textsc{tool\_schema}, or \textsc{tool\_implementation}.
+For example, given 10 tasks with 7~\textsc{pass}, 2~\textsc{tool\_coverage},
+and 1~\textsc{agent\_reasoning}, PASS $= 7/9 = 0.78$; the
+\textsc{agent\_reasoning} failure is excluded from both numerator and
+denominator.
 
 \textbf{SYNTH} (synthesis sufficiency) is derived from the \textsc{server\_sufficient} verdict: it is the fraction of tasks for which the judge found the server sufficient regardless of whether the agent succeeded. SYNTH measures synthesis quality independently of the evaluation
 agent, and is computed only for tasks where the judge returned a non-\textsc{unknown} verdict. When SYNTH is high but PASS is low, the bottleneck is agent reasoning; when both are low, the bottleneck is synthesis.
