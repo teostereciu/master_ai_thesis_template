@@ -78,7 +78,7 @@ This separation is the central design choice. In prior tool-use evaluations, the
 
 We select 14 REST APIs spanning five domains: developer tooling (GitHub, Jira), productivity and collaboration (Notion, Confluence), e-commerce (eBay Buy, eBay Commerce, eBay Sell, Shopify), communication (Mastodon, Zulip), and data and financial services (Stripe, Alphavantage, Spoonacular, OpenWeatherMap). Selection criteria were: (i)~availability of a sandboxed or resettable test environment with stable test credentials, (ii)~REST-based HTTP interface returning JSON, (iii)~public developer documentation available as HTML or Markdown, and (iv)~variation along the two primary experimental axes: \emph{familiarity} (the degree to which an API is likely well-represented in pre-training corpora) and \emph{complexity} (endpoint count, parameter density, and authentication complexity).
 
-APIs range from high-familiarity, high-complexity (GitHub, Stripe) to low-familiarity, low-complexity (Alphavantage). The eBay suite provides three difficulty tiers within a single platform: the Buy, Commerce, and Sell sub-APIs differ substantially in documentation volume and endpoint coverage despite sharing the same host and OAuth model. Jira and the eBay Sell API represent the most challenging synthesis targets, with large hierarchical documentation and high parameter cardinality.
+APIs range from high-familiarity, high-complexity (GitHub) to low-familiarity, low-complexity (Alphavantage), with intermediate cases such as Stripe and Zulip occupying the middle of the familiarity axis. The eBay suite provides three difficulty tiers within a single platform: the Buy, Commerce, and Sell sub-APIs differ substantially in documentation volume and endpoint coverage despite sharing the same host and OAuth model. Jira and the eBay Sell API represent the most challenging synthesis targets, with large hierarchical documentation and high parameter cardinality.
 
 \subsection{Documentation Collection}
 
@@ -193,7 +193,7 @@ Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-co
 We evaluate eight synthesis models spanning four model families and two
 inference backends. Table~\ref{tab:models} summarises their key properties.
 GPT-5.2 serves as the primary baseline across all 14 APIs and all three conditions.
-GPT-5.4 and GPT-5.4-mini are evaluated as more recent OpenAI baselines; GPT-5.4-mini was run on a pilot three-API set (GitHub, Stripe, Zulip) and aborted after confirming uniformly weak results across all conditions. Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) offer a strong/efficient tradeoff within the same model family. Gemini~3.1~Pro provides a third model family. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
+GPT-5.4 and GPT-5.4-mini are evaluated as more recent OpenAI baselines; GPT-5.4-mini was evaluated on a restricted three-API set (GitHub, Stripe, Zulip) due to uniformly weak results, and is not included in the full 14-API evaluation. Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) offer a strong/efficient tradeoff within the same model family. Gemini~3.1~Pro provides a third model family. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
 served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
 80\,GB GPUs (160\,GB total VRAM, CUDA~12.2). Where results are missing, this reflects synthesis failures rather than intentional subset selection. Model comparison results are presented in Section~\ref{sec:model_comparison}.
 
@@ -222,14 +222,14 @@ Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 
 
 \noindent
 Several additional models were evaluated as synthesis candidates but excluded
-from the primary comparison due to systematic failures. GPT-4.1 produced
+from the full 14-API primary comparison due to systematic failures. GPT-4.1 produced
 non-functional servers across all tested datasets because it generates FastMCP
 code using an older class-based API (\texttt{register\_tool},
 \texttt{StripeMCPServer()}) that no longer exists in the version installed in
-the evaluation environment --- a training-cutoff artefact. GPT-5.4 mini
+the evaluation environment --- a training-cutoff artefact. GPT-5.4-mini
 consistently collapsed tool coverage by flattening all endpoints into a single
 shallow implementation file, resulting in near-zero pass rates on all but the
-simplest APIs. Gemini~2.5~Pro and Gemini~3.5~Flash both exhibited an
+simplest APIs; it is included in the restricted model comparison on GitHub, Stripe, and Zulip (Section~\ref{sec:model_comparison}). Gemini~2.5~Pro and Gemini~3.5~Flash both exhibited an
 edit-loop failure: the synthesis agent satisfied itself with a partial
 implementation and terminated before writing a top-level \texttt{server.py},
 producing unusable outputs across all tested datasets. These models are
