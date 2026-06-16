@@ -150,9 +150,7 @@ A typical synthesis run follows three phases. In the \emph{exploration} phase (t
 rereading key files. Figure~\ref{fig:synth-trace} shows a representative trace.
 
 \begin{figure}[h]
-\centering
-\small
-\begin{verbatim}
+\begin{TraceBox}
 [turn 1]  read_file(TASK.md)
 [turn 1]  glob(docs/*.md)
 [turn 2]  read_file(docs/browse.md)
@@ -162,8 +160,9 @@ rereading key files. Figure~\ref{fig:synth-trace} shows a representative trace.
 [turn 9]  write_file(server.py)
 [turn 10] write_file(grounding.json)
 [turn 11] write_file(requirements.txt)
-\end{verbatim}
-\caption{Typical synthesis agent trace (eBay Buy, docs condition, GPT-5.2). 813K input tokens, 11K output tokens, 190 seconds.}
+\end{TraceBox}
+\caption{Typical synthesis agent trace (eBay Buy, docs condition, GPT-5.2).
+813K input tokens, 11K output tokens, 190 seconds.}
 \label{fig:synth-trace}
 \end{figure}
 
@@ -236,7 +235,7 @@ For the 14 APIs in the primary evaluation set, we manually authored 13--25
 natural-language tasks per API (265 tasks total; median 19 per API). Tasks
 are specified in a \texttt{tasks.yaml} file using a four-field schema:
 
-\begin{verbatim}
+\begin{YamlBox}
 - id: search_products
   prompt: >
     Search for "wireless headphones" on eBay. Report
@@ -244,7 +243,7 @@ are specified in a \texttt{tasks.yaml} file using a four-field schema:
     results.
   expected: itemId
   tags: [read]
-\end{verbatim}
+\end{YamlBox}
 
 \noindent
 Tasks follow four design principles. First, prompts are \emph{goal-oriented}: they describe the desired outcome without naming tools, parameter fields, or HTTP endpoints. Second, they provide only the domain knowledge the agent cannot infer from tool schemas (e.g.\ ``amounts are in cents''), not call sequences or parameter names. Third, they require \emph{synthesis over echo}: comparison, counting, filtering, or multi-step retrieval rather than raw
@@ -293,14 +292,14 @@ Task outcomes are assessed by a separate LLM judge (Gemini~3~Flash) that does no
 \noindent
 The judge responds in a fixed plain-text format (no markdown) to enable reliable parsing:
 
-\begin{verbatim}
+\begin{JudgeBox}
 OUTCOME: PASS
 FAILURE_CAUSE: NONE
 SERVER_SUFFICIENT: YES
-REASON: The agent correctly identified the search tool, 
-        applied the right filters, and extracted the 
+REASON: The agent correctly identified the search tool,
+        applied the right filters, and extracted the
         requested itemId values.
-\end{verbatim}
+\end{JudgeBox}
 
 \noindent
 The \textsc{tool\_documentation} category distinguishes a missing tool (coverage gap) from a present-but-undiscoverable tool (documentation gap): when the server implements the correct endpoint but gives it a misleading name or description, the agent fails not because the tool is absent but because it cannot identify it. This distinction is absent from most prior tool-use benchmarks and matters for understanding where synthesis quality breaks down independent of coverage.

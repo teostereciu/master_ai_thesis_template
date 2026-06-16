@@ -20,6 +20,19 @@
 \usepackage{natbib}
 \usepackage{booktabs} %%%%%% ADDED BY ME
 
+\usepackage{xcolor}
+\usepackage{fancyvrb}
+% Styled verbatim environments for code/trace excerpts
+\DefineVerbatimEnvironment{TraceBox}{Verbatim}{%
+  frame=leftline, fillcolor=\color{gray!8}, rulecolor=\color{gray!50},%
+  fontsize=\small, framesep=5pt, xleftmargin=8pt}
+\DefineVerbatimEnvironment{YamlBox}{Verbatim}{%
+  frame=leftline, fillcolor=\color{cyan!5}, rulecolor=\color{cyan!45},%
+  fontsize=\small, framesep=5pt, xleftmargin=8pt}
+\DefineVerbatimEnvironment{JudgeBox}{Verbatim}{%
+  frame=leftline, fillcolor=\color{orange!5}, rulecolor=\color{orange!40},%
+  fontsize=\small, framesep=5pt, xleftmargin=8pt}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DOCUMENT METADATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
