@@ -1,30 +1,239 @@
 \chapter{Results}
 \label{sec:results}
 % Give the outcomes for each research question in the form of a table or graphic (with caption).
-Write about your results here. Good captions to tables and/or figures are key.
+%Write about your results here. Good captions to tables and/or figures are key.
 
 % Sometimes,  especially  if  you  have  quite  different experiments or research  questions,  it makes sense to interleave the experimental setup and the results sections, so the reader does not get lost. It is then helpful to structure clearly in (sub)subsections.
 
-\section{Table and Figures}
-        \begin{table}[h] % h for Here, t for Top, b for Bottom
-                \centering
-                \caption{By convention, Table caption goes on top.}
-                \begin{tabular}{lcr}
-                        \textbf{Left} & \textbf{center} & \textbf{right} \\
-                        \hline
-                        111 & 222 & 333 \\
-                        444 & 555 & 666
-                \end{tabular}
-        \end{table}
+%\section{Table and Figures}
+%        \begin{table}[h] % h for Here, t for Top, b for Bottom
+%                \centering
+%                \caption{By convention, Table caption goes on top.}
+%                \begin{tabular}{lcr}
+%                        \textbf{Left} & \textbf{center} & \textbf{right} \\
+%                        \hline
+%                        111 & 222 & 333 \\
+%                        444 & 555 & 666
+%                \end{tabular}
+%        \end{table}
 
-        \begin{figure}[h]
-                \centering
-                \includegraphics[width=0.5\linewidth]{example-image}
-                \caption[Example figure]{Example figure. Notice that the caption goes below and that there is a way to have a shorter caption for the list of Figures.}
-        \end{figure}
+%        \begin{figure}[h]
+%                \centering
+%                \includegraphics[width=0.5\linewidth]{example-image}
+%                \caption[Example figure]{Example figure. Notice that the caption goes below and that there is a way to have a shorter caption for the list of Figures.}
+%        \end{figure}
 
-        \begin{figure*}[b]
-                \centering
-                \includegraphics[width=0.8\linewidth, height=.2\textheight]{example-image}
-                \caption{Example figure spanning the two columns.}
-        \end{figure*}
+%        \begin{figure*}[b]
+%                \centering
+%                \includegraphics[width=0.8\linewidth, height=.2\textheight]{example-image}
+%                \caption{Example figure spanning the two columns.}
+%        \end{figure*}
+
+
+This chapter presents results for the five research questions introduced before. Section~\ref{sec:rq1} establishes that synthesis is feasible for most APIs. Section~\ref{sec:rq2} shows that synthesized
+servers enable effective agent task completion and compares against
+human-authored references. Section~\ref{sec:rq3} characterises how
+synthesizers rely on parametric knowledge and when this affects downstream
+performance. Section~\ref{sec:rq4} examines the effect of documentation
+availability. Section~\ref{sec:rq5} quantifies the relationship between
+synthesis quality and agent pass rate.
+
+% ------------------------------------------------------------
+\section{RQ1: Synthesis Feasibility}
+\label{sec:rq1}
+% ------------------------------------------------------------
+
+\textbf{Can LLMs synthesize functional API tool servers from documentation alone?}
+
+Figure~\ref{fig:heatmap} shows PASS and SYNTH across all 14 APIs and three
+synthesis conditions. Twelve of 14 APIs achieve SYNTH $\geq 75\%$ in the
+docs condition, with a median of approximately 84\%. Only Jira (56\%) and
+eBay Sell (43\%) fall consistently below that threshold, indicating that
+synthesis is feasible for the large majority of APIs tested.
+
+The dominant failure mode is \emph{coverage gap}: the server starts and
+runs correctly, but the synthesizer omits the specific endpoints required
+by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative trend between
+endpoint count and SYNTH visible in Figure~\ref{fig:complexity}. Structural
+failure --- servers that crash or omit the required \texttt{server.py}
+entrypoint entirely --- is rare with GPT-5.2 (the primary synthesis model)
+and occurs mainly with weaker or smaller models.
+
+SYNTH is also notably stable across conditions for most APIs: Confluence
+holds at 95\% across all three conditions and Mastodon at 93--100\%,
+indicating that synthesis quality is primarily determined by API structure
+rather than what context is provided. The exceptions --- eBay Commerce drops from SYNTH=100\% (docs) to 54\% (mutated) --- arise where parameter
+mutations reduce tool coverage directly.
+
+Grounding analysis shows that synthesizers consistently anchor tools to
+real documentation sources: citation validity is 86--100\% across datasets
+(every \texttt{grounding.json} entry points to an existing file with a
+syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{fig1_primary_heatmap.pdf}
+  \caption{Agent pass rate (PASS, large) and server synthesis sufficiency
+    (SYNTH, small) across 14 APIs and three synthesis conditions.
+    Rows sorted by mean PASS descending.
+    Colour encodes PASS on a red--orange--green scale.}
+  \label{fig:heatmap}
+\end{figure}
+
+% ------------------------------------------------------------
+\section{RQ2: Agent Task Completion}
+\label{sec:rq2}
+% ------------------------------------------------------------
+
+\textbf{Do synthesized servers enable effective agent task completion,
+compared to human-authored references?}
+
+Figure~\ref{fig:strip} shows the distribution of PASS across APIs and
+conditions. The median PASS is approximately 80\% in the docs condition and
+86\% in the no-docs condition, with a long tail of high performers
+(Mastodon 100\% across all three conditions; Confluence 91--93\%;
+OpenWeatherMap 86--100\%) and a small floor group (Jira mean 42\%;
+eBay Sell mean 45\%).
+
+The variance across APIs is explained by two distinct mechanisms. For the
+floor group, SYNTH is also low: Jira SYNTH=44--56\%, eBay Sell SYNTH=43\%.
+These are synthesis failures masquerading as agent failures --- when the
+required tools are absent, the agent cannot compensate. For APIs with
+moderate PASS but higher SYNTH (Stripe: SYNTH=77\%, PASS=72\%), the
+bottleneck shifts to agent reasoning on complex multi-step tasks.
+Figure~\ref{fig:scatter} makes this distinction visible: points near the
+diagonal are synthesis-limited; points below it are agent-limited.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{fig2_condition_slopes.pdf}
+  \caption{Distribution of PASS per synthesis condition.
+    Each dot is one API; dashed line shows the median.
+    The 50\% reference line is shown in light grey.}
+  \label{fig:strip}
+\end{figure}
+
+\paragraph{Comparison with human-authored references.}
+On GitHub, the community MCP server scores 65\% PASS. Synthesized servers
+with docs match this (62--67\% across valid runs), and synthesized servers
+without docs comfortably exceed it (83--90\%), because the synthesis model's
+parametric knowledge of the GitHub API produces more complete tool coverage
+than the hand-written reference. On Zulip, the community reference scores
+68\%; the synthesized docs-condition server scores 80\%. In both cases the
+human reference fails on the same \texttt{TOOL\_COVERAGE} pattern ---
+missing webhooks, branch protection, and Actions dispatch for GitHub;
+message edit, DM search, and scheduled messages for Zulip --- while the
+synthesized server adds these endpoints.
+
+% ------------------------------------------------------------
+\section{RQ3: Parametric Knowledge and Documentation Faithfulness}
+\label{sec:rq3}
+% ------------------------------------------------------------
+
+\textbf{To what extent do synthesizers rely on parametric knowledge rather
+than documentation, and does this affect performance?}
+
+The mutated-docs condition directly operationalises this question: if a
+synthesizer adopts the renamed parameter names, it is reading the
+documentation; if it does not, it is writing from memory.
+Figure~\ref{fig:adherence} (left) shows mutation adherence rates across
+APIs. GitHub, Stripe, Shopify, Zulip, and Jira all show near-zero HTTP
+adoption --- the synthesis model completely ignores parameter mutations and
+produces a server reflecting its training-time knowledge of the API.
+Mastodon and Alphavantage exhibit full adoption (100\%), indicating the
+synthesizer follows the provided documentation faithfully.
+
+The right panel of Figure~\ref{fig:adherence} tests whether low adherence
+predicts nodocs winning (the hypothesis being that strong parametric
+knowledge makes documentation unnecessary or even harmful). The relationship
+is weak and noisy. GitHub fits the hypothesis: zero adherence, nodocs wins
+by 21 percentage points. Stripe does not: also zero adherence, but docs
+still yield 10 percentage points higher PASS. This shows that parametric
+reliance at the synthesis stage does not cleanly propagate to agent
+performance.
+
+The mechanism behind this is that the effect of parametric reliance depends
+on whether the synthesis model and the evaluation agent share the same prior.
+When both ignore mutations and operate from training-time knowledge ---
+as for GitHub --- the mutation is invisible to the whole pipeline and
+performance is unaffected. When the synthesizer adopts mutations faithfully
+(high adherence) but the evaluation agent's prior does not anticipate the
+renamed parameters, performance degrades. The contamination is only
+detectable as a problem when the two components have mismatched priors.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{results_adherence.png}
+  \caption{Left: mutation adherence rates (HTTP and interface adoption)
+    per API, sorted by HTTP adoption. Right: adherence vs.\ the
+    difference in PASS between docs and no-docs conditions.
+    Low adherence implies the synthesizer relied on parametric knowledge
+    rather than the provided documentation.}
+  \label{fig:adherence}
+\end{figure}
+
+% ------------------------------------------------------------
+\section{RQ4: Effect of Documentation Availability}
+\label{sec:rq4}
+% ------------------------------------------------------------
+
+\textbf{How does documentation availability affect synthesis and agent
+performance?}
+
+Figure~\ref{fig:strip} shows the median PASS per condition. The no-docs
+median (86\%) meets or exceeds the docs median (80\%), indicating that
+removing documentation does not on average degrade agent performance.
+This aggregate result conceals meaningful per-API variation, visible in
+Figure~\ref{fig:docs_effect}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\linewidth]{fig7_docs_effect.pdf}
+  \caption{Docs vs.\ no-docs PASS per API. Points above the diagonal
+    indicate APIs where removing documentation improved performance;
+    points below indicate APIs where documentation helped.}
+  \label{fig:docs_effect}
+\end{figure}
+
+APIs above the diagonal (nodocs wins) include GitHub, Notion, and Mastodon:
+high-frequency, well-documented APIs for which the synthesis model has
+strong training-time priors. Removing documentation reduces noise and allows
+the model to produce a clean, complete server from memory. APIs below the
+diagonal (docs help) include Stripe and Zulip: less saturated in training
+data, or with API conventions sufficiently idiosyncratic that documentation
+provides genuine signal the model could not otherwise recover.
+
+The mutated condition (also visible in Figure~\ref{fig:strip}) shows a
+modest further decrease in the median (77\%), indicating that parameter
+renaming does introduce some degradation on average. However, the APIs most
+sensitive to mutation are precisely those with high adherence
+(Section~\ref{sec:rq3}), consistent with the interpretation that harm from
+mutations is mediated by whether the synthesizer adopted them.
+
+% ------------------------------------------------------------
+\section{RQ5: Synthesis Quality as a Predictor of Agent Performance}
+\label{sec:rq5}
+% ------------------------------------------------------------
+
+\textbf{Does synthesis quality predict agent task performance?}
+
+Figure~\ref{fig:scatter} plots SYNTH against PASS for all 42 API--condition
+pairs. The Pearson correlation is $r = 0.895$ ($p < 0.0001$, $n = 42$),
+indicating a strong linear relationship between synthesis sufficiency and
+agent pass rate. This is the central methodological validation result: SYNTH
+is a reliable proxy for downstream utility, and failures in synthesis
+propagate to agent failures with high fidelity.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.72\linewidth]{fig4_synth_scatter.pdf}
+  \caption{SYNTH vs.\ PASS across all 42 API--condition pairs
+    ($r = 0.895$). Shape encodes synthesis condition;
+    colour encodes API category.
+    The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
+  \label{fig:scatter}
+\end{figure}
+
+The points near or above the diagonal represent cases where the agent performs at or above what synthesis quality would predict --- most commonly when the agent compensates for minor coverage gaps with general reasoning (Spoonacular: SYNTH=75\%, PASS=100\% in the docs condition). Points well below the diagonal (eBay Commerce mutated: SYNTH=54\%, PASS=55\%) confirm that when synthesis fails to cover the task space, agent performance cannot recover. The Jira no-docs outlier (SYNTH=44\%, PASS=25\%) represents the most severe case of synthesis-induced failure in the benchmark.
+
+Taken together, these results validate SYNTH as a leading indicator: measuring synthesis sufficiency before running the full evaluation pipeline gives a reliable estimate of whether agent task completion will succeed.

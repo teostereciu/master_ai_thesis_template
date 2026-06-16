@@ -1,36 +1,78 @@
 \chapter{Introduction}
 \label{sec:introduction}
+
+Large language models have become capable agents that can plan, reason, and call external tools to act in the world~\citep{brown2020gpt3,codeact2024}. The standard framing of this capability is \emph{tool use}: given a fixed set of pre-built functions, an agent selects the right one and passes the appropriate arguments~\citep{schick2023toolformer}. Benchmark suites such as MCP-Universe~\citep{mcpuniverse2025}, MCPAgentBench~\citep{mcpagentbench2024}, and WAPIIBench~\citep{wapiibench2025} measure this ability extensively, and the field has made substantial progress on it.
+
+What these benchmarks leave unexamined is the step that must come before tool use in any realistic deployment: someone has to create the tools in the first place. In practice this is done by human engineers who read API documentation, write wrapper code, and expose the result through a protocol the agent can call. This process does not scale. A modern enterprise ecosystem spans hundreds of REST APIs; keeping tool wrappers current as those APIs evolve is a continuous maintenance burden. The gap between the APIs that exist and the APIs that agents can actually reach is, at present, almost entirely a human-labour bottleneck.
+
+An appealing alternative is \emph{tool synthesis}: letting the model itself read documentation and produce the tool implementation. Contemporary models can write code~\citep{toolfactory2025}, operate as autonomous agents with file-system access~\citep{codeact2024}, and generate MCP-compatible tool servers from documentation~\citep{doc2agent2025}. The combination suggests that producing a functional, deployable tool server from raw API documentation may already be within reach. Yet no prior work has systematically evaluated this capability across diverse APIs under controlled conditions: existing benchmarks either assume tools exist, focus on single-function code generation without live API execution, or assess high-level agent behaviour without examining the tool layer at all.
+
+This shift from tool use to tool synthesis is conceptually framed by the \emph{LLM as Tool Maker} (LATM) paradigm~\citep{cai2023latm}, in which a capable model acts as an architect that proposes, verifies, and packages software tools for downstream use. The adoption of the Model Context Protocol (MCP)~\citep{anthropic2024mcp} makes this practically tractable. Unlike traditional REST integrations, which require bespoke human-engineered connectors for each client--API pair, MCP wraps heterogeneous backends in a uniform JSON-RPC interface that agents can discover and call at runtime. This collapses integration complexity from $N \times M$ (every model client wired to every API) to $N + M$ (each side adapts once to the shared protocol), making automated synthesis the natural path to scaling agentic tool coverage.
+
+A fundamental tension arises, however, at the boundary of neural generation and software execution. API interfaces are rigid: parameter names must match exactly, types must be correct, and HTTP payloads must conform to schema. LLMs generate code and serialise arguments through probabilistic token selection, which does not inherently respect these hard constraints. More importantly, the large presence of standardised API patterns and open-source library code in pre-training corpora creates strong, low-entropy priors over common software utilities. For well-known APIs such as GitHub or Stripe, a model may produce a functionally correct wrapper entirely from memory, ignoring the documentation provided at inference time. This phenomenon --- sometimes called \emph{parametric gravity}~\citep{mallen2023knowns,juice2025} --- means that in-context documentation does not automatically override training-time knowledge, particularly for APIs that are heavily represented in pre-training data.
+
+This thesis closes that gap. We ask: \emph{can language models reliably synthesize functional API tool servers from documentation, and do those servers enable effective agent task completion?} To answer this, we introduce an end-to-end benchmark covering 14 REST APIs drawn from productivity tools, e-commerce platforms, communication systems, financial services, and developer tooling. The APIs are chosen to vary along two axes: \emph{familiarity} (the degree to which the API is likely represented in pre-training data) and \emph{complexity} (number of endpoints, parameter density, and structural depth). For each API, a synthesis agent is given raw documentation and asked to produce a complete, runnable MCP server. The resulting server is then
+evaluated by a separate agent that attempts 13--25 natural-language tasks against it, with outcomes judged by a third language model.
+
+Formally, tool synthesis is an autoregressive generation process conditioned on a task specification $T$, the model's static weights $\theta$, and an external documentation context $C$:
+%
+\begin{equation}
+  P(X \mid T, C;\, \theta)
+  = \prod_{i=1}^{n} P(x_i \mid x_{<i},\, T,\, C;\, \theta)
+  \label{eq:synthesis}
+\end{equation}
+%
+where $X = (x_1, \ldots, x_n)$ is the generated server implementation. We study three instantiations of the context $C$: the full documentation $C_{\text{docs}}$, the empty context $C_{\emptyset}$ (no documentation), and a counter-factually mutated context $C_{\text{mut}}$ in which core parameter
+names are renamed to conflict with training-time knowledge. Holding $T$ and $\theta$ fixed while varying $C$ isolates how much the output distribution depends on in-context evidence versus the parametric knowledge encoded in $\theta$.
+
+Beyond feasibility, we use the benchmark to investigate two further questions. First, to what extent do models rely on \emph{parametric knowledge}---facts absorbed during pre-training---rather than the documentation provided at inference time? We study this through three synthesis conditions corresponding to different values of $C$ in Equation~\ref{eq:synthesis}: with full documentation, without any documentation, and with documentation whose parameter names have been deliberately mutated to conflict with training-time knowledge. Mutation adherence is measured at two levels: the Python function signature (interface layer) and the outbound HTTP payload (network layer), allowing us to detect where parametric gravity asserts itself during generation. Second, does synthesis quality predict agent task performance? If the two are tightly coupled, synthesis sufficiency is a cheap proxy for the expensive downstream evaluation.
+
+Existing software engineering benchmarks such as SWE-bench~\citep{jimenez2023swebench} evaluate agents as black boxes, measuring macro pass/fail rates without explaining where and why failures occur. Conversely, mechanistic work on parametric memory and context--memory conflict~\citep{mallen2023knowns,longpre2021entity,juice2025} is largely restricted to open-domain question-answering datasets, which do not capture the stateful, protocol-driven constraints of live API execution. This thesis bridges that gap empirically: we measure parametric influence through controlled documentation ablations and counterfactual mutations, using a live execution environment as the ground truth signal.
+
+A natural follow-on question is \emph{where in the model} parametric gravity asserts itself. When a synthesis model ignores a mutated parameter name and reverts to its training-time prior, this reversal must be traceable to some point in the forward pass --- a layer at which the residual stream representation of the in-context token gives way to the attractor encoded in the model weights~\citep{meng2022rome,factualrecall2025}. We conduct a preliminary investigation of this question using a log-linear probe on the residual stream of a smaller open-weight model, examining at which transformer layers representations of mutated parameter names are overridden by their training-time counterparts~\citep{alain2017understanding,belrose2023tunedlens}. This analysis is exploratory and does not constitute a primary empirical contribution, but it provides a mechanistic grounding for the behavioural patterns observed in the benchmark and points toward richer explanations of when and why in-context documentation fails to ground generation.
+
+Beyond empirical analysis, we distil the findings into a set of practical design guidelines for practitioners building LLM-based tool synthesis systems. These cover documentation structure and pre-processing, server specification format, synthesis prompt design, and post-synthesis validation strategies. While not a formal contribution, these guidelines follow directly from the failure modes identified in the benchmark and are intended to make the results actionable for practitioners who need to deploy synthesis pipelines at scale.
+
+Our main findings are: (i)~synthesis is feasible for most APIs under the best conditions (median agent pass rate~80\%), and synthesized servers match or exceed human-authored reference implementations on GitHub and Zulip; (ii)~removing documentation does not degrade---and sometimes improves---performance on high-frequency APIs, because model weights already encode correct implementations and documentation adds context noise; (iii)~mutation adherence is near-zero for well-known public APIs, confirming that parametric knowledge dominates documentation for those APIs, and its effect on agent performance depends on whether both the synthesizer and the agent share the same prior about the API; (iv)~synthesis pass rate and agent pass rate are strongly correlated ($r = 0.895$), establishing synthesis quality as a reliable proxy for downstream utility. We additionally present a preliminary probing analysis connecting the observed parametric dominance to representational dynamics in the transformer residual stream, and derive a set of practical guidelines for robust synthesis system design.
+
+The remainder of this thesis is organised as follows.
+Chapter~\ref{sec:related_work} surveys related work on tool-use benchmarks, code generation, parametric knowledge, and autonomous agents.
+Chapter~\ref{sec:methodology} describes the benchmark construction, synthesis pipeline, evaluation harness, and experimental conditions.
+Chapter~\ref{sec:results} presents results structured around the five research questions.
+Chapter~\ref{sec:discussion} ...
+Chapter~\ref{sec:conclusion} interprets the findings, connects the probing analysis to the behavioural results, presents practical design guidelines, and identifies directions for future work.
+
 % Mention scientific context/field, problem statement, research gap and (sub) research question(s). 
-Write your introduction here. It should be immediately clear how your proposed contribution is scientifically relevant and fills the research gap.
-  This is a test citation \cite{Gruber1995}
+%Write your introduction here. It should be immediately clear how your proposed contribution is scientifically relevant and fills the research gap.
+%  This is a test citation \cite{Gruber1995}
 
-Towards the end of the introduction, you should also add your \textit{preliminary} \textbf{reasearch questions (RQ)} here. You may want to state your main RQ like this:
+%Towards the end of the introduction, you should also add your \textit{preliminary} \textbf{reasearch questions (RQ)} here. You may want to state your main RQ like this:
 
-\noindent\textit{To what extent can a master thesis template enhance the quality of the final thesis?}
+%\noindent\textit{To what extent can a master thesis template enhance the quality of the final thesis?}
 
-You can then list the sub-questions as:
-\begin{itemize}
-    \item How does the structure of the template influence the final grading?
-    \item To what extent is textual guidance sufficient for structured working?
-    \item \dots
-\end{itemize}
-
-
-The page limit is 35 pages. In any case, the irrelevant and the long unclear explanations will be penalized: clarity does not require long blocks of text, quite the opposite.
+%You can then list the sub-questions as:
+%\begin{itemize}
+%    \item How does the structure of the template influence the final grading?
+%    \item To what extent is textual guidance sufficient for structured working?
+%    \item \dots
+%\end{itemize}
 
 
-\section{Section}
-  \subsection{Subsection}
-    \subsubsection{Subsubsection}
-      \paragraph{Paragraph} Ex culpa ut commodo proident esse excepteur mollit in sed aliqua fugiat sed cupidatat dolor sint quis veniam amet aute ea fugiat quis do excepteur sunt commodo magna cupidatat veniam minim anim mollit do enim et nostrud ad esse velit nisi est dolor do ut dolore excepteur nulla ex sunt exercitation consequat ullamco ad in fugiat ut ut enim adipisicing cillum nisi anim ullamco ullamco nisi esse aute dolore amet nisi adipisicing dolor dolore do ut aliqua in sunt aliqua tempor duis amet ut non adipisicing nostrud ex ullamco excepteur culpa anim est minim fugiat laborum ex irure consectetur eu in reprehenderit sint magna ut consequat laborum ex minim laboris culpa amet incididunt laborum laborum dolore nulla cupidatat dolore in aliqua ut eu in magna sunt eiusmod est labore sit eu incididunt fugiat in culpa pariatur voluptate duis id velit sunt reprehenderit pariatur amet esse dolore minim non fugiat fugiat amet incididunt commodo sit dolor.
+%The page limit is 35 pages. In any case, the irrelevant and the long unclear explanations will be penalized: clarity does not require long blocks of text, quite the opposite.
 
-      In \verb|itemize| and \verb|enumeration|, longer sentences and text in paragraphs could require manual hyphenation with \verb|-| in case of boxes under- or over-flows:
-      \begin{itemize}
-        \item Ad dolor nisi culpa eu eiusmod sint ut est in nisi quis ut deserunt ut anim ut proident proident officia laborum in.
-        \item Dolore et irure adipisicing ex anim exercitation sit pro-ident mollit.
-      \end{itemize}
 
-      \begin{enumerate}
-        \item Incididunt id cillum mollit officia aliquip id dolor ea reprehenderit ut pariatur consequat dolore adipisicing sit minim minim id irure ullamco nulla occaecat sint ut deserunt tempor aute eiusmod dolor.
-        \item Aliquip sunt in voluptate occaecat ut magna cupidatat sunt duis ut proident consequat.
-      \end{enumerate}
+%\section{Section}
+%  \subsection{Subsection}
+%    \subsubsection{Subsubsection}
+%      \paragraph{Paragraph} Ex culpa ut commodo proident esse excepteur mollit in sed aliqua fugiat sed cupidatat dolor sint quis veniam amet aute ea fugiat quis do excepteur sunt commodo magna cupidatat veniam minim anim mollit do enim et nostrud ad esse velit nisi est dolor do ut dolore excepteur nulla ex sunt exercitation consequat ullamco ad in fugiat ut ut enim adipisicing cillum nisi anim ullamco ullamco nisi esse aute dolore amet nisi adipisicing dolor dolore do ut aliqua in sunt aliqua tempor duis amet ut non adipisicing nostrud ex ullamco excepteur culpa anim est minim fugiat laborum ex irure consectetur eu in reprehenderit sint magna ut consequat laborum ex minim laboris culpa amet incididunt laborum laborum dolore nulla cupidatat dolore in aliqua ut eu in magna sunt eiusmod est labore sit eu incididunt fugiat in culpa pariatur voluptate duis id velit sunt reprehenderit pariatur amet esse dolore minim non fugiat fugiat amet incididunt commodo sit dolor.
+
+%      In \verb|itemize| and \verb|enumeration|, longer sentences and text in paragraphs could require manual hyphenation with \verb|-| in case of boxes under- or over-flows:
+%      \begin{itemize}
+%        \item Ad dolor nisi culpa eu eiusmod sint ut est in nisi quis ut deserunt ut anim ut proident proident officia laborum in.
+%        \item Dolore et irure adipisicing ex anim exercitation sit pro-ident mollit.
+%      \end{itemize}
+
+%      \begin{enumerate}
+%        \item Incididunt id cillum mollit officia aliquip id dolor ea reprehenderit ut pariatur consequat dolore adipisicing sit minim minim id irure ullamco nulla occaecat sint ut deserunt tempor aute eiusmod dolor.
+%        \item Aliquip sunt in voluptate occaecat ut magna cupidatat sunt duis ut proident consequat.
+%      \end{enumerate}

@@ -1,4 +1,86 @@
 \chapter{Discussion}
 \label{sec:discussion}
 % Compare your results with the state-of-the-art and reflect upon the results and limitations of the study. You can already hint at future work to which you come back in the conclusion section.
-Write your discussion here. Do not forget to use sub-sections. Normally, the discussion starts with comparing your results to other studies as precisely as possible. The limitations should be reflected upon in terms such as reproducibility,  scalability,  generalizability,  reliability  and  validity. It is also important to mention ethical concerns.
+%Write your discussion here. Do not forget to use sub-sections. Normally, the discussion starts with comparing your results to other studies as precisely as possible. The limitations should be reflected upon in terms such as reproducibility,  scalability,  generalizability,  reliability  and  validity. It is also important to mention ethical concerns.
+
+\section{Synthesis as a General Capability}
+
+The central empirical finding is that LLM-based tool synthesis is broadly feasible: twelve of fourteen APIs achieve SYNTH $\geq 75\%$ under the best synthesis condition, and the median agent pass rate of 80\% demonstrates that synthesized servers are not merely structurally valid but functionally useful. This is a non-trivial result. REST API integration involves strict interface contracts, multi-step authentication flows, and domain-specific
+parameter conventions --- constraints that probabilistic generation does not inherently respect. That synthesis models navigate these requirements reliably across domains as diverse as e-commerce, communication, and financial data suggests the capability is not narrow or brittle.
+
+The two failure cases --- Jira and eBay Sell --- share a structural characteristic: extremely large documentation corpora with hundreds of endpoints distributed across deeply nested resource hierarchies. This points to a \emph{coverage scaling problem} rather than a fundamental inability to synthesize: the model understands the API but cannot attend to all endpoints
+within a single synthesis context. This is consistent with findings on positional bias in long contexts~\cite{liu2023lostmiddle,disentanglerecall2025},
+and suggests that decomposition strategies --- synthesizing one API resource group at a time and assembling the results --- could close this gap without requiring larger context windows.
+
+The comparison with human-authored reference servers on GitHub and Zulip sharpens this conclusion. Synthesized servers match the GitHub community server in the docs condition and substantially exceed it without documentation, while exceeding the Zulip reference in both conditions. The human references fail consistently on the same pattern: they cover the core, frequently-used API surface but omit less common but task-relevant endpoints (webhooks and Actions dispatch for GitHub; message edit and DM search for Zulip). A synthesis agent, by contrast, reads the full documentation and attempts comprehensive coverage --- and because it is not resource-constrained in the way a human contributor might be, this breadth comes without a corresponding quality trade-off.
+
+\section{Parametric Gravity: Mechanism and Consequence}
+
+The mutation adherence results reveal a sharp split across APIs.
+High-familiarity APIs (GitHub, Stripe, Shopify, Zulip, Jira) exhibit near-zero HTTP-layer adherence: the synthesis model ignores parameter mutations entirely and produces servers that reflect its training-time knowledge of the API. Low-familiarity APIs (Mastodon, Alphavantage) show near-complete adherence. This binary pattern is consistent with the training-frequency hypothesis of Mallen et al.~\cite{mallen2023knowns}: entities well-represented in pre-training data are retrieved from weights rather than from context.
+
+The consequence for downstream performance is, however, more nuanced than a simple ``parametric reliance hurts'' narrative. For GitHub, zero adherence coincides with the highest PASS gains in the no-docs condition (+21 pp): the model writes from memory, and its memory is accurate. For Stripe, zero adherence coincides with a \emph{docs advantage} (+10 pp): the model also writes from memory, but documentation provides additional signal that
+improves coverage. The mechanism that determines which outcome obtains is whether the synthesis model's training-time representation of the API is complete enough to be relied upon. GitHub's API, being one of the most heavily documented REST APIs on the web, almost certainly saturates model memory. Stripe's is large and has evolved significantly since the likely training cutoff of the primary models --- a scenario identified by Lagging~\cite{lagging2025} as particularly susceptible to silent faithfulness failures.
+
+This interpretation has a practical implication: whether to include documentation in the synthesis context is not a universal design choice but an API-specific one, and the right decision correlates with how confidently the synthesis model can write from memory. A pre-synthesis probe --- for example, asking the model to generate a list of API endpoints before providing documentation --- could serve as a low-cost signal for this confidence.
+
+\section{Representational Dynamics: Preliminary Probing Evidence}
+
+The behavioural adherence results raise a mechanistic question: at which layer in the forward pass does parametric gravity assert itself? If a model ignores a mutated parameter name despite it being present in the context, the in-context representation must at some layer be overridden by a training-time attractor --- a pattern that prior mechanistic work localises to middle-layer feed-forward modules~\cite{meng2022rome,factualrecall2025}.
+
+Our preliminary log-linear probing analysis on a smaller open-weight model provides a first empirical window into this. Probing the residual stream at each transformer layer for whether the mutated or original parameter name is better predicted reveals a characteristic transition: early layers faithfully represent the in-context token (high probe accuracy for the mutated name), while mid-to-late layers shift toward the training-time prior (high probe accuracy for the original name). This transition layer
+varies by API: it occurs earlier for high-familiarity APIs (GitHub-like) than for low-familiarity ones (Mastodon-like), consistent with stronger parametric attractors for APIs more densely represented in training data.
+
+These findings align with recent work on how post-training reshapes
+representations~\cite{posttrainingreshapes2025}: instruction fine-tuning and RLHF alter the geometry of the residual stream in ways that could modulate the transition point. This suggests that the choice of synthesis model --- not just pre-training corpus composition but also fine-tuning regime --- affects the layer at which context is overridden. It also identifies a concrete intervention point: a targeted context-faithful fine-tuning signal applied at the transition layers could, in principle, reduce parametric gravity without sacrificing the broader capabilities that make these models effective synthesizers.
+
+This analysis is exploratory; results are on a single smaller model and should not be over-generalised. We include it to ground the behavioural patterns in an emerging mechanistic framework and to motivate future work connecting probing methodology to the synthesis setting.
+
+\section{Synthesis Quality as a Proxy Metric}
+
+The strong SYNTH--PASS correlation ($r = 0.895$, $p < 0.0001$, $n = 42$) has a direct practical implication: synthesis sufficiency, assessed by an LLM judge examining the server's tool list without running the evaluation agent, is a reliable predictor of downstream agent task performance. This matters because the full evaluation pipeline --- spinning up a sandboxed API environment, running the evaluation agent for up to 15 turns per task, calling the judge --- is expensive in both API quota and wall time. SYNTH can be assessed at synthesis time, before any agent evaluation occurs.
+
+The two regimes visible in Figure~\ref{fig:scatter} sharpen when this metric is used diagnostically. For synthesis-limited cases (low SYNTH, low PASS), investment in improving synthesis quality --- better documentation pre-processing, larger context windows, iterative tool refinement --- will directly improve agent outcomes. For agent-limited cases (high SYNTH, lower PASS), the bottleneck is the evaluation agent's ability to compose available tools into correct multi-step plans, and improving synthesis will not help; the intervention should target the agent's reasoning or task decomposition.
+
+One class of outlier is worth noting: Spoonacular in the docs condition achieves PASS=100\% despite SYNTH=75\%. This occurs because the evaluation agent compensates for minor coverage gaps using general culinary knowledge to reformulate queries through available tools. This agent-compensation effect is bounded --- it requires the agent to have its own parametric knowledge about the domain --- and cannot be relied upon for APIs in unfamiliar domains (compare Jira, where the agent has no comparable domain model to fall back on).
+
+\section{Practical Design Guidelines}
+
+The results point to several concrete recommendations for practitioners building LLM-based tool synthesis systems.
+
+\paragraph{Documentation pre-processing matters for large APIs.}
+For APIs with more than approximately 50 endpoints, raw documentation dumps produce coverage gaps: the synthesizer cannot attend to all endpoints in a single pass. Structured chunking by resource group, with per-chunk synthesis followed by assembly, is likely to produce higher SYNTH scores than end-to-end synthesis from a monolithic documentation corpus.
+
+\paragraph{Omitting documentation is safe for high-familiarity APIs.} For APIs heavily represented in model training data --- GitHub, Stripe, major productivity platforms --- the no-docs condition matches or exceeds the docs condition. Documentation can add noise by providing competing context that the model must adjudicate against its priors, particularly for long, partially-outdated documentation files. Practitioners should consider a pre-synthesis familiarity check before deciding whether to include documentation in the synthesis context.
+
+\paragraph{Grounding manifests provide a weak but useful quality signal.} Requiring the synthesizer to produce a \texttt{grounding.json} enables a fast post-synthesis check: verify that every tool is anchored to an existing documentation file and a syntactically valid endpoint string. This does not guarantee implementation correctness --- a model can cite the right document while misreading it --- but tools lacking any documentation anchor are a reliable signal of unconstrained parametric generation, and missing grounding coverage (tools with no entry) often correlates with structural synthesis failures.
+
+\paragraph{SYNTH is a cheap pre-flight metric.}
+Running an LLM judge over the tool list before committing to full agent evaluation identifies synthesis-limited cases early. A SYNTH threshold of around 75\% appears to be the boundary below which full evaluation is unlikely to produce acceptable PASS rates in our benchmark; APIs below this threshold benefit more from re-synthesis than from agent tuning.
+
+\paragraph{Prefer models with strong context-faithfulness for mutating or evolving APIs.} When the target API is less familiar to the model, or when documentation has been deliberately structured to override training priors (as in our mutated condition), synthesis models that exhibit higher context adherence --- Sonnet~4.6 in our comparison --- produce more reliable servers. The GPT-5.4 regression on Stripe (8\% vs.\ 72\% baseline) illustrates the risk of deploying a model with strong parametric priors on an API that has evolved since its training cutoff.
+
+\section{Comparison with Prior Work}
+
+Direct numerical comparison with prior work is complicated by the absence of overlapping evaluation sets: ToolFactory~\cite{toolfactory2025} and Doc2Agent~\cite{doc2agent2025} each evaluate on their own API selections and do not report PASS rates on the same 14 APIs used here. Qualitative comparison is nonetheless informative.
+
+ToolFactory targets OpenAPI-specified inputs and focuses on coverage of the formal schema; our benchmark uses raw Markdown documentation, a substantially harder input modality that better reflects real practitioner conditions. Where ToolFactory reports synthesis success in terms of schema coverage, we report end-to-end agent task completion, which additionally exercises tool naming, description quality, and implementation correctness under live API execution.
+
+Doc2Agent is closest to our work in motivation: it demonstrates that MCP servers can be generated from documentation at scale across many APIs. Our benchmark adds the no-docs and mutated conditions that Doc2Agent does not evaluate, enabling the parametric knowledge analysis that is our primary empirical contribution. Doc2Agent also does not measure whether synthesized servers match or exceed human-authored alternatives; our comparison against the GitHub and Zulip community servers provides evidence on that question.
+
+WAPIIBench~\cite{wapiibench2025} catalogues LLM-generated API integration errors against live services and reports error taxonomies that partially overlap with our failure cause categories (\textsc{tool\_schema},
+\textsc{tool\_implementation}). Their finding that authentication and parameter serialisation errors are the most frequent failure types is consistent with our observation that synthesis failures are more often coverage gaps than implementation bugs in the tools that \emph{are} produced.
+
+\section{Limitations}
+
+\paragraph{Generalizability.}
+The 14-API evaluation set spans five domains and a wide range of API sizes, but is not exhaustive. All selected APIs are REST-based, return JSON, and have English-language documentation. APIs with non-REST interfaces (GraphQL, gRPC), streaming responses, complex webhook architectures, or non-English documentation are not represented. The degree to which the parametric gravity findings generalise to programming-language SDKs rather than HTTP APIs is also unknown: the mutation adherence analysis is specific to the HTTP parameter-name setting.
+
+\paragraph{Reliability.}
+PASS rates are determined by an LLM judge, which introduces variability. We use a fixed judge model (Gemini~3~Flash) with a structured fixed-format prompt to reduce inconsistency, but judge agreement with human annotation has not been formally validated for this benchmark. Similarly, the probing analysis rests on a single open-weight model; results should not be taken as established fact about frontier-scale models.
+
+\paragraph{Reproducibility.}
+All synthesis runs are stochastic: the same synthesis model and documentation may produce a different server on a different run. We report single-run results per condition rather than averages over multiple runs, which means some variance in PASS and SYNTH is unaccounted for. API sandboxes may also change state between runs, introducing noise in write-task evaluations.
+
+\paragraph{Ethical considerations.}
+Automated tool synthesis lowers the barrier to creating API integrations, including potentially for APIs whose terms of service restrict automated access or data extraction. The benchmark deliberately uses official sandbox environments with test credentials, but production deployment of synthesis pipelines against APIs not designed for automated access raises ToS and privacy concerns that practitioners should assess case by case. There is also an energy cost to running large synthesis models at scale; the no-docs condition, which is substantially cheaper, may be preferable where API familiarity is high, reducing unnecessary compute.
