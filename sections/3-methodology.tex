@@ -60,7 +60,7 @@
 
 \section{Overview}
 
-Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API documentation and produces an MCP server; a separate evaluation agent attempts natural-language tasks against that server; an LLM judge scores each attempt. The three-stage design cleanly separates synthesis quality from agent reasoning ability, allowing failures to be attributed to the correct component. The process is fully automated and requires no human annotation beyond the initial task authoring. Figure~\ref{fig:pipeline} illustrates the pipeline.
+Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API documentation and produces an MCP server; a separate evaluation agent attempts natural-language tasks against that server; an LLM judge scores each attempt. The three-stage design cleanly separates synthesis quality from agent reasoning ability, allowing failures to be attributed to the correct component. The process is fully automated and requires no human annotation beyond the initial task authoring. Figure~\ref{fig:pipeline} illustrates the pipeline. The benchmark code, synthesized servers, evaluation tasks, and raw results are publicly available.\footnote{\url{https://github.com/PLACEHOLDER/agent-tooling}}
 
 \begin{figure}[h]
 \centering
@@ -94,7 +94,7 @@ These human-authored servers serve as a practical baseline: they represent what 
 
 \subsection{Parameter Mutations}
 
-To probe the degree to which synthesis models rely on parametric knowledge rather than the provided documentation, we introduce a \emph{mutated} condition ($C_{\text{mut}}$) for each API. For each dataset, we identify 4--6 core parameter names that are prominent in the API and likely encoded in training-time weights (e.g.\ \texttt{limit}, \texttt{offset}, \texttt{sort} for eBay Buy) and replace them uniformly throughout the documentation with plausible but distinct alternatives (e.g.\ \texttt{max\_results}, \texttt{skip}, \texttt{order\_by}). Replacement names are chosen to be syntactically plausible --- consistent with conventions in adjacent APIs --- while being clearly different from the originals at the string level.
+To probe the degree to which synthesis models rely on parametric knowledge rather than the provided documentation, we introduce a \emph{mutated} condition ($C_{\text{mut}}$) for each API. For each dataset, we identify 4--6 core parameter names that are prominent in the API and likely encoded in training-time weights (e.g.\ \texttt{limit}, \texttt{offset}, \texttt{sort} for eBay Buy) and replace them uniformly throughout the documentation with plausible but distinct alternatives (e.g.\ \texttt{max\_results}, \texttt{skip}, \texttt{order\_by}). Replacement names are chosen to be syntactically plausible --- consistent with conventions in adjacent APIs --- while being clearly different from the originals at the string level. Replacements are applied via exact-string substitution across all documentation files for the dataset, ensuring consistency; no fuzzy or regex-based matching is used.
 
 A synthesis model that faithfully follows the mutated documentation should produce tools using the new parameter names consistently. A model dominated by parametric memory will reproduce the original names regardless. We quantify this as \emph{mutation adherence}, measured at two levels:
 
@@ -143,7 +143,7 @@ The grounding manifest enables two lightweight analyses. \emph{Citation validity
 
 \subsection{Synthesis Agent}
 
-The synthesis agent operates in an agentic loop with access to a set of file-system tools. The primary synthesis models (GPT-5.2, GPT-5.4, and Qwen3-Coder-Next via vLLM) are provided six tools: \texttt{read\_file}, \texttt{write\_file}, \texttt{edit\_file}, \texttt{glob}, \texttt{grep}, and \texttt{list\_directory}. The agent receives the task specification and, depending on the synthesis condition, a populated documentation directory. It iterates freely until it produces the required deliverables.
+The synthesis agent operates in an agentic loop with access to a set of file-system tools. The primary synthesis models (GPT-5.2, GPT-5.4, and Qwen3-Coder-Next via vLLM) are provided six tools: \texttt{read\_file}, \texttt{write\_file}, \texttt{edit\_file}, \texttt{glob}, \texttt{grep}, and \texttt{list\_directory}. The agent receives the task specification and, depending on the synthesis condition, a populated documentation directory. It iterates freely until it produces the required deliverables. Synthesis models are run at their provider defaults unless otherwise noted; sampling temperature is not explicitly fixed across all models. Each API--condition pair is synthesized in a single run; multiple runs are performed only for the variance study reported in Section~\ref{sec:rq1}. For APIs whose documentation corpora exceed a model's effective context window, the agent reads files selectively rather than receiving all documentation concatenated upfront; no corpus was artificially truncated.
 
 A typical synthesis run follows three phases. In the \emph{exploration} phase (turns 1--3), the agent reads \texttt{TASK.md}, lists the documentation directory, and reads a subset of files to understand the API's structure and authentication model. In the \emph{implementation} phase (turns 4--20), it writes tool modules and a shared HTTP client. In the \emph{finalisation} phase (last 2--3 turns), it assembles \texttt{server.py}, writes \texttt{grounding.json} and
 \texttt{requirements.txt}, then performs a self-verification pass by
@@ -262,6 +262,8 @@ The agent's system prompt instructs it to always call at least one tool before a
 
 The evaluation harness speaks only MCP: it calls \texttt{list\_tools()} to discover available tools and \texttt{call\_tool(name, args)} to invoke them.
 No other protocol or API client is provided. All HTTP logic --- authentication, request construction, token refresh, error handling --- executes inside the synthesized server process and is invisible to both the harness and the evaluation agent. The evaluation agent's performance therefore depends entirely on the interface quality and implementation correctness of the synthesized server.
+
+The harness launches the synthesized server as a subprocess via stdio transport and waits up to 30 seconds for a successful \texttt{list\_tools()} response before marking the run as an \textsc{environment} failure. Each task is subject to a per-task wall-time cap of 5 minutes; tool calls that hang beyond this limit are terminated and scored as \textsc{environment}. Write tasks are isolated by the naming prefix convention and cleaned up after each run to prevent state leakage between tasks.
 
 \subsection{Judge}
 
