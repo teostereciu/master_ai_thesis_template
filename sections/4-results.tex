@@ -77,44 +77,53 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that
 
 \begin{table*}[htbp]
   \centering
-  \caption{Agent PASS (\%) per API and synthesis condition, averaged within each model tier.
-    \textbf{Frontier}: Sonnet~4.6, GPT-5.4, GPT-5.2.
-    \textbf{Mid}: Haiku~4.5, Gemini~3.1~Pro, Qwen3-Coder-Next.
-    \textbf{Base}: GPT-5.4-mini, Qwen3-Coder-Next-Base.
-    Rows sorted by frontier docs avg descending.
-    \textbf{Bold} = highest value in each row.
-    \colorbox{red!12}{Red} = below 50\%.
-    $^\dagger$ = fewer than 3 models contributed to average.}
+  \caption{Agent PASS (\%) per API and synthesis model, organised by tier.
+    Rows sorted by frontier-tier docs performance descending.
+    \textbf{Bold} = row maximum. \colorbox{red!12}{Red} = below 50\%.
+    --- = not evaluated or synthesis crash.
+    \textit{Tier med.} = per-model median across evaluated APIs.}
   \label{tab:pass_results}
-  \setlength{\tabcolsep}{4pt}
+  \setlength{\tabcolsep}{3pt}
   \scriptsize
-  \begin{tabular}{l rrr rrr rrr}
+  \begin{tabular}{l rrr rrr rrr rrr rrr rrr rrr rrr}
     \toprule
-    & \multicolumn{3}{c}{\textbf{Frontier}} & \multicolumn{3}{c}{\textbf{Mid}} & \multicolumn{3}{c}{\textbf{Base}} \\
-    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
-    \textbf{Dataset} & D & N & M & D & N & M & D & N & M \\
+    & \multicolumn{6}{c}{\textbf{Base}}
+    & \multicolumn{9}{c}{\textbf{Mid}}
+    & \multicolumn{9}{c}{\textbf{Frontier}} \\
+    \cmidrule(lr){2-7}\cmidrule(lr){8-16}\cmidrule(lr){17-25}
+    & \multicolumn{3}{c}{\textbf{GPT-5.4-mini}}
+    & \multicolumn{3}{c}{\textbf{Qwen3-Next-Base}}
+    & \multicolumn{3}{c}{\textbf{Qwen3-Next}}
+    & \multicolumn{3}{c}{\textbf{Gem~3.1~Pro}}
+    & \multicolumn{3}{c}{\textbf{Haiku~4.5}}
+    & \multicolumn{3}{c}{\textbf{GPT-5.2}}
+    & \multicolumn{3}{c}{\textbf{GPT-5.4}}
+    & \multicolumn{3}{c}{\textbf{Sonnet~4.6}} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
+    \cmidrule(lr){14-16}\cmidrule(lr){17-19}\cmidrule(lr){20-22}\cmidrule(lr){23-25}
+    \textbf{API} & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M \\
     \midrule
-    Mastodon       & \textbf{100} & \textbf{81}$^\dagger$ & \textbf{97}$^\dagger$ & 89 & 70 & 81 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 \\
-    OpenWeatherMap & \textbf{100} & \textbf{94} & \textbf{100} & \textbf{100} & 86 & \textbf{100} & --- & --- & --- \\
-    Spoonacular    & \textbf{93}$^\dagger$ & \textbf{86}$^\dagger$ & \textbf{69}$^\dagger$ & 83 & 76 & 88 & --- & 60 & --- \\
-    Notion         & \textbf{80}$^\dagger$ & \textbf{96} & \textbf{95}$^\dagger$ & 81 & 35 & 50 & --- & \cellcolor{red!12}0 & --- \\
-    Confluence     & \textbf{87}$^\dagger$ & \textbf{96}$^\dagger$ & \textbf{74}$^\dagger$ & 53 & 67 & 61 & 64 & --- & --- \\
-    Alphavantage   & \textbf{83}$^\dagger$ & \textbf{91}$^\dagger$ & \textbf{83}$^\dagger$ & \textbf{100} & \textbf{100} & 90 & 92 & --- & --- \\
-    eBay Commerce  & \textbf{96}$^\dagger$ & \textbf{65}$^\dagger$ & \textbf{59}$^\dagger$ & 94 & \cellcolor{red!12}22 & \cellcolor{red!12}22 & \cellcolor{red!12}45 & --- & --- \\
-    Shopify        & \textbf{90} & \textbf{91} & \textbf{62}$^\dagger$ & 90 & 76 & 85 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 \\
-    GitHub         & \textbf{70} & \textbf{91} & \textbf{83} & 80 & 77 & 59 & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 \\
-    eBay Buy       & \textbf{71}$^\dagger$ & \textbf{79} & \textbf{93}$^\dagger$ & 51 & 76 & \cellcolor{red!12}37 & \cellcolor{red!12}6 & --- & --- \\
-    Zulip          & \textbf{90} & \textbf{63} & \textbf{44}$^\dagger$ & \cellcolor{red!12}44 & \cellcolor{red!12}40 & 51 & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 \\
-    Stripe         & \textbf{52} & \textbf{75} & \textbf{56} & \cellcolor{red!12}45 & \cellcolor{red!12}56 & \cellcolor{red!12}68 & \cellcolor{red!12}14 & \cellcolor{red!12}28 & \cellcolor{red!12}19 \\
-    eBay Sell      & \cellcolor{red!12}\textbf{22}$^\dagger$ & \cellcolor{red!12}\textbf{56}$^\dagger$ & \cellcolor{red!12}\textbf{44}$^\dagger$ & \cellcolor{red!12}69 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & \cellcolor{red!12}0 & --- \\
-    Jira           & \textbf{60} & \textbf{44} & \textbf{62} & \cellcolor{red!12}64 & \cellcolor{red!12}17 & \cellcolor{red!12}46 & --- & --- & --- \\
+    OpenWeatherMap & \textbf{100} & \textbf{100} & \textbf{100} & --- & --- & --- & \textbf{100} & 86 & \textbf{100} & 85 & 90 & 95 & 95 & 65 & 60 & \textbf{100} & 86 & \textbf{100} & \textbf{100} & 95 & \textbf{100} & --- & \textbf{100} & --- \\
+    eBay Commerce & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}45 & --- & --- & \textbf{100} & --- & \cellcolor{red!12}11 & 83 & \cellcolor{red!12}44 & \cellcolor{red!12}45 & \cellcolor{red!12}30 & \cellcolor{red!12}10 & 50 & \textbf{100} & 89 & 55 & 88 & \cellcolor{red!12}40 & 62 & \textbf{100} & --- & --- \\
+    Mastodon & 57 & 79 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & 87 & 80 & 54 & \textbf{100} & 92 & 87 & 93 & \cellcolor{red!12}40 & 86 & \textbf{100} & \textbf{100} & \textbf{100} & 91 & 90 & \textbf{100} & --- & --- & 92 \\
+    Zulip & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & --- & --- & \cellcolor{red!12}0 & --- & --- & 64 & 76 & 84 & 62 & 55 & \cellcolor{red!12}36 & \cellcolor{red!12}26 & 80 & 60 & 62 & 90 & 85 & 71 & \textbf{100} & \cellcolor{red!12}43 & --- \\
+    Spoonacular & 94 & 82 & \textbf{100} & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & --- & 79 & 86 & \textbf{100} & 90 & 78 & 80 & 82 & 60 & --- & --- & --- \\
+    Shopify & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 93 & 75 & 94 & 87 & 92 & 62 & 83 & 92 & 53 & \textbf{100} & --- & --- \\
+    Alphavantage & --- & --- & --- & 92 & --- & --- & --- & --- & --- & \textbf{100} & \textbf{100} & 90 & --- & --- & --- & 86 & 90 & 88 & 80 & 92 & 78 & --- & --- & \cellcolor{red!12}40 \\
+    Confluence & \cellcolor{red!12}33 & 80 & \cellcolor{red!12}43 & 64 & --- & --- & \cellcolor{red!12}39 & --- & 50 & --- & \textbf{100} & \textbf{100} & 80 & \cellcolor{red!12}33 & \cellcolor{red!12}33 & 92 & 93 & 91 & 69 & \textbf{100} & 85 & --- & 94 & \cellcolor{red!12}47 \\
+    Notion & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & --- & 94 & 94 & \textbf{100} & 56 & \cellcolor{red!12}5 & 50 & 78 & \textbf{100} & \textbf{100} & 62 & \textbf{100} & --- & \textbf{100} & 87 & 85 \\
+    eBay Buy & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & --- & 80 & 67 & \textbf{100} & 73 & 67 & 80 & 69 & 92 & \textbf{100} & --- & 79 & --- \\
+    GitHub & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & --- & --- & 58 & 60 & 57 & 78 & 71 & \cellcolor{red!12}36 & 95 & 90 & 86 & 62 & 83 & 76 & 58 & 89 & 73 & 90 & \textbf{100} & \textbf{100} \\
+    Jira & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}25 & --- & --- & --- & 71 & --- & \cellcolor{red!12}42 & 58 & \cellcolor{red!12}44 & \cellcolor{red!12}31 & 62 & \cellcolor{red!12}7 & 64 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 73 & 58 & \textbf{79} \\
+    Stripe & \cellcolor{red!12}14 & \cellcolor{red!12}0 & \cellcolor{red!12}19 & --- & 56 & --- & --- & 62 & --- & \cellcolor{red!12}47 & 50 & 59 & 57 & 75 & 86 & 72 & 62 & 57 & \cellcolor{red!12}8 & 62 & \cellcolor{red!12}12 & 77 & \textbf{100} & \textbf{100} \\
+    eBay Sell & \cellcolor{red!12}7 & \cellcolor{red!12}8 & \cellcolor{red!12}8 & --- & \cellcolor{red!12}0 & --- & \textbf{100} & --- & --- & \cellcolor{red!12}38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & \cellcolor{red!12}17 & \cellcolor{red!12}9 & \cellcolor{red!12}36 & \cellcolor{red!12}38 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & \cellcolor{red!12}45 & \cellcolor{red!12}44 & --- & 73 & --- \\
     \midrule
-    \textit{Median} & \textit{85} & \textit{82} & \textit{69} & \textit{77} & \textit{67} & \textit{58} & \textit{38} & \textit{0} & \textit{0} \\
+    \textit{Tier med.} & \textit{36} & \textit{11} & \textit{29} & \textit{45} & \textit{0} & \textit{0} & \textit{79} & \textit{80} & \textit{54} & \textit{83} & \textit{78} & \textit{87} & \textit{71} & \textit{40} & \textit{64} & \textit{83} & \textit{88} & \textit{77} & \textit{74} & \textit{90} & \textit{71} & \textit{100} & \textit{87} & \textit{85} \\
     \bottomrule
   \end{tabular}
   \par\smallskip\raggedright\scriptsize
-  D = docs, N = nodocs, M = mutated. --- = no data for this tier/condition.
-  $^\dagger$ = only 1--2 models in average (sparse coverage).
+  D = docs, N = nodocs, M = mutated.
+  Qwen3-Next-Base = Qwen3-Coder-Next-Base; Qwen3-Next = Qwen3-Coder-Next.
 \end{table*}
 
 \begin{figure}[htbp]
