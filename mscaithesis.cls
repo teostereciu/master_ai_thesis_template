@@ -142,7 +142,7 @@
                 \begin{minipage}[t]{.5\textwidth}
                         Supervisor: \@dailysupervisor \hfill\\
                         \ifdefempty{\@uvasupervisor}{}{University Supervisor: \@uvasupervisor \hfill\\}
-                        \ifdefempty{\@addsupervisor}{}{Additional Supervisor: \@addsupervisor \hfill\\}
+                        \ifdefempty{\@addsupervisor}{}{Additional Supervisors: \@addsupervisor \hfill\\}
 
 
                         ~\hfill Examiner: \@examiner
