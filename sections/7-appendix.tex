@@ -61,26 +61,40 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
   $^d$ Haiku spoonacular docs pending at time of writing.
 \end{table}
 
-\begin{figure*}[htbp]
+\begin{table}[htbp]
   \centering
-  \includegraphics[width=0.75\linewidth]{media/fig1_primary_heatmap.pdf}
-  \caption{Agent pass rate (PASS, large) and server synthesis sufficiency
-    (SYNTH, small) across 14 APIs and three synthesis conditions for the GPT-5.2
-    reference model. Rows sorted by mean PASS descending.
-    Colour encodes PASS on a red--orange--green scale.}
-  \label{fig:heatmap}
-\end{figure*}
-
-\begin{figure*}[htbp]
-  \centering
-  \includegraphics[width=\linewidth]{media/fig3_model_comparison.pdf}
-  \caption{Per-API, per-model PASS breakdown across all synthesis conditions
-    (docs, nodocs, mutated) for the common three-API set (GitHub, Stripe, Zulip).
-    Each group of bars corresponds to one API; colours distinguish synthesis models.
-    Zero-height bars indicate synthesis crashes or complete tool-coverage failure.
-    The GPT-5.4 Stripe docs bar (8\%) reflects broken tool stubs confirmed by SYNTH=48\%, not agent failure.}
-  \label{fig:model_comparison}
-\end{figure*}
+  \caption{PASS and SYNTH (\%) for the no-docs and mutated conditions, GPT-5.2 reference model.
+    Rows in the same order as Table~\ref{tab:pass_results}.
+    \colorbox{red!12}{Red} = PASS below 50\%.
+    SYNTH = server synthesis sufficiency (fraction of task-relevant tools present).}
+  \label{tab:apx:nodocs_mutated}
+  \setlength{\tabcolsep}{5pt}
+  \small
+  \begin{tabular}{l rr rr}
+    \toprule
+    & \multicolumn{2}{c}{\textbf{No-docs}} & \multicolumn{2}{c}{\textbf{Mutated}} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    \textbf{API} & \textbf{PASS} & \textbf{SYNTH} & \textbf{PASS} & \textbf{SYNTH} \\
+    \midrule
+    OpenWeatherMap & 86  & 83  & 100 & 100 \\
+    eBay Commerce  & 89  & 85  & 55  &  54 \\
+    Mastodon       & 100 & 100 & 100 & 100 \\
+    Zulip          & 60  &  48 &  62 &  64 \\
+    Spoonacular    & 90  &  75 &  78 &  75 \\
+    Shopify        & 92  &  94 &  62 &  61 \\
+    Alphavantage   & 90  &  89 &  88 &  89 \\
+    Confluence     & 93  &  95 &  91 &  95 \\
+    Notion         & 100 & 100 & 100 & 100 \\
+    eBay Buy       & 67  &  94 &  80 &  88 \\
+    GitHub         & 83  &  87 &  76 &  61 \\
+    Jira           & \cellcolor{red!12}25 & 44 & \cellcolor{red!12}50 & 56 \\
+    Stripe         & 62  &  68 &  57 &  73 \\
+    eBay Sell      & \cellcolor{red!12}50 & 50 & \cellcolor{red!12}43 & 43 \\
+    \midrule
+    \textit{Median} & \textit{88} & \textit{86} & \textit{77} & \textit{75} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 % ------------------------------------------------------------
 \section{Synthesis Variance Study}

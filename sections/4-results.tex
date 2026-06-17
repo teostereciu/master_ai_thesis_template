@@ -49,24 +49,27 @@ real documentation sources: citation validity is 86--100\% across datasets
 (every \texttt{grounding.json} entry points to an existing file with a
 syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
-Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.937$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here, but the primary synthesis feasibility evidence is SYNTH, shown alongside PASS in the full heatmap (Figure~\ref{fig:heatmap}, Appendix~\ref{sec:apx:full_results}).
+Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside SYNTH for the docs condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.937$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here. SYNTH for the no-docs and mutated conditions appears in Table~\ref{tab:apx:nodocs_mutated} (Appendix~\ref{sec:apx:full_results}).
 
 \begin{table*}[htbp]
   \centering
-  \caption{Agent PASS (\%) per API and synthesis model, organised by tier.
+  \caption{Agent PASS (\%) per API and synthesis model, organised by tier (D = docs, N = no-docs, M = mutated).
+    The \textbf{SYNTH} column shows server synthesis sufficiency for the docs condition (GPT-5.2 reference).
+    SYNTH for no-docs and mutated appears in Table~\ref{tab:apx:nodocs_mutated} (Appendix).
     Rows sorted by frontier-tier docs performance descending.
-    \textbf{Bold} = row maximum. \colorbox{red!12}{Red} = below 50\%.
+    \textbf{Bold} = row maximum PASS. \colorbox{red!12}{Red} = below 50\%.
     --- = not evaluated or synthesis crash.
-    \textit{Tier med.} = per-model median across evaluated APIs.}
+    \textit{Med.} = per-column median across evaluated APIs.}
   \label{tab:pass_results}
-  \setlength{\tabcolsep}{3pt}
+  \setlength{\tabcolsep}{2.8pt}
   \scriptsize
-  \begin{tabular}{l rrr rrr rrr rrr rrr rrr rrr rrr}
+  \begin{tabular}{l r rrr rrr rrr rrr rrr rrr rrr rrr}
     \toprule
-    & \multicolumn{6}{c}{\textbf{Base}}
+    & & \multicolumn{6}{c}{\textbf{Base}}
     & \multicolumn{9}{c}{\textbf{Mid}}
     & \multicolumn{9}{c}{\textbf{Frontier}} \\
-    \cmidrule(lr){2-7}\cmidrule(lr){8-16}\cmidrule(lr){17-25}
+    \cmidrule(lr){3-8}\cmidrule(lr){9-17}\cmidrule(lr){18-26}
+    & \textbf{SYNTH}
     & \multicolumn{3}{c}{\textbf{GPT-5.4-mini}}
     & \multicolumn{3}{c}{\textbf{Qwen3-Next-Base}}
     & \multicolumn{3}{c}{\textbf{Qwen3-Next}}
@@ -75,31 +78,33 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that
     & \multicolumn{3}{c}{\textbf{GPT-5.2}}
     & \multicolumn{3}{c}{\textbf{GPT-5.4}}
     & \multicolumn{3}{c}{\textbf{Sonnet~4.6}} \\
-    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
-    \cmidrule(lr){14-16}\cmidrule(lr){17-19}\cmidrule(lr){20-22}\cmidrule(lr){23-25}
-    \textbf{API} & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M \\
+    \cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(lr){9-11}\cmidrule(lr){12-14}
+    \cmidrule(lr){15-17}\cmidrule(lr){18-20}\cmidrule(lr){21-23}\cmidrule(lr){24-26}
+    \textbf{API} & \textbf{(D)} & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M \\
     \midrule
-    OpenWeatherMap & \textbf{100} & \textbf{100} & \textbf{100} & --- & --- & --- & \textbf{100} & 86 & \textbf{100} & 85 & 90 & 95 & 95 & 65 & 60 & \textbf{100} & 86 & \textbf{100} & \textbf{100} & 95 & \textbf{100} & --- & \textbf{100} & --- \\
-    eBay Commerce & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}45 & --- & --- & \textbf{100} & --- & \cellcolor{red!12}11 & 83 & \cellcolor{red!12}44 & \cellcolor{red!12}45 & \cellcolor{red!12}30 & \cellcolor{red!12}10 & 50 & \textbf{100} & 89 & 55 & 88 & \cellcolor{red!12}40 & 62 & \textbf{100} & --- & --- \\
-    Mastodon & 57 & 79 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & 87 & 80 & 54 & \textbf{100} & 92 & 87 & 93 & \cellcolor{red!12}40 & 86 & \textbf{100} & \textbf{100} & \textbf{100} & 91 & 90 & \textbf{100} & --- & --- & 92 \\
-    Zulip & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & --- & --- & \cellcolor{red!12}0 & --- & --- & 64 & 76 & 84 & 62 & 55 & \cellcolor{red!12}36 & \cellcolor{red!12}26 & 80 & 60 & 62 & 90 & 85 & 71 & \textbf{100} & \cellcolor{red!12}43 & --- \\
-    Spoonacular & 94 & 82 & \textbf{100} & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & --- & 79 & 86 & \textbf{100} & 90 & 78 & 80 & 82 & 60 & --- & --- & --- \\
-    Shopify & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 93 & 75 & 94 & 87 & 92 & 62 & 83 & 92 & 53 & \textbf{100} & --- & --- \\
-    Alphavantage & --- & --- & --- & 92 & --- & --- & --- & --- & --- & \textbf{100} & \textbf{100} & 90 & --- & --- & --- & 86 & 90 & 88 & 80 & 92 & 78 & --- & --- & \cellcolor{red!12}40 \\
-    Confluence & \cellcolor{red!12}33 & 80 & \cellcolor{red!12}43 & 64 & --- & --- & \cellcolor{red!12}39 & --- & 50 & --- & \textbf{100} & \textbf{100} & 80 & \cellcolor{red!12}33 & \cellcolor{red!12}33 & 92 & 93 & 91 & 69 & \textbf{100} & 85 & --- & 94 & \cellcolor{red!12}47 \\
-    Notion & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & --- & 94 & 94 & \textbf{100} & 56 & \cellcolor{red!12}5 & 50 & 78 & \textbf{100} & \textbf{100} & 62 & \textbf{100} & --- & \textbf{100} & 87 & 85 \\
-    eBay Buy & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & --- & 80 & 67 & \textbf{100} & 73 & 67 & 80 & 69 & 92 & \textbf{100} & --- & 79 & --- \\
-    GitHub & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & --- & --- & 58 & 60 & 57 & 78 & 71 & \cellcolor{red!12}36 & 95 & 90 & 86 & 62 & 83 & 76 & 58 & 89 & 73 & 90 & \textbf{100} & \textbf{100} \\
-    Jira & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}25 & --- & --- & --- & 71 & --- & \cellcolor{red!12}42 & 58 & \cellcolor{red!12}44 & \cellcolor{red!12}31 & 62 & \cellcolor{red!12}7 & 64 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 73 & 58 & \textbf{79} \\
-    Stripe & \cellcolor{red!12}14 & \cellcolor{red!12}0 & \cellcolor{red!12}19 & --- & 56 & --- & --- & 62 & --- & \cellcolor{red!12}47 & 50 & 59 & 57 & 75 & 86 & 72 & 62 & 57 & \cellcolor{red!12}8 & 62 & \cellcolor{red!12}12 & 77 & \textbf{100} & \textbf{100} \\
-    eBay Sell & \cellcolor{red!12}7 & \cellcolor{red!12}8 & \cellcolor{red!12}8 & --- & \cellcolor{red!12}0 & --- & \textbf{100} & --- & --- & \cellcolor{red!12}38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & \cellcolor{red!12}17 & \cellcolor{red!12}9 & \cellcolor{red!12}36 & \cellcolor{red!12}38 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & \cellcolor{red!12}45 & \cellcolor{red!12}44 & --- & 73 & --- \\
+    OpenWeatherMap & 100 & \textbf{100} & \textbf{100} & \textbf{100} & --- & --- & --- & \textbf{100} & 86 & \textbf{100} & 85 & 90 & 95 & 95 & 65 & 60 & \textbf{100} & 86 & \textbf{100} & \textbf{100} & 95 & \textbf{100} & --- & \textbf{100} & --- \\
+    eBay Commerce & 100 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}45 & --- & --- & \textbf{100} & --- & \cellcolor{red!12}11 & 83 & \cellcolor{red!12}44 & \cellcolor{red!12}45 & \cellcolor{red!12}30 & \cellcolor{red!12}10 & 50 & \textbf{100} & 89 & 55 & 88 & \cellcolor{red!12}40 & 62 & \textbf{100} & --- & --- \\
+    Mastodon & 93 & 57 & 79 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & 87 & 80 & 54 & \textbf{100} & 92 & 87 & 93 & \cellcolor{red!12}40 & 86 & \textbf{100} & \textbf{100} & \textbf{100} & 91 & 90 & \textbf{100} & --- & --- & 92 \\
+    Zulip & 84 & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & --- & --- & \cellcolor{red!12}0 & --- & --- & 64 & 76 & 84 & 62 & 55 & \cellcolor{red!12}36 & \cellcolor{red!12}26 & 80 & 60 & 62 & 90 & 85 & 71 & \textbf{100} & \cellcolor{red!12}43 & --- \\
+    Spoonacular & 75 & 94 & 82 & \textbf{100} & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & --- & 79 & 86 & \textbf{100} & 90 & 78 & 80 & 82 & 60 & --- & --- & --- \\
+    Shopify & 89 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 93 & 75 & 94 & 87 & 92 & 62 & 83 & 92 & 53 & \textbf{100} & --- & --- \\
+    Alphavantage & 84 & --- & --- & --- & 92 & --- & --- & --- & --- & --- & \textbf{100} & \textbf{100} & 90 & --- & --- & --- & 86 & 90 & 88 & 80 & 92 & 78 & --- & --- & \cellcolor{red!12}40 \\
+    Confluence & 95 & \cellcolor{red!12}33 & 80 & \cellcolor{red!12}43 & 64 & --- & --- & \cellcolor{red!12}39 & --- & 50 & --- & \textbf{100} & \textbf{100} & 80 & \cellcolor{red!12}33 & \cellcolor{red!12}33 & 92 & 93 & 91 & 69 & \textbf{100} & 85 & --- & 94 & \cellcolor{red!12}47 \\
+    Notion & 91 & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & --- & 94 & 94 & \textbf{100} & 56 & \cellcolor{red!12}5 & 50 & 78 & \textbf{100} & \textbf{100} & 62 & \textbf{100} & --- & \textbf{100} & 87 & 85 \\
+    eBay Buy & 88 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & --- & 80 & 67 & \textbf{100} & 73 & 67 & 80 & 69 & 92 & \textbf{100} & --- & 79 & --- \\
+    GitHub & 61 & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & --- & --- & 58 & 60 & 57 & 78 & 71 & \cellcolor{red!12}36 & 95 & 90 & 86 & 62 & 83 & 76 & 58 & 89 & 73 & 90 & \textbf{100} & \textbf{100} \\
+    Jira & 56 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}25 & --- & --- & --- & 71 & --- & \cellcolor{red!12}42 & 58 & \cellcolor{red!12}44 & \cellcolor{red!12}31 & 62 & \cellcolor{red!12}7 & 64 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 73 & 58 & \textbf{79} \\
+    Stripe & 77 & \cellcolor{red!12}14 & \cellcolor{red!12}0 & \cellcolor{red!12}19 & --- & 56 & --- & --- & 62 & --- & \cellcolor{red!12}47 & 50 & 59 & 57 & 75 & 86 & 72 & 62 & 57 & \cellcolor{red!12}8 & 62 & \cellcolor{red!12}12 & 77 & \textbf{100} & \textbf{100} \\
+    eBay Sell & 43 & \cellcolor{red!12}7 & \cellcolor{red!12}8 & \cellcolor{red!12}8 & --- & \cellcolor{red!12}0 & --- & \textbf{100}$^*$ & --- & --- & \cellcolor{red!12}38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & \cellcolor{red!12}17 & \cellcolor{red!12}9 & \cellcolor{red!12}36 & \cellcolor{red!12}38 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & \cellcolor{red!12}45 & \cellcolor{red!12}44 & --- & 73 & --- \\
     \midrule
-    \textit{Tier med.} & \textit{36} & \textit{11} & \textit{29} & \textit{45} & \textit{0} & \textit{0} & \textit{79} & \textit{80} & \textit{54} & \textit{83} & \textit{78} & \textit{87} & \textit{71} & \textit{40} & \textit{64} & \textit{83} & \textit{88} & \textit{77} & \textit{74} & \textit{90} & \textit{71} & \textit{100} & \textit{87} & \textit{85} \\
+    \textit{Med.} & \textit{86} & \textit{36} & \textit{11} & \textit{29} & \textit{45} & \textit{0} & \textit{0} & \textit{79} & \textit{80} & \textit{54} & \textit{83} & \textit{78} & \textit{87} & \textit{71} & \textit{40} & \textit{64} & \textit{83} & \textit{88} & \textit{77} & \textit{74} & \textit{90} & \textit{71} & \textit{100} & \textit{87} & \textit{85} \\
     \bottomrule
   \end{tabular}
   \par\smallskip\raggedright\scriptsize
-  D = docs, N = nodocs, M = mutated.
+  D = docs, N = no-docs, M = mutated.
   Qwen3-Next-Base = Qwen3-Coder-Next-Base; Qwen3-Next = Qwen3-Coder-Next.
+  SYNTH (D) = server synthesis sufficiency, docs condition, GPT-5.2 reference model.
+  $^*$eBay Sell Qwen3-Next docs: $N_\text{scoreable}\leq3$; treat with caution.
 \end{table*}
 
 \begin{figure}[htbp]
@@ -227,7 +232,7 @@ The points near or above the diagonal represent cases where the agent performs a
 
 \textbf{How does synthesis model capability affect agent pass rate?}
 
-Figure~\ref{fig:model_capability} summarises per-model PASS distributions on the common GitHub/Stripe/Zulip set; Table~\ref{tab:pass_results} provides the full 14-API breakdown. The per-API, per-condition detail for this three-API set appears in Figure~\ref{fig:model_comparison} (Appendix~\ref{sec:apx:full_results}).
+Figure~\ref{fig:model_capability} summarises per-model PASS distributions on the common GitHub/Stripe/Zulip set; Table~\ref{tab:pass_results} provides the full 14-API breakdown. The full per-model breakdown across all 14 APIs and conditions is in Table~\ref{tab:apx:full_results} (Appendix~\ref{sec:apx:full_results}).
 
 Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2, GPT-5.4, and Haiku~4.5 form a competitive mid-tier, though with distinct failure modes: GPT-5.4 produces broken tool stubs for Stripe docs (8\%) --- a synthesis-level failure confirmed by SYNTH=48\% --- while Haiku~4.5 collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1~Pro is broadly competitive for GitHub and Zulip but weaker on Stripe.
 
