@@ -28,13 +28,45 @@ This interpretation has a practical implication: whether to include documentatio
 
 The behavioural adherence results raise a mechanistic question: at which layer in the forward pass does parametric gravity assert itself? If a model ignores a mutated parameter name despite it being present in the context, the in-context representation must at some layer be overridden by a training-time attractor --- a pattern that prior mechanistic work localises to middle-layer feed-forward modules~\cite{meng2022rome,factualrecall2025}.
 
-Our preliminary log-linear probing analysis on a smaller open-weight model provides a first empirical window into this. Probing the residual stream at each transformer layer for whether the mutated or original parameter name is better predicted reveals a characteristic transition: early layers faithfully represent the in-context token (high probe accuracy for the mutated name), while mid-to-late layers shift toward the training-time prior (high probe accuracy for the original name). This transition layer
-varies by API: it occurs earlier for high-familiarity APIs (GitHub-like) than for low-familiarity ones (Mastodon-like), consistent with stronger parametric attractors for APIs more densely represented in training data.
+We address this using a logit-lens study on a smaller open-weight model (Qwen2.5-7B-Instruct, 29 layers). For each probed synthesis run, we identify token positions where the mutated and original parameter names are in competition, then track the per-layer logit difference $\delta_\ell = \text{logit}(\text{original}) - \text{logit}(\text{mutated})$ as the residual stream propagates through the network. A positive $\delta_\ell$ at the final layer indicates parametric memory prevailed; a negative value indicates the model followed the in-context documentation.
 
-These findings align with recent work on how post-training reshapes
-representations~\cite{posttrainingreshapes2025}: instruction fine-tuning and RLHF alter the geometry of the residual stream in ways that could modulate the transition point. This suggests that the choice of synthesis model --- not just pre-training corpus composition but also fine-tuning regime --- affects the layer at which context is overridden. It also identifies a concrete intervention point: a targeted context-faithful fine-tuning signal applied at the transition layers could, in principle, reduce parametric gravity without sacrificing the broader capabilities that make these models effective synthesizers.
+Figure~\ref{fig:logprobe_summary} summarises outcomes across 13 APIs: GitHub, Stripe, and eBay Commerce show 100\% parametric memory --- every probed mutation is overridden by training-time knowledge. Mastodon, Confluence, Jira, OpenWeatherMap, and Spoonacular show 100\% context following, consistent with their lower training representation. APIs in between (Zulip 40\% memory, eBay Buy 50\%) exhibit mixed behaviour depending on parameter familiarity.
 
-This analysis is exploratory; results are on a single smaller model and should not be over-generalised. We include it to ground the behavioural patterns in an emerging mechanistic framework and to motivate future work connecting probing methodology to the synthesis setting.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{media/fig_logprobe_summary.pdf}
+  \caption{Left: fraction of probed mutations where the model chose the
+    training-time parameter name over the in-context mutated name, per API.
+    APIs with higher training familiarity (GitHub, Stripe) show 100\% parametric
+    memory; less-familiar APIs (Mastodon, Confluence) show full context-following.
+    Right: average transformer layer at which the winning token first dominates
+    the logit difference. Memory outcomes (red) typically resolve early
+    (layers 1--6); context-following outcomes (green) can persist or resolve
+    later (eBay Sell: layer 22).}
+  \label{fig:logprobe_summary}
+\end{figure}
+
+Figure~\ref{fig:logprobe_traces} shows representative layer traces for GitHub (all parametric-memory) and Zulip (mixed). For GitHub parameters such as \texttt{per\_page} and \texttt{state}, $\delta_\ell$ becomes strongly positive within the first few layers and remains so --- the training-time attractor dominates from early in the forward pass. By contrast, Zulip's \texttt{narrow} and \texttt{num\_before} parameters (less idiosyncratic names) show persistently negative $\delta_\ell$: the model follows the mutated documentation. The Zulip \texttt{anchor} parameter is notable: $\delta_\ell$ stays negative until layer 26, where the parametric attractor abruptly asserts itself --- a late-layer override consistent with a mid-network fact recall mechanism~\cite{meng2022rome}.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{media/fig_logprobe_traces.pdf}
+  \caption{Logit-lens traces for selected GitHub (top row, all memory) and
+    Zulip (bottom row, mixed) parameters. Each panel plots
+    $\delta_\ell = \text{logit}(\text{original}) - \text{logit}(\text{mutated})$
+    across all 29 transformer layers. Positive values (red shading) indicate
+    parametric gravity; negative (green shading) indicate context following.
+    The dashed vertical line marks the flip layer. GitHub parameters resolve
+    early (L1 for \texttt{per\_page}, \texttt{state}; L14 for \texttt{labels});
+    Zulip \texttt{anchor} shows a characteristic late-layer flip at L26.}
+  \label{fig:logprobe_traces}
+\end{figure}
+
+The average flip layer differs systematically between outcomes: memory-outcome mutations resolve at layers 1--6 on average, while context-following mutations sometimes persist to layer 22 or beyond. This is consistent with the \emph{parametric gravity} mechanism being an early-to-mid network phenomenon that, when active, preempts later context integration. APIs without strong attractors reach context-following outcomes gradually throughout the network rather than through a sharp transition.
+
+These findings align with recent work on how post-training reshapes representations~\cite{posttrainingreshapes2025}: instruction fine-tuning and RLHF alter the geometry of the residual stream in ways that could modulate the transition point. This suggests that the choice of synthesis model --- not just pre-training corpus composition but also fine-tuning regime --- affects the layer at which context is overridden. It also identifies a concrete intervention point: a targeted context-faithful fine-tuning signal applied at the transition layers could, in principle, reduce parametric gravity without sacrificing the broader capabilities that make these models effective synthesizers.
+
+This analysis is exploratory; results are on a single smaller 7B-parameter model (Qwen2.5-7B-Instruct) and should not be over-generalised to the production-scale models used in the main benchmark. We include it to ground the behavioural patterns in a mechanistic framework and to motivate future work connecting logit-lens methodology to the synthesis setting.
 
 \section{Synthesis Quality as a Proxy Metric}
 
