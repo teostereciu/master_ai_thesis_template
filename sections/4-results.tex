@@ -49,7 +49,7 @@ real documentation sources: citation validity is 86--100\% across datasets
 (every \texttt{grounding.json} entry points to an existing file with a
 syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
-Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.946$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here, but the primary synthesis feasibility evidence is SYNTH, shown alongside PASS in the full heatmap (Figure~\ref{fig:heatmap}, Appendix~\ref{sec:apx:full_results}).
+Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.937$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here, but the primary synthesis feasibility evidence is SYNTH, shown alongside PASS in the full heatmap (Figure~\ref{fig:heatmap}, Appendix~\ref{sec:apx:full_results}).
 
 \begin{table*}[htbp]
   \centering
@@ -206,13 +206,13 @@ The mutated condition (also visible in Figure~\ref{fig:strip}) shows a modest fu
 
 \textbf{Does synthesis quality predict agent task performance?}
 
-Figure~\ref{fig:scatter} plots SYNTH against PASS for all 201 (model, API, condition) triples where both metrics are available across the eight synthesis models. The Pearson correlation is $r = 0.946$ ($p < 0.0001$, $n = 201$), indicating a strong and consistent linear relationship between synthesis tool coverage and agent pass rate that holds across models, APIs, and conditions. Low-SYNTH entries (base-tier models on complex APIs) consistently correspond to low PASS in Table~\ref{tab:pass_results}. SYNTH is a reliable proxy for downstream utility, and synthesis failures propagate to agent failures with high fidelity.
+Figure~\ref{fig:scatter} plots SYNTH against PASS for all 209 (model, API, condition) triples where both metrics are available across the eight synthesis models. The Pearson correlation is $r = 0.937$ ($p < 0.0001$, $n = 209$), indicating a strong and consistent linear relationship between synthesis tool coverage and agent pass rate that holds across models, APIs, and conditions. Low-SYNTH entries (base-tier models on complex APIs) consistently correspond to low PASS in Table~\ref{tab:pass_results}. SYNTH is a reliable proxy for downstream utility, and synthesis failures propagate to agent failures with high fidelity.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
-  \caption{SYNTH vs.\ PASS across all 201 (model, API, condition) triples
-    ($r = 0.946$, $n = 201$). Shape encodes synthesis condition;
+  \caption{SYNTH vs.\ PASS across all 209 (model, API, condition) triples
+    ($r = 0.937$, $n = 209$). Shape encodes synthesis condition;
     colour encodes synthesis model.
     The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
   \label{fig:scatter}
