@@ -47,9 +47,10 @@ on a common three-API evaluation set.
 
 \textbf{Can LLMs synthesize functional API tool servers from documentation alone?}
 
-Figure~\ref{fig:heatmap} shows PASS and SYNTH across all 14 APIs and three
-synthesis conditions. Twelve of 14 APIs achieve SYNTH $\geq 75\%$ in the
-docs condition, with a median of approximately 84\%. Only Jira (56\%) and
+Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers;
+Table~\ref{tab:pass_results} reports the full tier-averaged PASS by condition.
+Twelve of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition (frontier tier),
+with a median of approximately 84\%. Only Jira (56\%) and
 eBay Sell (43\%) fall consistently below that threshold, indicating that
 synthesis is feasible for the large majority of APIs tested.
 
@@ -72,40 +73,49 @@ real documentation sources: citation validity is 86--100\% across datasets
 (every \texttt{grounding.json} entry points to an existing file with a
 syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
-Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.895$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here, but the primary synthesis feasibility evidence is SYNTH as shown in Figure~\ref{fig:heatmap}.
+Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.895$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here, but the primary synthesis feasibility evidence is SYNTH, shown alongside PASS in the full heatmap (Figure~\ref{fig:heatmap}, Appendix~\ref{sec:apx:full_results}).
 
-\begin{table}[htbp]
+\begin{table*}[htbp]
   \centering
-  \caption{Agent pass rate (PASS, \%) per API and synthesis condition.
-    Rows sorted by mean PASS descending. \textbf{Bold} marks the highest
-    value in each row. \colorbox{red!12}{Red} cells indicate PASS $< 50\%$.
-    PASS = agent pass rate on scoreable tasks. Heatmap (Fig.~\ref{fig:heatmap}) shows SYNTH alongside PASS.}
+  \caption{Agent PASS (\%) per API and synthesis condition, averaged within each model tier.
+    \textbf{Frontier}: Sonnet~4.6, GPT-5.4, GPT-5.2.
+    \textbf{Mid}: Haiku~4.5, Gemini~3.1~Pro, Qwen3-Coder-Next.
+    \textbf{Base}: GPT-5.4-mini, Qwen3-Coder-Next-Base.
+    Rows sorted by frontier docs avg descending.
+    \textbf{Bold} = highest value in each row.
+    \colorbox{red!12}{Red} = below 50\%.
+    $^\dagger$ = fewer than 3 models contributed to average.}
   \label{tab:pass_results}
-  \setlength{\tabcolsep}{5pt}
-  \small
-  \begin{tabular}{lrrr}
+  \setlength{\tabcolsep}{4pt}
+  \scriptsize
+  \begin{tabular}{l rrr rrr rrr}
     \toprule
-    \textbf{Dataset} & \textbf{With docs} & \textbf{No docs} & \textbf{Mutated params} \\
+    & \multicolumn{3}{c}{\textbf{Frontier}} & \multicolumn{3}{c}{\textbf{Mid}} & \multicolumn{3}{c}{\textbf{Base}} \\
+    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+    \textbf{Dataset} & D & N & M & D & N & M & D & N & M \\
     \midrule
-    Mastodon         & \textbf{100} & \textbf{100} & \textbf{100} \\
-    OpenWeatherMap   & \textbf{100} &           86 & \textbf{100} \\
-    Spoonacular      & \textbf{100} &           90 &           78 \\
-    Notion           &           78 & \textbf{100} & \textbf{100} \\
-    Confluence       &           92 &           93 & \textbf{91}  \\
-    Alphavantage     &           86 &           90 & \textbf{88}  \\
-    eBay Commerce    & \textbf{100} &           89 &           55 \\
-    Shopify          &           87 & \textbf{92}  &           62 \\
-    GitHub           &           62 & \textbf{83}  &           76 \\
-    eBay Buy         &           73 &           67 & \textbf{80}  \\
-    Zulip            & \textbf{80}  &           60 &           62 \\
-    Stripe           & \textbf{72}  &           62 &           57 \\
-    eBay Sell        & \cellcolor{red!12}38 & \textbf{50}  & \cellcolor{red!12}43 \\
-    Jira             & \textbf{50}  & \cellcolor{red!12}25 & \textbf{50} \\
+    Mastodon       & \textbf{100} & \textbf{81}$^\dagger$ & \textbf{97}$^\dagger$ & 89 & 70 & 81 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 \\
+    OpenWeatherMap & \textbf{100} & \textbf{94} & \textbf{100} & \textbf{100} & 86 & \textbf{100} & --- & --- & --- \\
+    Spoonacular    & \textbf{93}$^\dagger$ & \textbf{86}$^\dagger$ & \textbf{69}$^\dagger$ & 83 & 76 & 88 & --- & 60 & --- \\
+    Notion         & \textbf{80}$^\dagger$ & \textbf{96} & \textbf{95}$^\dagger$ & 81 & 35 & 50 & --- & \cellcolor{red!12}0 & --- \\
+    Confluence     & \textbf{87}$^\dagger$ & \textbf{96}$^\dagger$ & \textbf{74}$^\dagger$ & 53 & 67 & 61 & 64 & --- & --- \\
+    Alphavantage   & \textbf{83}$^\dagger$ & \textbf{91}$^\dagger$ & \textbf{83}$^\dagger$ & \textbf{100} & \textbf{100} & 90 & 92 & --- & --- \\
+    eBay Commerce  & \textbf{96}$^\dagger$ & \textbf{65}$^\dagger$ & \textbf{59}$^\dagger$ & 94 & \cellcolor{red!12}22 & \cellcolor{red!12}22 & \cellcolor{red!12}45 & --- & --- \\
+    Shopify        & \textbf{90} & \textbf{91} & \textbf{62}$^\dagger$ & 90 & 76 & 85 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 \\
+    GitHub         & \textbf{70} & \textbf{91} & \textbf{83} & 80 & 77 & 59 & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 \\
+    eBay Buy       & \textbf{71}$^\dagger$ & \textbf{79} & \textbf{93}$^\dagger$ & 51 & 76 & \cellcolor{red!12}37 & \cellcolor{red!12}6 & --- & --- \\
+    Zulip          & \textbf{90} & \textbf{63} & \textbf{44}$^\dagger$ & \cellcolor{red!12}44 & \cellcolor{red!12}40 & 51 & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 \\
+    Stripe         & \textbf{52} & \textbf{75} & \textbf{56} & \cellcolor{red!12}45 & \cellcolor{red!12}56 & \cellcolor{red!12}68 & \cellcolor{red!12}14 & \cellcolor{red!12}28 & \cellcolor{red!12}19 \\
+    eBay Sell      & \cellcolor{red!12}\textbf{22}$^\dagger$ & \cellcolor{red!12}\textbf{56}$^\dagger$ & \cellcolor{red!12}\textbf{44}$^\dagger$ & \cellcolor{red!12}69 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & \cellcolor{red!12}0 & --- \\
+    Jira           & \textbf{60} & \textbf{44} & \textbf{62} & \cellcolor{red!12}64 & \cellcolor{red!12}17 & \cellcolor{red!12}46 & --- & --- & --- \\
     \midrule
-    \textit{Median}  &           80 &           86 &           77 \\
+    \textit{Median} & \textit{85} & \textit{82} & \textit{69} & \textit{77} & \textit{67} & \textit{58} & \textit{38} & \textit{0} & \textit{0} \\
     \bottomrule
   \end{tabular}
-\end{table}
+  \par\smallskip\raggedright\scriptsize
+  D = docs, N = nodocs, M = mutated. --- = no data for this tier/condition.
+  $^\dagger$ = only 1--2 models in average (sparse coverage).
+\end{table*}
 
 \begin{figure}[htbp]
   \centering
@@ -118,15 +128,18 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition; note that
   \label{fig:complexity}
 \end{figure}
 
-\begin{figure}[htbp]
+\begin{figure*}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{media/fig1_primary_heatmap.pdf}
-  \caption{Agent pass rate (PASS, large) and server synthesis sufficiency
-    (SYNTH, small) across 14 APIs and three synthesis conditions.
-    Rows sorted by mean PASS descending.
-    Colour encodes PASS on a red--orange--green scale.}
-  \label{fig:heatmap}
-\end{figure}
+  \includegraphics[width=\linewidth]{media/fig_tier_bars.pdf}
+  \caption{Agent pass rate (\%) across 14 APIs, grouped by synthesis model tier
+    (frontier: Sonnet~4.6, GPT-5.4, GPT-5.2; mid: Haiku~4.5, Gemini~3.1~Pro,
+    Qwen3-Coder-Next; base: GPT-5.4-mini, Qwen3-Coder-Next-Base).
+    Each bar shows the tier average; tick marks above bars show the tier best.
+    APIs sorted by frontier docs performance descending.
+    Left: docs condition; right: no-docs condition.
+    Missing bars indicate no data for that tier--API combination.}
+  \label{fig:tier_bars}
+\end{figure*}
 
 % ------------------------------------------------------------
 \section{RQ2: Agent Task Completion}

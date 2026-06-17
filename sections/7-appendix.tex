@@ -63,6 +63,16 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
 
 \begin{figure*}[htbp]
   \centering
+  \includegraphics[width=0.75\linewidth]{media/fig1_primary_heatmap.pdf}
+  \caption{Agent pass rate (PASS, large) and server synthesis sufficiency
+    (SYNTH, small) across 14 APIs and three synthesis conditions for the GPT-5.2
+    reference model. Rows sorted by mean PASS descending.
+    Colour encodes PASS on a red--orange--green scale.}
+  \label{fig:heatmap}
+\end{figure*}
+
+\begin{figure*}[htbp]
+  \centering
   \includegraphics[width=\linewidth]{media/fig3_model_comparison.pdf}
   \caption{Per-API, per-model PASS breakdown across all synthesis conditions
     (docs, nodocs, mutated) for the common three-API set (GitHub, Stripe, Zulip).
