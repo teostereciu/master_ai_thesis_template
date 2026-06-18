@@ -13,7 +13,7 @@ synthesizers rely on parametric knowledge and when this affects downstream
 performance. Section~\ref{sec:rq4} examines the effect of documentation
 availability. Section~\ref{sec:rq5} quantifies the relationship between
 synthesis quality and agent pass rate.
-Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown across all eight synthesis models and three conditions; Section~\ref{sec:model_comparison} discusses model-tier effects in detail.
+Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown across all eight synthesis models and three conditions; the complete matrix across all APIs and models is in Table~\ref{tab:apx:full_results} (Appendix~\ref{sec:apx:full_results}).
 
 % ------------------------------------------------------------
 \section{RQ1: Synthesis Feasibility}
@@ -222,31 +222,4 @@ Figure~\ref{fig:scatter} plots SYNTH against PASS for all 209 (model, API, condi
 \end{figure}
 
 The points near or above the diagonal represent cases where the agent performs at or above what synthesis quality would predict --- most commonly when the agent completes tasks despite partial synthesis coverage, possibly through alternative tool combinations. Points well below the diagonal confirm that when synthesis fails to cover the task space, agent performance cannot recover. Taken together, these results validate SYNTH as a leading indicator: measuring synthesis sufficiency before running the full evaluation pipeline gives a reliable estimate of whether agent task completion will succeed.
-
-% ------------------------------------------------------------
-\section{Model Comparison}
-\label{sec:model_comparison}
-% ------------------------------------------------------------
-
-\textbf{How does synthesis model capability affect agent pass rate?}
-
-Figure~\ref{fig:model_capability} summarises per-model PASS distributions on the common GitHub/Stripe/Zulip set; Table~\ref{tab:pass_results} provides the full 14-API breakdown. The full per-model breakdown across all 14 APIs and conditions is in Table~\ref{tab:apx:full_results} (Appendix~\ref{sec:apx:full_results}).
-
-Sonnet~4.6 achieves the highest median PASS on this three-API common set (9 data points; see Table~\ref{tab:pass_results} for the full 14-API comparison). GPT-5.2 and GPT-5.4 are the other frontier models: GPT-5.4 produces broken tool stubs for Stripe docs (8\%, PASS) --- a synthesis-level failure confirmed by SYNTH=48\% --- while GPT-5.2 is broadly reliable. Haiku~4.5 (mid tier) is competitive on many APIs but collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1~Pro is broadly competitive for GitHub and Zulip but weaker on Stripe.
-
-The base tier shows qualitatively different failure patterns. GPT-5.4-mini consistently produces shallow servers with too few relevant tools (TOOL\_COVERAGE dominates, $-$43\,pp vs.\ GPT-5.2 on average); it partially recovers on simple APIs where parametric knowledge is strong (OpenWeatherMap: 100\% across all conditions). Qwen3-Coder-Next-Base produces no valid server on GitHub in any condition and scores near-zero on most APIs --- the expected outcome for a base model without instruction tuning.
-
-Synthesis reliability scales with tier. Frontier models achieve near-complete reliability across all conditions. Qwen3-Coder-Next (mid tier) crashes or produces no valid server on several common-set conditions (Table~\ref{tab:pass_results}) but is competitive where synthesis succeeds. The nodocs advantage (RQ4) is strongest for frontier models: Sonnet~4.6 and GPT-5.2 match or improve on GitHub without documentation, while smaller models degrade --- consistent with weaker parametric priors.
-
-This model-level variation in adherence is a confound for the aggregate RQ3 results: near-zero adherence for GitHub reflects a mixture of frontier models ignoring mutations entirely (parametric dominance) and mid-tier models adopting renames at the interface level but not propagating them to outbound HTTP calls. The full per-model adherence breakdown is shown in Figure~\ref{fig:adherence}.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\linewidth]{media/fig9_model_capability.pdf}
-  \caption{PASS distributions for eight synthesis models on the common
-    three-API set (GitHub, Stripe, Zulip), ordered by approximate capability.
-    Each box shows nine data points (3 APIs $\times$ 3 conditions);
-    crash/failure conditions count as 0\%.}
-  \label{fig:model_capability}
-\end{figure}
 
