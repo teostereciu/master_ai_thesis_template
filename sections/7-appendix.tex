@@ -65,7 +65,7 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
     Notion         & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & \cellcolor{red!12}0 & 94 & 94 & 100 & 78 & 100 & 100 & 62 & 100 & \cellcolor{red!12}0 & 56 & \cellcolor{red!12}5 & 50 & 100 & 87 & 85 \\
     OpenWeatherMap & --- & --- & --- & --- & --- & --- & 100 & 86 & 100 & 85 & 90 & 95 & 100 & 86 & 100 & 100 & 95 & 100 & 95 & 65 & 60 & \cellcolor{red!12}0 & 100 & \cellcolor{red!12}0 \\
     Shopify        & --- & --- & --- & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 87 & 92 & 62 & 83 & 92 & 53 & 93 & 75 & 94 & 100 & \cellcolor{red!12}0 & --- \\
-    Spoonacular    & --- & --- & --- & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & 100 & 90 & 78 & 80 & 82 & 60 & ---$^d$ & 79 & 86 & 93 & \cellcolor{red!12}0 & 92 \\
+    Spoonacular    & --- & --- & --- & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & 100 & 90 & 78 & 80 & 82 & 60 & 93 & 79 & 86 & 93 & \cellcolor{red!12}0 & 92 \\
     \bottomrule
   \end{tabular}
   \par\smallskip
@@ -74,7 +74,6 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
   $^a$ Rate-limited; shared 25\,req/day key exhausted.
   $^b$ GPT-5.4-mini full matrix aborted after 26/112 evals; only confluence nodocs/mutated returned non-zero.
   $^c$ Tiny scoreable N ($\leq$3 due to ENVIRONMENT errors); treat with caution.
-  $^d$ Haiku spoonacular docs pending at time of writing.
 \end{table}
 
 \begin{table}[htbp]
@@ -117,7 +116,7 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
 \label{sec:apx:variance}
 % ------------------------------------------------------------
 
-To quantify synthesis stochasticity, we ran GPT-5.2 five times on each of three APIs and all three conditions, holding all other variables fixed. Tables~\ref{tab:apx:var_shopify}--\ref{tab:apx:var_github} report per-run PASS and SYNTH; Table~\ref{tab:apx:var_summary} summarises key statistics.
+To quantify synthesis stochasticity, we ran GPT-5.2 five times on each of three APIs and all three conditions, holding all other variables fixed. Tables~\ref{tab:apx:var_shopify_d}--\ref{tab:apx:var_github} report per-run PASS and SYNTH; Table~\ref{tab:apx:var_summary} summarises key statistics.
 
 \paragraph{Shopify.}
 The nodocs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): SYNTH locks at 94\% on every run ($\sigma=0$), and CURRENT ranges 80--94\% (mean 90\%, $\sigma\approx6$\,pp). Docs condition is high-variance (Table~\ref{tab:apx:var_shopify_d}): CURRENT 59--93\% ($\sigma\approx13$\,pp), with no degeneracy but large differences between small (131-line, 93\%) and large (538-line, 75\%) servers. Mutated (Table~\ref{tab:apx:var_shopify_m}) has one startup crash and CURRENT 67--92\% across non-crash runs; mutation adherence is perfectly stable (0\% HTTP / 20\% iface on every run).
