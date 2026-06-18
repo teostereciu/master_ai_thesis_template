@@ -119,7 +119,7 @@ Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, AP
 To quantify synthesis stochasticity, we ran GPT-5.2 five times on each of three APIs and all three conditions, holding all other variables fixed. Tables~\ref{tab:apx:var_shopify_d}--\ref{tab:apx:var_github} report per-run PASS and SYNTH; Table~\ref{tab:apx:var_summary} summarises key statistics.
 
 \paragraph{Shopify.}
-The nodocs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): SYNTH locks at 94\% on every run ($\sigma=0$), and CURRENT ranges 80--94\% (mean 90\%, $\sigma\approx6$\,pp). Docs condition is high-variance (Table~\ref{tab:apx:var_shopify_d}): CURRENT 59--93\% ($\sigma\approx13$\,pp), with no degeneracy but large differences between small (131-line, 93\%) and large (538-line, 75\%) servers. Mutated (Table~\ref{tab:apx:var_shopify_m}) has one startup crash and CURRENT 67--92\% across non-crash runs; mutation adherence is perfectly stable (0\% HTTP / 20\% iface on every run).
+The nodocs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): SYNTH locks at 94\% on every run ($\sigma=0$), and PASS ranges 80--94\% (mean 90\%, $\sigma\approx6$\,pp). Docs condition is high-variance (Table~\ref{tab:apx:var_shopify_d}): PASS 59--93\% ($\sigma\approx13$\,pp), with no degeneracy but large differences between small (131-line, 93\%) and large (538-line, 75\%) servers. Mutated (Table~\ref{tab:apx:var_shopify_m}) has one startup crash and PASS 67--92\% across non-crash runs; mutation adherence is perfectly stable (0\% HTTP / 20\% iface on every run).
 
 \begin{table}[htbp]
   \centering
@@ -215,7 +215,7 @@ Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 run
 \end{table}
 
 \paragraph{Stripe.}
-Docs and nodocs each have 1/5 degeneracy (startup crash). Valid docs runs score 46--67\% (ref 72\%); the bottleneck is AGENT\_REASONING (8--14 failures per run), not tool coverage. Nodocs valid runs score 38--62\% (ref 62\%), with lower SYNTH (57--73\%) reflecting weaker parametric knowledge of Stripe's API surface. Mutated shows the widest variance (20--69\% across 4 non-degenerate runs); adherence itself varies run-to-run (0--20\% HTTP), in contrast to Shopify's perfectly stable adherence.
+Docs and nodocs each have 1/5 degeneracy (startup crash). Valid docs runs score 46--67\% (ref 72\%); the bottleneck is AGENT\_REASONING (8--14 failures per run), not tool coverage. Nodocs valid runs score 38--62\% (ref 62\%), with lower SYNTH (57--73\%) reflecting weaker parametric knowledge of Stripe's API surface. Mutated shows the widest variance (20--69\% across 4 non-degenerate runs); adherence itself varies run-to-run (0--20\% HTTP), in contrast to Shopify's perfectly stable adherence. Table~\ref{tab:apx:var_stripe} summarises all three conditions.
 
 \begin{table}[htbp]
   \centering

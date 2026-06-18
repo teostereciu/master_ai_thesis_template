@@ -13,7 +13,7 @@ relevant limitations of the study.
 
 \paragraph{RQ1: Can LLMs synthesize functional API tool servers from
 documentation alone?}
-Yes, for most APIs tested. Twelve of fourteen APIs achieve SYNTH $\geq 75\%$
+Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$
 in the docs condition, and the dominant failure mode is coverage gap (omitted
 endpoints) rather than structural failure (broken or non-executable servers).
 This answer is qualified by generalizability: all APIs in the benchmark are
@@ -47,7 +47,7 @@ or mutation strategies.
 \paragraph{RQ4: How does documentation availability affect synthesis and
 agent performance?}
 The aggregate effect is smaller than expected: the no-docs condition median
-(86\%) meets or exceeds the docs condition median (80\%), driven by
+(88\%) meets or exceeds the docs condition median (83\%), driven by
 high-familiarity APIs where model memory substitutes for documentation.
 Documentation helps for less familiar APIs (Stripe, Zulip) and hurts for
 highly familiar ones (GitHub, Mastodon), suggesting the effect is mediated
