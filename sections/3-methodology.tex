@@ -88,7 +88,7 @@ This choice is deliberate: it reflects realistic synthesis conditions, where a p
 
 \subsection{Human Reference Servers}
 
-For two APIs --- GitHub and Zulip --- publicly available, community-maintained MCP servers exist and can be evaluated against the same task suite. The GitHub MCP server is the official implementation maintained by GitHub, written in Go.\footnote{\url{https://github.com/github/github-mcp-server}} The Zulip server is a community-contributed open-source project written in TypeScript.\footnote{\url{https://github.com/akougkas/zulipchat-mcp}} Both expose a subset of the respective APIs as tools. We run both reference servers against the same evaluation agent and judge pipeline used for the synthesized servers, without any modification.
+For two APIs --- GitHub and Zulip --- publicly available, community-maintained MCP servers exist and can be evaluated against the same task suite. The GitHub MCP server is the official implementation maintained by GitHub, written in Go.\footnote{\url{https://github.com/github/github-mcp-server}} The Zulip server is a community-contributed open-source project written in Python.\footnote{\url{https://github.com/akougkas/zulipchat-mcp}} Both expose a subset of the respective APIs as tools. We run both reference servers against the same evaluation agent and judge pipeline used for the synthesized servers, without any modification.
 
 These human-authored servers serve as a practical baseline: they represent what a developer with API familiarity and access to the official documentation would produce without time pressure from an automated benchmark. Crucially, neither server was constructed with our specific evaluation tasks in mind, so coverage gaps reflect genuine tool-design choices rather than benchmark overfitting. Comparing synthesized server PASS rates against these baselines directly answers whether automated synthesis can match or exceed hand-crafted implementations (Section~\ref{sec:rq2}).
 
@@ -195,24 +195,24 @@ inference backends. Table~\ref{tab:models} summarises their key properties.
 GPT-5.2 serves as the primary baseline across all 14 APIs and all three conditions.
 GPT-5.4 and GPT-5.4-mini are evaluated as more recent OpenAI baselines; GPT-5.4-mini was evaluated on a restricted three-API set (GitHub, Stripe, Zulip) due to uniformly weak results, and is not included in the full 14-API evaluation. Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) offer a strong/efficient tradeoff within the same model family. Gemini~3.1~Pro provides a third model family. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
 served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
-80\,GB GPUs (160\,GB total VRAM, CUDA~12.2). Where results are missing, this reflects synthesis failures rather than intentional subset selection. Model comparison results are presented in Section~\ref{sec:model_comparison}.
+80\,GB GPUs (160\,GB total VRAM, CUDA~12.2). Where results are missing, this reflects synthesis failures or \texttt{INSTRUCTIONS.md} violations (i.e. \texttt{server.py} is not runnable within the evaluation harness). 
 
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; n.d.\ = not disclosed by provider. For Qwen3, 3B act.\ denotes activated parameters per token (mixture-of-experts architecture). GPT-5.4-mini was evaluated on GitHub, Stripe, and Zulip only.}
+\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; $\approx$ indicates approximate counts when official numbers have not been disclosed by provider (n.d.). act.\ denotes activated parameters per token (mixture-of-experts architecture).}
 \label{tab:models}
 \setlength{\tabcolsep}{2.7pt}
 \begin{tabular}{lllrr}
 \toprule
 \textbf{Model} & \textbf{Family} & \textbf{Access} & \textbf{Params} & \textbf{Context} \\
 \midrule
-GPT-5.2              & OpenAI GPT-5    & Azure API            & n.d.  & 400K   \\
-GPT-5.4              & OpenAI GPT-5    & Azure API            & n.d.  & 1.05M  \\
+GPT-5.2              & OpenAI GPT-5    & Azure API            & $\approx$1.4T act.  & 400K   \\
+GPT-5.4              & OpenAI GPT-5    & Azure API            & $\approx$1T act.  & 1.05M  \\
 GPT-5.4-mini         & OpenAI GPT-5    & Azure API            & n.d.  & 400K  \\
-Sonnet~4.6           & Anthropic Claude & GCP API             & n.d.  & 1M     \\
-Haiku~4.5            & Anthropic Claude & GCP API             & n.d.  & 200K   \\
-Gemini~3.1~Pro       & Google Gemini   & GCP API              & n.d.  & 1M     \\
+Sonnet~4.6           & Anthropic Claude & GCP API             &  $\approx$130B act.  & 1M     \\
+Haiku~4.5            & Anthropic Claude & GCP API             & $\approx$21B act.  & 200K   \\
+Gemini~3.1~Pro       & Google Gemini   & GCP API              & $\approx$1.2T act.  & 1M     \\
 Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
 Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
 \bottomrule
@@ -221,8 +221,7 @@ Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 
 \end{table}
 
 \noindent
-Several additional models were evaluated as synthesis candidates but excluded
-from the full 14-API primary comparison due to systematic failures. GPT-4.1 produced
+Several additional models were evaluated as synthesis candidates but excluded from the full 14-API primary comparison due to systematic failures. GPT-4.1 produced
 non-functional servers across all tested datasets because it generates FastMCP
 code using an older class-based API (\texttt{register\_tool},
 \texttt{StripeMCPServer()}) that no longer exists in the version installed in
