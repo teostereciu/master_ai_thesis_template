@@ -34,8 +34,7 @@ APIs tested.
 
 The dominant failure mode is \emph{coverage gap}: the server starts and
 runs correctly, but the synthesizer omits the specific endpoints required
-by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative trend between
-endpoint count and SYNTH visible in Figure~\ref{fig:complexity}. Structural failure --- servers that crash or omit the required \texttt{server.py}
+by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative log-linear trend between endpoint count and agent pass rate ($r = -0.68$; Figure~\ref{fig:complexity} in the Appendix). Structural failure --- servers that crash or omit the required \texttt{server.py}
 entrypoint entirely --- scales strongly with model tier: it is rare for frontier
 models (GPT-5.2, GPT-5.4, Sonnet~4.6) but frequent for base-tier models, and
 mid-tier models such as Qwen3-Coder-Next crash on multiple conditions in
@@ -113,17 +112,6 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside 
   SYNTH (D) = server synthesis sufficiency, docs condition, GPT-5.2 reference model.
   $^*$eBay Sell Qwen3-Next docs: $N_\text{scoreable}\leq3$; treat with caution.
 \end{table*}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\linewidth]{media/fig8_api_complexity.pdf}
-  \caption{Endpoint documentation file count (log scale) vs.\ agent PASS
-    (docs condition, GPT-5.2). Marker size encodes synthesis input token volume.
-    Dashed line is a log-linear fit. Larger APIs with denser documentation
-    systematically yield lower PASS, driven by coverage gaps rather than
-    server errors.}
-  \label{fig:complexity}
-\end{figure}
 
 \begin{figure*}[htbp]
   \centering

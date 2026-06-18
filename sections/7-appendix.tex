@@ -6,6 +6,22 @@
 \label{sec:apx:first_appendix}
 
 % ------------------------------------------------------------
+\section{API Complexity vs Agent Performance}
+\label{sec:apx:complexity}
+% ------------------------------------------------------------
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.85\linewidth]{media/fig8_api_complexity.pdf}
+  \caption{Endpoint documentation file count (log scale) vs.\ agent PASS
+    (docs condition, GPT-5.2). Marker size encodes synthesis input token volume.
+    Dashed line is a log-linear fit ($r = -0.68$). Larger APIs with denser
+    documentation systematically yield lower PASS, driven by coverage gaps
+    rather than server errors.}
+  \label{fig:complexity}
+\end{figure}
+
+% ------------------------------------------------------------
 \section{Full Per-Model Results Table}
 \label{sec:apx:full_results}
 % ------------------------------------------------------------
