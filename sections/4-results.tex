@@ -24,10 +24,13 @@ Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown acro
 
 Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers;
 Table~\ref{tab:pass_results} reports the full per-model PASS breakdown.
-Twelve of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition (frontier tier),
-with a median of approximately 84\%. Only Jira (56\%) and
-eBay Sell (43\%) fall consistently below that threshold, indicating that
-synthesis is feasible for the large majority of APIs tested.
+Eleven of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition (frontier tier),
+with a median of 86\% (Table~\ref{tab:pass_results}, SYNTH column). Jira (56\%),
+eBay Sell (43\%), and GitHub (61\%) fall below that threshold; the last is
+notable given GitHub's familiarity --- synthesis covers most endpoints but
+not enough for the denser task set. The remaining 11 APIs all synthesize
+successfully, indicating that synthesis is feasible for the large majority of
+APIs tested.
 
 The dominant failure mode is \emph{coverage gap}: the server starts and
 runs correctly, but the synthesizer omits the specific endpoints required
@@ -35,8 +38,8 @@ by certain benchmark tasks. This is most pronounced for large APIs with many end
 endpoint count and SYNTH visible in Figure~\ref{fig:complexity}. Structural failure --- servers that crash or omit the required \texttt{server.py}
 entrypoint entirely --- scales strongly with model tier: it is rare for frontier
 models (GPT-5.2, GPT-5.4, Sonnet~4.6) but frequent for base-tier models, and
-mid-tier models such as Qwen3-Coder-Next crash on five of nine conditions on
-the common GitHub/Stripe/Zulip set.
+mid-tier models such as Qwen3-Coder-Next crash on multiple conditions in
+the common GitHub/Stripe/Zulip set (Table~\ref{tab:pass_results}).
 
 SYNTH is also notably stable across conditions for most APIs: Confluence
 holds at approximately 95\% SYNTH across all three conditions and Mastodon at 93--100\%,
@@ -45,11 +48,15 @@ rather than what context is provided. The exceptions --- eBay Commerce drops fro
 mutations reduce tool coverage directly.
 
 Grounding analysis shows that synthesizers consistently anchor tools to
-real documentation sources: citation validity is 86--100\% across datasets
-(every \texttt{grounding.json} entry points to an existing file with a
-syntactically plausible endpoint string), and grounding coverage is complete (every synthesized tool has a corresponding entry). This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
+real documentation sources. For the primary GPT-5.2 docs condition, every
+\texttt{grounding.json} entry points to an existing documentation file
+(100\% doc-existence rate) and every synthesized tool has a corresponding
+grounding entry (100\% coverage). Citation accuracy --- whether the cited
+file plausibly describes the tool --- is 86--100\% across datasets; GitHub's
+86\% reflects a small number of tools citing multi-operation documents only
+loosely related to the specific endpoint. This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
-Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside SYNTH for the docs condition; note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.937$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here. SYNTH for the no-docs and mutated conditions appears in Table~\ref{tab:apx:nodocs_mutated} (Appendix~\ref{sec:apx:full_results}).
+Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside SYNTH for the docs condition (GPT-5.2 reference). Note that PASS and SYNTH are distinct metrics --- SYNTH measures server tool coverage whereas PASS measures end-to-end agent success. Their strong correlation ($r = 0.937$, Section~\ref{sec:rq5}) means PASS also serves as an indirect measure of synthesis quality here. The SYNTH column uses GPT-5.2 as the reference synthesizer because it has the most complete per-API SYNTH extraction; per-model per-condition SYNTH values used in the Section~\ref{sec:rq5} scatter are available in the codebase. SYNTH for the no-docs and mutated conditions (GPT-5.2) appears in Table~\ref{tab:apx:nodocs_mutated} (Appendix~\ref{sec:apx:full_results}).
 
 \begin{table*}[htbp]
   \centering
@@ -86,18 +93,18 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside 
     eBay Commerce & 100 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}45 & --- & --- & \textbf{100} & --- & \cellcolor{red!12}11 & 83 & \cellcolor{red!12}44 & \cellcolor{red!12}45 & \cellcolor{red!12}30 & \cellcolor{red!12}10 & 50 & \textbf{100} & 89 & 55 & 88 & \cellcolor{red!12}40 & 62 & \textbf{100} & --- & --- \\
     Mastodon & 93 & 57 & 79 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & 87 & 80 & 54 & \textbf{100} & 92 & 87 & 93 & \cellcolor{red!12}40 & 86 & \textbf{100} & \textbf{100} & \textbf{100} & 91 & 90 & \textbf{100} & --- & --- & 92 \\
     Zulip & 84 & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & --- & --- & \cellcolor{red!12}0 & --- & --- & 64 & 76 & 84 & 62 & 55 & \cellcolor{red!12}36 & \cellcolor{red!12}26 & 80 & 60 & 62 & 90 & 85 & 71 & \textbf{100} & \cellcolor{red!12}43 & --- \\
-    Spoonacular & 75 & 94 & 82 & \textbf{100} & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & --- & 79 & 86 & \textbf{100} & 90 & 78 & 80 & 82 & 60 & --- & --- & --- \\
+    Spoonacular & 75 & 94 & 82 & \textbf{100} & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & --- & 79 & 86 & \textbf{100} & 90 & 78 & 80 & 82 & 60 & 93 & --- & 92 \\
     Shopify & 89 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 93 & 75 & 94 & 87 & 92 & 62 & 83 & 92 & 53 & \textbf{100} & --- & --- \\
-    Alphavantage & 84 & --- & --- & --- & 92 & --- & --- & --- & --- & --- & \textbf{100} & \textbf{100} & 90 & --- & --- & --- & 86 & 90 & 88 & 80 & 92 & 78 & --- & --- & \cellcolor{red!12}40 \\
+    Alphavantage & 84 & --- & --- & --- & 92 & --- & --- & --- & --- & --- & \textbf{100} & \textbf{100} & 90 & --- & --- & --- & 86 & 90 & 88 & 80 & 92 & 78 & --- & --- & --- \\
     Confluence & 95 & \cellcolor{red!12}33 & 80 & \cellcolor{red!12}43 & 64 & --- & --- & \cellcolor{red!12}39 & --- & 50 & --- & \textbf{100} & \textbf{100} & 80 & \cellcolor{red!12}33 & \cellcolor{red!12}33 & 92 & 93 & 91 & 69 & \textbf{100} & 85 & --- & 94 & \cellcolor{red!12}47 \\
-    Notion & 91 & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & --- & 94 & 94 & \textbf{100} & 56 & \cellcolor{red!12}5 & 50 & 78 & \textbf{100} & \textbf{100} & 62 & \textbf{100} & --- & \textbf{100} & 87 & 85 \\
-    eBay Buy & 88 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & --- & 80 & 67 & \textbf{100} & 73 & 67 & 80 & 69 & 92 & \textbf{100} & --- & 79 & --- \\
+    Notion & 91 & 60 & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & --- & 94 & 94 & \textbf{100} & 56 & \cellcolor{red!12}5 & 50 & 78 & \textbf{100} & \textbf{100} & 62 & \textbf{100} & --- & \textbf{100} & 87 & 85 \\
+    eBay Buy & 88 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 82 & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & --- & 80 & 67 & \textbf{100} & 73 & 67 & 80 & 69 & 92 & \textbf{100} & --- & 79 & --- \\
     GitHub & 61 & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & --- & --- & --- & 58 & 60 & 57 & 78 & 71 & \cellcolor{red!12}36 & 95 & 90 & 86 & 62 & 83 & 76 & 58 & 89 & 73 & 90 & \textbf{100} & \textbf{100} \\
     Jira & 56 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}25 & --- & --- & --- & 71 & --- & \cellcolor{red!12}42 & 58 & \cellcolor{red!12}44 & \cellcolor{red!12}31 & 62 & \cellcolor{red!12}7 & 64 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 73 & 58 & \textbf{79} \\
     Stripe & 77 & \cellcolor{red!12}14 & \cellcolor{red!12}0 & \cellcolor{red!12}19 & --- & 56 & --- & --- & 62 & --- & \cellcolor{red!12}47 & 50 & 59 & 57 & 75 & 86 & 72 & 62 & 57 & \cellcolor{red!12}8 & 62 & \cellcolor{red!12}12 & 77 & \textbf{100} & \textbf{100} \\
     eBay Sell & 43 & \cellcolor{red!12}7 & \cellcolor{red!12}8 & \cellcolor{red!12}8 & --- & \cellcolor{red!12}0 & --- & \textbf{100}$^*$ & --- & --- & \cellcolor{red!12}38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & \cellcolor{red!12}17 & \cellcolor{red!12}9 & \cellcolor{red!12}36 & \cellcolor{red!12}38 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & \cellcolor{red!12}45 & \cellcolor{red!12}44 & --- & 73 & --- \\
     \midrule
-    \textit{Med.} & \textit{86} & \textit{36} & \textit{11} & \textit{29} & \textit{45} & \textit{0} & \textit{0} & \textit{79} & \textit{80} & \textit{54} & \textit{83} & \textit{78} & \textit{87} & \textit{71} & \textit{40} & \textit{64} & \textit{83} & \textit{88} & \textit{77} & \textit{74} & \textit{90} & \textit{71} & \textit{100} & \textit{87} & \textit{85} \\
+    \textit{Med.} & \textit{86} & \textit{38} & \textit{11} & \textit{30} & \textit{45} & \textit{0} & \textit{0} & \textit{79} & \textit{80} & \textit{54} & \textit{83} & \textit{78} & \textit{87} & \textit{71} & \textit{40} & \textit{64} & \textit{83} & \textit{88} & \textit{77} & \textit{74} & \textit{90} & \textit{71} & \textit{97} & \textit{87} & \textit{92} \\
     \bottomrule
   \end{tabular}
   \par\smallskip\raggedright\scriptsize
@@ -110,8 +117,8 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig8_api_complexity.pdf}
-  \caption{Endpoint documentation file count (log scale) vs.\ agent pass rate
-    (docs condition). Marker size encodes synthesis input token volume.
+  \caption{Endpoint documentation file count (log scale) vs.\ agent PASS
+    (docs condition, GPT-5.2). Marker size encodes synthesis input token volume.
     Dashed line is a log-linear fit. Larger APIs with denser documentation
     systematically yield lower PASS, driven by coverage gaps rather than
     server errors.}
@@ -138,22 +145,23 @@ Table~\ref{tab:pass_results} reports agent PASS per API and condition alongside 
 
 \textbf{Do synthesized servers enable effective agent task completion, compared to human-authored references?}
 
-Figure~\ref{fig:strip} shows the distribution of PASS across APIs and conditions. Across the frontier tier, the median PASS is 83\% in the docs condition, 88\% in the no-docs condition, and 77\% in the mutated condition (see \textit{Tier med.} rows in Table~\ref{tab:pass_results}). The distribution has a long tail of high performers (OpenWeatherMap and Mastodon near 100\% across all conditions and all tiers; Confluence and Notion above 90\% for frontier models) and a persistent floor group (eBay Sell and Jira below 50\% across most models and conditions).
+Figure~\ref{fig:strip} shows the distribution of PASS across APIs and conditions. Across the frontier tier, the median PASS is 83\% in the docs condition, 88\% in the no-docs condition, and 77\% in the mutated condition (see \textit{Tier med.} rows in Table~\ref{tab:pass_results}). The distribution has a long tail of high performers (OpenWeatherMap and Mastodon near 100\% across all three conditions for frontier models; Confluence and Notion above 90\% for frontier docs and no-docs conditions) and a persistent floor group (eBay Sell and Jira below 50\% across most models and conditions).
 
-The variance across APIs is explained by two distinct mechanisms. For the floor group, SYNTH is also low: Jira SYNTH=44--56\%, eBay Sell SYNTH=43\%. These are synthesis failures masquerading as agent failures --- when the required tools are absent, the agent cannot compensate. For APIs with moderate PASS but higher SYNTH (Stripe: SYNTH=77\%, frontier PASS=52--77\%), the bottleneck shifts to agent reasoning on complex multi-step tasks. Figure~\ref{fig:scatter} makes this distinction visible: points near the diagonal are synthesis-limited; points below it are agent-limited.
+The variance across APIs is explained by two distinct mechanisms. For the floor group, SYNTH is also low: Jira SYNTH=44--56\%, eBay Sell SYNTH=43\%. These are synthesis failures that manifest as agent failures --- when the required tools are absent, the agent cannot compensate. For APIs with moderate PASS but higher SYNTH (Stripe: SYNTH=77\%, frontier PASS=8--100\% with GPT-5.4 as low outlier due to broken tool stubs), the bottleneck shifts to agent reasoning on complex multi-step tasks. Figure~\ref{fig:scatter} makes this distinction visible: points near the diagonal are synthesis-limited; points below it are agent-limited.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{media/fig2_condition_slopes.pdf}
-  \caption{Distribution of PASS per synthesis condition (frontier tier, GPT-5.2 reference model).
-    Each dot is one API. Dashed lines show per-tier medians:
+  \caption{Distribution of PASS per synthesis condition (frontier tier).
+    Each dot is one API; the strip shows all frontier synthesis models.
+    Dashed lines show per-tier medians:
     frontier (\textcolor{NavyBlue}{dark blue}), mid (\textcolor{teal}{teal}), base (grey).
     The 50\% reference line is shown in light grey.}
   \label{fig:strip}
 \end{figure}
 
 \paragraph{Comparison with human-authored references.}
-On the two APIs where community MCP servers were available as baselines, synthesized servers match or exceed the reference. On GitHub, the community MCP server scores 65\% PASS. Synthesized servers with docs match this (62--67\% across valid runs), and synthesized servers without docs comfortably exceed it (83--90\%), because the synthesis model's parametric knowledge of the GitHub API produces more complete tool coverage than the hand-written reference. On Zulip, the community reference scores 68\%; the synthesized docs-condition server scores 80\%. In both cases the human reference fails on the same \texttt{TOOL\_COVERAGE} pattern --- missing webhooks, branch protection, and Actions dispatch for GitHub; message edit, DM search, and scheduled messages for Zulip ---while the synthesized server adds these endpoints.
+On the two APIs where community MCP servers were available as baselines, synthesized servers match or exceed the reference. On GitHub, the community MCP server scores 65\% PASS. Synthesized servers with docs match this (62--67\% across valid runs, Table~\ref{tab:apx:var_github}), and synthesized servers without docs comfortably exceed it (81--90\% across variance-study runs), because the synthesis model's parametric knowledge of the GitHub API produces more complete tool coverage than the hand-written reference. On Zulip, the community reference scores 68\% PASS; the synthesized docs-condition server scores 80\% (Table~\ref{tab:pass_results}). In both cases the human reference fails on the same \texttt{TOOL\_COVERAGE} pattern --- missing webhooks, branch protection, and Actions dispatch for GitHub; message edit, DM search, and scheduled messages for Zulip ---while the synthesized server adds these endpoints.
 
 % ------------------------------------------------------------
 \section{RQ3: Parametric Knowledge and Documentation Faithfulness}
@@ -162,21 +170,23 @@ On the two APIs where community MCP servers were available as baselines, synthes
 
 \textbf{To what extent do synthesizers rely on parametric knowledge rather than documentation, and does this affect performance?}
 
-The mutated-docs condition directly operationalises this question: if a synthesizer adopts the renamed parameter names, it is reading the documentation; if it does not, it is writing from memory. Adherence measurements were collected for GPT-5.2 (the primary synthesis model); model-tier variation in adherence is discussed in Section~\ref{sec:model_comparison}. Figure~\ref{fig:adherence} shows the PASS delta (mutated $-$ docs) per API alongside the interface-layer adherence rate (diamond markers). GitHub, Stripe, Shopify, Zulip, and Jira show near-zero adherence --- the synthesizer ignores mutations entirely and writes from training-time knowledge. Mastodon and Alphavantage reach full adherence, indicating the model follows provided documentation faithfully for less-familiar APIs.
+The mutated-docs condition directly operationalises this question: if a synthesizer adopts the renamed parameter names, it is reading the documentation; if it does not, it is writing from memory. Figure~\ref{fig:adherence} shows the interface-layer adherence rate for all seven synthesis models across all 14 APIs, with rows sorted by GPT-5.2 mutation impact ($\Delta$PASS, right margin). Two structural patterns are immediately visible. First, GitHub and Stripe show zero adherence for \emph{every} model --- parametric knowledge dominates regardless of model tier or documentation. Second, GPT-5.4 is the most doc-faithful model: it reaches 100\% adherence for Confluence, Mastodon, and eBay Commerce, substantially higher than GPT-5.2 on the same APIs. Gemini~3.1~Pro shows the opposite extreme: zero adherence across all 14 APIs, suggesting it synthesizes exclusively from training-time memory irrespective of API familiarity.
 
-The bar lengths directly test whether low adherence implies immunity to mutation. GitHub fits: near-zero adherence, bar near zero ($-$14 pp, offset by nodocs improvements visible in Fig.~\ref{fig:docs_effect}). Stripe does not: also near-zero adherence, yet mutation still costs 15 pp. This confirms that parametric reliance at synthesis does not cleanly propagate to agent performance. For Stripe, the likely mechanism is synthesis-level noise introduced by the mutation context itself: even when the synthesizer does not adopt specific parameter renames, the presence of contradictory signals between parametric knowledge and the mutated documentation may degrade other aspects of server quality---such as endpoint path construction or authentication header generation---without this being captured by the interface-layer adherence metric, which tracks only parameter name adoption.
+These patterns do not cleanly translate to mutation immunity. The right margin shows that the most hurt APIs (eBay Commerce $-$45\,pp, Shopify $-$25\,pp, Spoonacular $-$22\,pp) span a wide range of adherence values across models, and low-adherence APIs are not uniformly protected. GitHub fits the expected pattern: near-zero adherence for all models, $+$14\,pp delta (consistent with the nodocs advantage in Fig.~\ref{fig:docs_effect}). Stripe does not: also near-zero adherence for every model, yet mutation still costs 15\,pp. The likely mechanism is synthesis-level noise from the mutation context itself: even without adopting specific parameter renames, the contradictory signals between parametric knowledge and mutated documentation may degrade other aspects of server quality --- endpoint path construction, authentication headers --- without this appearing in the adherence metric, which tracks only parameter name adoption.
 
-The mechanism behind this is that the effect of parametric reliance depends on whether the synthesis model and the evaluation agent share the same prior. When both ignore mutations and operate from training-time knowledge --- as for GitHub --- the mutation is invisible to the whole pipeline and performance is unaffected. When the synthesizer adopts mutations faithfully (high adherence) but the evaluation agent's prior does not anticipate the renamed parameters, performance degrades. The contamination is only detectable as a problem when the two components have mismatched priors.
+The mechanism behind this is that the effect of parametric reliance depends on whether the synthesis model and the evaluation agent share the same prior. When both ignore mutations and operate from training-time knowledge --- as for GitHub --- the mutation is invisible to the whole pipeline and performance is unaffected. When the synthesizer adopts mutations faithfully (high adherence) but the evaluation agent's parametric prior does not anticipate the renamed parameters, performance degrades. This parameter-name mismatch between synthesizer and agent is therefore only harmful when the two components have divergent priors about the API.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig6_mutation_sensitivity.pdf}
-  \caption{PASS delta (mutated $-$ docs, in percentage points) per API, sorted
-    ascending. Red bars indicate APIs hurt by parameter renaming; green bars
-    indicate APIs that benefit or are unaffected. Diamond markers (amber) show
-    the interface-layer mutation adherence rate: how many renamed parameters the
-    synthesizer adopted. Low adherence implies the synthesizer relied on
-    parametric knowledge rather than the provided documentation.}
+  \caption{Interface adherence (\%) to mutated parameter names, per API (rows) and
+    synthesis model (columns), ordered base $\to$ frontier.
+    Rows sorted by GPT-5.2 ΔPASS (mutated $-$ docs); right margin shows that delta.
+    Darker cells = higher adherence (model follows mutated docs).
+    Gemini~3.1~Pro shows zero adherence across all APIs; GPT-5.4 is the most
+    doc-faithful model for unfamiliar APIs.
+    GitHub and Stripe are 0 for every model: parametric knowledge dominates
+    regardless of what the documentation says.}
   \label{fig:adherence}
 \end{figure}
 
@@ -193,16 +203,16 @@ For the frontier tier, the condition medians are: docs~83\%, no-docs~88\%, mutat
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.72\linewidth]{media/fig7_docs_effect.pdf}
-  \caption{Docs vs.\ no-docs PASS per API. Points above the diagonal
-    indicate APIs where removing documentation improved performance;
-    points below indicate APIs where documentation helped.}
+  \caption{Docs (x-axis) vs.\ no-docs (y-axis) PASS per API (GPT-5.2).
+    Points above the diagonal indicate APIs where removing documentation
+    improved performance; points below indicate APIs where documentation helped.}
   \label{fig:docs_effect}
 \end{figure}
 
 APIs above the diagonal (nodocs wins) include GitHub, Notion, and Mastodon: high-frequency, well-documented APIs for which the synthesis model has strong training-time priors. Removing documentation reduces noise and allows the model to produce a clean, complete server from memory. APIs below the diagonal (docs help) include Stripe and Zulip: less saturated in training
 data, or with API conventions sufficiently idiosyncratic that documentation provides genuine signal the model could not otherwise recover.
 
-The mutated condition (also visible in Figure~\ref{fig:strip}) shows a modest further decrease in the median (77\%), indicating that parameter renaming does introduce some degradation on average. However, the APIs most sensitive to mutation are precisely those with high adherence (Section~\ref{sec:rq3}), consistent with the interpretation that harm from mutations is mediated by whether the synthesizer adopted them.
+The mutated condition (also visible in Figure~\ref{fig:strip}) shows a modest further decrease in the median (77\%), indicating that parameter renaming introduces some degradation on average. As discussed in Section~\ref{sec:rq3}, this relationship is not monotonic: Stripe has near-zero adherence yet still loses 15\,pp, while GitHub has near-zero adherence and is unaffected. High adherence is neither necessary nor sufficient for mutation sensitivity.
 
 % ------------------------------------------------------------
 \section{RQ5: Synthesis Quality as a Predictor of Agent Performance}
@@ -234,13 +244,13 @@ The points near or above the diagonal represent cases where the agent performs a
 
 Figure~\ref{fig:model_capability} summarises per-model PASS distributions on the common GitHub/Stripe/Zulip set; Table~\ref{tab:pass_results} provides the full 14-API breakdown. The full per-model breakdown across all 14 APIs and conditions is in Table~\ref{tab:apx:full_results} (Appendix~\ref{sec:apx:full_results}).
 
-Sonnet~4.6 achieves the highest median PASS across the three APIs. GPT-5.2, GPT-5.4, and Haiku~4.5 form a competitive mid-tier, though with distinct failure modes: GPT-5.4 produces broken tool stubs for Stripe docs (8\%) --- a synthesis-level failure confirmed by SYNTH=48\% --- while Haiku~4.5 collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1~Pro is broadly competitive for GitHub and Zulip but weaker on Stripe.
+Sonnet~4.6 achieves the highest median PASS on this three-API common set (9 data points; see Table~\ref{tab:pass_results} for the full 14-API comparison). GPT-5.2 and GPT-5.4 are the other frontier models: GPT-5.4 produces broken tool stubs for Stripe docs (8\%, PASS) --- a synthesis-level failure confirmed by SYNTH=48\% --- while GPT-5.2 is broadly reliable. Haiku~4.5 (mid tier) is competitive on many APIs but collapses on Zulip nodocs (36\%) and mutated (26\%), indicating weaker parametric coverage of that API. Gemini~3.1~Pro is broadly competitive for GitHub and Zulip but weaker on Stripe.
 
 The base tier shows qualitatively different failure patterns. GPT-5.4-mini consistently produces shallow servers with too few relevant tools (TOOL\_COVERAGE dominates, $-$43\,pp vs.\ GPT-5.2 on average); it partially recovers on simple APIs where parametric knowledge is strong (OpenWeatherMap: 100\% across all conditions). Qwen3-Coder-Next-Base produces no valid server on GitHub in any condition and scores near-zero on most APIs --- the expected outcome for a base model without instruction tuning.
 
-Synthesis reliability scales with tier. Frontier models achieve near-complete reliability across all conditions. Qwen3-Coder-Next (mid tier) crashes on five of nine common-set conditions but is competitive where synthesis succeeds. The nodocs advantage (RQ4) is strongest for frontier models: Sonnet~4.6 and GPT-5.2 match or improve on GitHub without documentation, while smaller models degrade --- consistent with weaker parametric priors.
+Synthesis reliability scales with tier. Frontier models achieve near-complete reliability across all conditions. Qwen3-Coder-Next (mid tier) crashes or produces no valid server on several common-set conditions (Table~\ref{tab:pass_results}) but is competitive where synthesis succeeds. The nodocs advantage (RQ4) is strongest for frontier models: Sonnet~4.6 and GPT-5.2 match or improve on GitHub without documentation, while smaller models degrade --- consistent with weaker parametric priors.
 
-This model-level variation in adherence is a confound for the aggregate RQ3 results: near-zero adherence for GitHub reflects a mixture of frontier models ignoring mutations entirely (parametric dominance) and mid-tier models adopting renames at the interface level but not propagating them to outbound HTTP calls. The full per-model adherence breakdown is in Appendix~\ref{sec:apx:full_results}.
+This model-level variation in adherence is a confound for the aggregate RQ3 results: near-zero adherence for GitHub reflects a mixture of frontier models ignoring mutations entirely (parametric dominance) and mid-tier models adopting renames at the interface level but not propagating them to outbound HTTP calls. The full per-model adherence breakdown is shown in Figure~\ref{fig:adherence}.
 
 \begin{figure}[htbp]
   \centering
