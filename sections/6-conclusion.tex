@@ -12,8 +12,7 @@ Below we answer each research question and qualify the answers with the
 relevant limitations of the study.
 
 \paragraph{RQ1: Can LLMs synthesize functional API tool servers from documentation alone?}
-Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$ in the docs condition, and the dominant failure mode is coverage gap (omitted endpoints) rather than structural failure (broken or non-executable servers). This answer is qualified by generalizability: all APIs in the benchmark are
-REST-based with English documentation, and synthesis feasibility for larger or differently structured APIs remains to be established. Single-run synthesis and evaluation also means some variance in these figures is unaccounted for.
+Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$ in the docs condition, and the frontier-tier median PASS of 83\% demonstrates these servers are not just syntactically valid but produce real task-completion utility in practice. The dominant failure mode is coverage gap (omitted endpoints) rather than structural failure (broken or non-executable servers). Notably, successful synthesis does not require frontier-scale models for all APIs: mid-tier models achieve competitive PASS on simpler, high-familiarity APIs (e.g., GitHub, Mastodon), though frontier models produce more reliable and consistent coverage across the full benchmark. This answer is qualified by generalizability: all APIs in the benchmark are REST-based with English documentation, and synthesis feasibility for larger or differently structured APIs remains to be established.
 
 \paragraph{RQ2: Do synthesized servers enable effective agent task completion, compared to human-authored references?}
 Yes, at a frontier-tier median PASS of 83\% in the docs condition, and synthesized servers match or exceed the two available human-authored references. On GitHub, no-docs synthesis achieves 83\% PASS (81--90\% across variance-study runs) against an official server baseline of 65\%; on Zulip, docs-condition synthesis scores 80\% against a baseline of 68\%. The qualification in this case is that agent performance is partially
@@ -37,4 +36,16 @@ code generation. A preliminary mechanistic analysis (Chapter~\ref{sec:mechanisti
 
 \section*{Future Work}
 
-The coverage scaling problem for large, lesser-known APIs (Jira, eBay Sell) is the most direct target for follow-on work: decomposed synthesis by resource group, with per-chunk synthesis and assembly, is a natural approach the current benchmark motivates but cannot evaluate. A multi-agent evaluation sweep would disentangle synthesis quality from evaluation-agent-specific reasoning. Extending the probing analysis to frontier-scale open-weight models would test whether the layer-transition pattern is general. Finally, a live benchmark that re-runs synthesis as APIs evolve would capture the dynamic challenge that static snapshots cannot.
+Several directions emerge directly from the findings.
+
+\textbf{Coverage scaling.} The most immediate target is decomposed synthesis for large APIs (Jira, eBay Sell): synthesizing one resource group at a time and assembling the result addresses the context-window bottleneck without requiring larger models.
+
+\textbf{Proprietary and non-public APIs.} All 14 benchmark APIs have public documentation. Extending synthesis to internal or proprietary APIs --- where documentation may be incomplete, inconsistently maintained, or confidential --- introduces new challenges around grounding signal quality and access control that merit separate investigation.
+
+\textbf{Neuro-symbolic and constraint-driven synthesis.} A natural follow-on to the full-server setting is to enforce protocol constraints symbolically at synthesis time: type-checking tool schemas, validating endpoint paths against an API registry, or running a lightweight stub call before committing to an implementation. Such neuro-symbolic approaches could eliminate the most common \verdict{tool\_schema} failures without requiring re-synthesis.
+
+\textbf{Adaptive documentation inclusion.} Our findings suggest that the optimal synthesis context is API-specific and predictable from familiarity. A practical system could automate this decision: a pre-synthesis probe (or mutation adherence mini-run) could estimate model confidence in the API's parametric representation and gate documentation inclusion accordingly.
+
+\textbf{Specialised multi-agent synthesis pipelines.} The single-agent synthesis scaffold used here is minimal by design. More capable pipelines could include a planner that decomposes synthesis by resource group, a verifier that tests generated tools against the live API, and an assembler that merges partial servers --- analogous to specialised coding agents for software engineering tasks.
+
+\textbf{Live versioning benchmarks.} Extending the probing analysis to frontier-scale open-weight models would test whether the layer-transition pattern generalises. A live benchmark that re-runs synthesis as APIs evolve would capture the dynamic challenge that static snapshots cannot, particularly for APIs at the Stripe/Zulip familiarity tier where parametric memory and documentation are in active tension.
