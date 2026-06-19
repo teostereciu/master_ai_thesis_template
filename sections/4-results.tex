@@ -32,7 +32,7 @@ Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API
 \begin{table*}[htbp]
   \centering
   \caption{Agent PASS (\%) per API and synthesis model, organised by tier (D = docs, N = no-docs, M = mutated).
-    In the GPT-5.2 columns, D\,(S) shows PASS with SYNTH in parentheses for the docs condition;
+    In the GPT-5.2 columns, \colorbox{gray!12}{D\,(S)} shows PASS with SYNTH in parentheses for the docs condition;
     full per-model SYNTH in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
     Rows sorted by frontier-tier docs performance descending.
     \textbf{Bold} = row maximum PASS. \colorbox{red!12}{Red} = below 50\%.
@@ -41,7 +41,7 @@ Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API
   \label{tab:pass_results}
   \setlength{\tabcolsep}{2.8pt}
   \scriptsize
-  \begin{tabular}{l rrr rrr rrr rrr rrr >{\columncolor{blue!8}}r rr rrr rrr rrr}
+  \begin{tabular}{l rrr rrr rrr rrr rrr >{\columncolor{gray!12}}r rr rrr rrr rrr}
     \toprule
     & \multicolumn{6}{c}{\textbf{Base}}
     & \multicolumn{9}{c}{\textbf{Mid}}

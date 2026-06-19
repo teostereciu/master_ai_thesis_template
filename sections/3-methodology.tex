@@ -1,18 +1,18 @@
 \chapter{Methodology}
 \label{sec:methodology}
 
-
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{media/benchmark_pipeline_thesis_v4.pdf}
+\caption{End-to-end benchmark pipeline. A synthesis agent (``Tool-Maker'') reads documentation and produces an MCP server; a separate evaluation agent (``Agent'') attempts tasks against it; a judge scores each attempt.}
+\label{fig:pipeline}
+\end{figure*}
 
 \section{Overview}
 
 Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API documentation and produces an MCP server; a separate evaluation agent attempts natural-language tasks against that server; an LLM judge scores each attempt. The three-stage design cleanly separates synthesis quality from agent reasoning ability, allowing failures to be attributed to the correct component. The process is fully automated and requires no human annotation beyond the initial task authoring. Figure~\ref{fig:pipeline} illustrates the pipeline. The benchmark code, synthesized servers, evaluation tasks, and raw results are publicly available.\footnote{\url{https://github.com/PLACEHOLDER/agent-tooling}}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=\linewidth]{media/benchmark_pipeline_thesis_v4.pdf}
-\caption{End-to-end benchmark pipeline. A synthesis agent (``Tool-Maker'') reads documentation and produces an MCP server; a separate evaluation agent (``Agent'') attempts tasks against it; a judge scores each attempt.}
-\label{fig:pipeline}
-\end{figure}
+
 
 \noindent
 This separation is the central design choice. In prior tool-use evaluations, the tool layer is given; here it is produced under test. A synthesized server that crashes, exposes incomplete tool coverage, or maps arguments incorrectly will cause agent failures regardless of how capable the evaluation model is. By isolating the synthesis stage, we can attribute failures to either the tool infrastructure (synthesis failures) or the evaluation agent (reasoning failures), and measure how tightly the two are coupled.
