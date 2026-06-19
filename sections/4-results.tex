@@ -18,7 +18,7 @@ Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown acro
 
 \textbf{Can LLMs synthesize functional API tool servers from documentation alone?}
 
-Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers (frontier, mid, base), averaged within each tier; Table~\ref{tab:pass_results} reports the full per-model breakdown. Eleven of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition for the frontier tier, with a frontier median of 86\% SYNTH (Table~\ref{tab:pass_results}, \textit{GPT-5.2 D\,(S)} column, which shows PASS alongside SYNTH in parentheses for that single model). Jira (56\%), eBay Sell (43\%), and GitHub (61\%) fall below that SYNTH threshold; the last is notable given GitHub's familiarity --- synthesis covers most endpoints but not enough for the denser task set. The remaining 11 APIs synthesize successfully, indicating feasibility for the large majority of APIs tested.
+Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers (frontier, mid, base), with each dot representing the tier average and the connecting line spanning the within-API range across tiers; Table~\ref{tab:pass_results} reports the full per-model breakdown. Eleven of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition for the frontier tier, with a frontier median of 86\% SYNTH (Table~\ref{tab:pass_results}, \textit{GPT-5.2 D\,(S)} column, which shows PASS alongside SYNTH in parentheses for that single model). Jira (56\%), eBay Sell (43\%), and GitHub (61\%) fall below that SYNTH threshold; the last is notable given GitHub's familiarity --- synthesis covers most endpoints but not enough for the denser task set. The remaining 11 APIs synthesize successfully, indicating feasibility for the large majority of APIs tested.
 
 The dominant failure mode is \emph{coverage gap}: the server starts and runs correctly, but the synthesizer omits endpoints required by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative log-linear trend between endpoint count and agent pass rate ($r = -0.68$; Figure~\ref{fig:complexity} in the Appendix). Structural failure --- servers that crash or omit the required \texttt{server.py} entrypoint entirely --- tends to increase at lower model tiers: frontier models (GPT-5.2, GPT-5.4, Sonnet~4.6) produce valid servers for most APIs, though Sonnet~4.6 has notable missing entries (Mastodon, Alphavantage, Zulip in mutated), while base-tier models crash frequently across the benchmark (Table~\ref{tab:pass_results}).
 
@@ -86,13 +86,14 @@ Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API
 \begin{figure*}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig_tier_bars.pdf}
-  \caption{Agent PASS rate (\%) across 14 APIs, grouped by synthesis model tier
+  \caption{Agent PASS rate (\%) across 14 APIs and three synthesis model tiers
     (frontier: Sonnet~4.6, GPT-5.4, GPT-5.2; mid: Haiku~4.5, Gemini~3.1~Pro,
     Qwen3-Coder-Next; base: GPT-5.4-mini, Qwen3-Coder-Next-Base).
-    Each bar shows the tier average; tick marks above bars show the tier best.
-    APIs sorted by frontier docs performance descending.
+    Each dot shows the tier average; the connecting line spans the range across tiers.
+    The frontier average is annotated numerically.
+    APIs sorted by frontier docs performance (top = best).
     Left: docs condition; right: no-docs condition.
-    Missing bars indicate no data for that tier--API combination.}
+    Missing dots indicate no data for that tier--API combination.}
   \label{fig:tier_bars}
 \end{figure*}
 
