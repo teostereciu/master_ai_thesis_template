@@ -4,12 +4,7 @@
 %Write your conclusion here. Be sure that the relation between the research gap and your contribution is clear. Be honest about how limitations in the study qualify the answer on the research question.
 
 
-This thesis addressed a gap in the tool-use literature: the assumption that
-tools are given. We asked whether language models can synthesize functional
-API tool servers from documentation, whether those servers enable effective
-agent task completion, and what role parametric knowledge plays in both.
-Below we answer each research question and qualify the answers with the
-relevant limitations of the study.
+This thesis addressed a gap in the tool-use literature: the assumption that tools are available. We asked whether language models can synthesize functional API tool servers from documentation, whether those servers enable effective agent task completion, and what role parametric knowledge plays in both. Below we answer each research question and qualify the answers with the relevant limitations of the study.
 
 \paragraph{RQ1: Can LLMs synthesize functional API tool servers from documentation alone?}
 Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$ in the docs condition, and the frontier-tier median PASS of 83\% demonstrates these servers are not just syntactically valid but produce real task-completion utility in practice. The dominant failure mode is coverage gap (omitted endpoints) rather than structural failure (broken or non-executable servers). Notably, successful synthesis does not require frontier-scale models for all APIs: mid-tier models achieve competitive PASS on simpler, high-familiarity APIs (e.g., GitHub, Mastodon), though frontier models produce more reliable and consistent coverage across the full benchmark. This answer is qualified by generalizability: all APIs in the benchmark are REST-based with English documentation, and synthesis feasibility for larger or differently structured APIs remains to be established.

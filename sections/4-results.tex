@@ -152,15 +152,7 @@ The mechanism behind this is that the effect of parametric reliance depends on w
   \label{fig:adherence}
 \end{figure}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
-  \caption{SYNTH vs.\ PASS across all 209 (model, API, condition) triples
-    ($r = 0.937$, $n = 209$). Shape encodes synthesis condition;
-    colour encodes synthesis model.
-    The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
-  \label{fig:scatter}
-\end{figure}
+
 % ------------------------------------------------------------
 \section{RQ4: Effect of Documentation Availability}
 \label{sec:rq4}
@@ -172,6 +164,16 @@ performance?}
 For the frontier tier, the condition medians are: docs~83\%, no-docs~88\%, mutated~77\% (Table~\ref{tab:pass_results}, \textit{Med.} row, frontier columns; Figure~\ref{fig:strip} shows the full per-API distribution). The no-docs median meets or exceeds the docs median, indicating that removing documentation does not on average degrade agent performance. This aggregate result conceals meaningful per-API variation. APIs where no-docs wins include GitHub, Notion, and Mastodon: high-frequency, well-documented APIs for which the synthesis model has strong training-time priors. Removing documentation reduces noise and allows the model to produce a clean, complete server from memory. APIs where docs help include Stripe and Zulip: less saturated in training data, or with API conventions sufficiently idiosyncratic that documentation provides genuine signal the model could not otherwise recover.
 
 The mutated condition (also visible in Figure~\ref{fig:strip}) shows a modest further decrease in the median (77\%), indicating that parameter renaming introduces some degradation on average. As discussed in Section~\ref{sec:rq3}, this relationship is not monotonic: Stripe has near-zero adherence yet still loses 15\,pp, while GitHub has near-zero adherence and is unaffected. High adherence is neither necessary nor sufficient for mutation sensitivity.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
+  \caption{SYNTH vs.\ PASS across all 209 (model, API, condition) triples
+    ($r = 0.937$, $n = 209$). Shape encodes synthesis condition;
+    colour encodes synthesis model.
+    The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
+  \label{fig:scatter}
+\end{figure}
 
 % ------------------------------------------------------------
 \section{RQ5: Synthesis Quality as a Predictor of Agent Performance}
