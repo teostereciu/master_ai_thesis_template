@@ -7,11 +7,7 @@
 
 
 This chapter presents results for the five research questions introduced before. Two metrics are reported throughout: \textbf{PASS} (the fraction of task attempts judged as successful out of all scoreable attempts) and \textbf{SYNTH} (synthesis sufficiency, the fraction of tasks for which an LLM judge finds the synthesized server's tool list sufficient, assessed without running the evaluation agent). Both are defined formally in Section~\ref{sec:metrics}. Section~\ref{sec:rq1} establishes that synthesis is feasible for most APIs. Section~\ref{sec:rq2} shows that synthesized
-servers enable effective agent task completion and compares against
-human-authored references. Section~\ref{sec:rq3} characterises how
-synthesizers rely on parametric knowledge and when this affects downstream
-performance. Section~\ref{sec:rq4} examines the effect of documentation
-availability. Section~\ref{sec:rq5} quantifies the relationship between
+servers enable effective agent task completion and compares against human-authored references. Section~\ref{sec:rq3} characterises how synthesizers rely on parametric knowledge and when this affects downstream performance. Section~\ref{sec:rq4} examines the effect of documentation availability. Section~\ref{sec:rq5} quantifies the relationship between
 synthesis quality and agent pass rate. A mechanistic probing study connecting these behavioural patterns to transformer internals is presented in Chapter~\ref{sec:mechanistic}.
 Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown across all eight synthesis models and three conditions; full per-model SYNTH for all conditions is in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
 
@@ -22,40 +18,17 @@ Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown acro
 
 \textbf{Can LLMs synthesize functional API tool servers from documentation alone?}
 
-Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers;
-Table~\ref{tab:pass_results} reports the full per-model PASS breakdown.
-Eleven of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition (frontier tier),
-with a median of 86\% (Table~\ref{tab:pass_results}, GPT-5.2 D\,(S) column). Jira (56\%),
-eBay Sell (43\%), and GitHub (61\%) fall below that threshold; the last is
-notable given GitHub's familiarity --- synthesis covers most endpoints but
-not enough for the denser task set. The remaining 11 APIs all synthesize
-successfully, indicating that synthesis is feasible for the large majority of
-APIs tested.
+Figure~\ref{fig:tier_bars} shows agent PASS across all 14 APIs and three model tiers; Table~\ref{tab:pass_results} reports the full per-model PASS breakdown. Eleven of 14 APIs achieve SYNTH $\geq 75\%$ in the docs condition (frontier tier), with a median of 86\% (Table~\ref{tab:pass_results}, \textit{GPT-5.2} \textit{D\,(S)} column). Jira (56\%), eBay Sell (43\%), and GitHub (61\%) fall below that threshold; the last is notable given GitHub's familiarity --- synthesis covers most endpoints but not enough for the denser task set. The remaining 11 APIs all synthesize successfully, indicating that synthesis is feasible for the large majority of APIs tested.
 
-The dominant failure mode is \emph{coverage gap}: the server starts and
-runs correctly, but the synthesizer omits the specific endpoints required
-by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative log-linear trend between endpoint count and agent pass rate ($r = -0.68$; Figure~\ref{fig:complexity} in the Appendix). Structural failure --- servers that crash or omit the required \texttt{server.py}
-entrypoint entirely --- scales strongly with model tier: it is rare for frontier
-models (GPT-5.2, GPT-5.4, Sonnet~4.6) but frequent for base-tier models, and
-mid-tier models such as Qwen3-Coder-Next crash on multiple conditions in
-the common GitHub/Stripe/Zulip set (Table~\ref{tab:pass_results}).
+The dominant failure mode is \emph{coverage gap}: the server starts and runs correctly, but the synthesizer omits the specific endpoints required by certain benchmark tasks. This is most pronounced for large APIs with many endpoints (eBay Sell, Jira), consistent with the negative log-linear trend between endpoint count and agent pass rate ($r = -0.68$; Figure~\ref{fig:complexity} in the Appendix). Structural failure --- servers that crash or omit the required \texttt{server.py}
+entrypoint entirely --- scales strongly with model tier: it is rare for frontier models (GPT-5.2, GPT-5.4, Sonnet~4.6) but frequent for base-tier models, and mid-tier models such as Qwen3-Coder-Next crash on multiple conditions in the common GitHub/Stripe/Zulip set (Table~\ref{tab:pass_results}).
 
-SYNTH is also notably stable across conditions for most APIs: Confluence
-holds at approximately 95\% SYNTH across all three conditions and Mastodon at 93--100\%,
-indicating that synthesis quality is primarily determined by API structure
-rather than what context is provided. The exceptions --- eBay Commerce drops from SYNTH=100\% (docs) to 54\% (mutated) --- arise where parameter
-mutations reduce tool coverage directly.
+SYNTH is also notably stable across conditions for most APIs: Confluence holds at approximately 95\% SYNTH across all three conditions and Mastodon at 93--100\%, indicating that synthesis quality is primarily determined by API structure rather than what context is provided. The exceptions --- eBay Commerce drops from SYNTH=100\% (docs) to 54\% (mutated) --- arise where parameter mutations reduce tool coverage directly.
 
-Grounding analysis shows that synthesizers consistently anchor tools to
-real documentation sources. For the primary GPT-5.2 docs condition, every
-\texttt{grounding.json} entry points to an existing documentation file
-(100\% doc-existence rate) and every synthesized tool has a corresponding
-grounding entry (100\% coverage). Citation accuracy --- whether the cited
-file plausibly describes the tool --- is 86--100\% across datasets; GitHub's
-86\% reflects a small number of tools citing multi-operation documents only
-loosely related to the specific endpoint. This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub no-docs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
+Grounding analysis shows that synthesizers consistently anchor tools to real documentation sources. For GPT-5.2 docs condition, every \texttt{grounding.json} entry points to an existing documentation file (100\% doc-existence rate) and every synthesized tool has a corresponding grounding entry (100\% coverage). Citation accuracy --- whether the cited
+file plausibly describes the tool --- is 86--100\% across datasets; GitHub's 86\% reflects a small number of tools citing multi-operation documents only loosely related to the specific endpoint. This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub no-docs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
-Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API and condition alongside SYNTH for the docs condition, placed adjacent to the GPT-5.2 columns for direct comparison. Full per-model, per-condition SYNTH values are in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
+Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API and condition alongside SYNTH for GPT-5.2 (docs). Full per-model, per-condition SYNTH values are in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
 
 \begin{table*}[htbp]
   \centering
@@ -114,7 +87,7 @@ Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API
 \begin{figure*}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig_tier_bars.pdf}
-  \caption{Agent pass rate (\%) across 14 APIs, grouped by synthesis model tier
+  \caption{Agent PASS rate (\%) across 14 APIs, grouped by synthesis model tier
     (frontier: Sonnet~4.6, GPT-5.4, GPT-5.2; mid: Haiku~4.5, Gemini~3.1~Pro,
     Qwen3-Coder-Next; base: GPT-5.4-mini, Qwen3-Coder-Next-Base).
     Each bar shows the tier average; tick marks above bars show the tier best.
