@@ -141,14 +141,7 @@ The mechanism behind this is that the effect of parametric reliance depends on w
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\linewidth]{media/fig6_mutation_sensitivity.pdf}
-  \caption{Interface adherence (\%) to mutated parameter names, per API (rows) and
-    synthesis model (columns), ordered base $\to$ frontier.
-    Rows sorted by GPT-5.2 $\Delta$PASS (mutated $-$ docs); right margin shows that delta.
-    Darker cells = higher adherence (model follows mutated docs).
-    Gemini~3.1~Pro shows near-zero adherence (exceptions: Spoonacular 14\%, eBay Commerce $\approx$0); GPT-5.4 is the most
-    doc-faithful model for unfamiliar APIs.
-    GitHub and Stripe show consistently low adherence: parametric knowledge dominates
-    regardless of what the documentation says.}
+  \caption{Interface adherence (\%) to mutated parameter names, per API (rows) and synthesis model (columns), ordered base $\to$ frontier. Rows sorted by GPT-5.2 $\Delta$PASS (mutated $-$ docs); right margin shows that delta. Darker cells = higher adherence (model follows mutated docs). Gemini~3.1~Pro shows near-zero adherence (exceptions: Spoonacular 14\%, eBay Commerce $\approx$0); GPT-5.4 is the most doc-faithful model for unfamiliar APIs. GitHub and Stripe show consistently low adherence.}
   \label{fig:adherence}
 \end{figure}
 
