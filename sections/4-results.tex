@@ -148,6 +148,15 @@ The mechanism behind this is that the effect of parametric reliance depends on w
   \label{fig:adherence}
 \end{figure}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
+  \caption{SYNTH vs.\ PASS across all 209 (model, API, condition) triples
+    ($r = 0.937$, $n = 209$). Shape encodes synthesis condition;
+    colour encodes synthesis model.
+    The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
+  \label{fig:scatter}
+\end{figure}
 % ------------------------------------------------------------
 \section{RQ4: Effect of Documentation Availability}
 \label{sec:rq4}
@@ -169,15 +178,6 @@ The mutated condition (also visible in Figure~\ref{fig:strip}) shows a modest fu
 
 Figure~\ref{fig:scatter} plots SYNTH against PASS for all 209 (model, API, condition) triples where both metrics are available across the eight synthesis models. The Pearson correlation is $r = 0.937$ ($p < 0.0001$, $n = 209$), indicating a strong and consistent linear relationship between synthesis tool coverage and agent pass rate that holds across models, APIs, and conditions. Low-SYNTH entries (base-tier models on complex APIs) consistently correspond to low PASS in Table~\ref{tab:pass_results}. SYNTH is a reliable proxy for downstream utility, and synthesis failures propagate to agent failures with high fidelity.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.72\linewidth]{media/fig4_synth_scatter.pdf}
-  \caption{SYNTH vs.\ PASS across all 209 (model, API, condition) triples
-    ($r = 0.937$, $n = 209$). Shape encodes synthesis condition;
-    colour encodes synthesis model.
-    The dashed line is $y = x$; the grey band is $\pm 10$ pp.}
-  \label{fig:scatter}
-\end{figure}
 
 The points near or above the diagonal represent cases where the agent performs at or above what synthesis quality would predict --- most commonly when the agent completes tasks despite partial synthesis coverage, possibly through alternative tool combinations. Points well below the diagonal confirm that when synthesis fails to cover the task space, agent performance cannot recover. Taken together, these results validate SYNTH as a leading indicator: measuring synthesis sufficiency before running the full evaluation pipeline gives a reliable estimate of whether agent task completion will succeed.
 

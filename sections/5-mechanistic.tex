@@ -30,7 +30,6 @@ Figure~\ref{fig:logprobe_summary} summarises outcomes across 13 APIs. GitHub, St
 
 Figure~\ref{fig:logprobe_traces} shows representative layer traces for GitHub (all parametric-memory) and Zulip (mixed). For GitHub parameters such as \texttt{per\_page} and \texttt{state}, $\delta_\ell$ becomes strongly positive within the first few layers and remains so --- the training-time attractor dominates from early in the forward pass. By contrast, Zulip's \texttt{narrow} and \texttt{num\_before} parameters show persistently negative $\delta_\ell$: the model follows the mutated documentation. The Zulip \texttt{anchor} parameter is notable: $\delta_\ell$ stays negative until layer 26, where the parametric attractor abruptly asserts itself --- a late-layer override consistent with a mid-network fact recall mechanism~\citep{meng2022rome}.
 
-
 The average flip layer differs systematically between outcomes: memory-outcome mutations resolve at layers 1--6 on average, while context-following mutations sometimes persist to layer 22 or beyond. This is consistent with parametric gravity being an early-to-mid network phenomenon that, when active, preempts later context integration. APIs without strong attractors reach context-following outcomes gradually throughout the network rather than through a sharp transition.
 
 Mechanistic interpretation of these results --- including their connection to feed-forward fact recall mechanisms and implications for synthesis model choice --- is provided in Section~\ref{sec:discussion-gravity}.

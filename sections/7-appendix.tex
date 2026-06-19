@@ -61,12 +61,13 @@ Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) 
   Qwen3-Next-Base and Qwen3-Next: frequent startup crashes reduce coverage; PASS results in Table~\ref{tab:pass_results}.
 \end{table}
 
+\newpage
 % ------------------------------------------------------------
 \section{API Complexity vs Agent Performance}
 \label{sec:apx:complexity}
 % ------------------------------------------------------------
 
-\begin{figure}[htbp]
+\begin{figure*}[htbp]
   \centering
   \includegraphics[width=0.85\linewidth]{media/fig8_api_complexity.pdf}
   \caption{Endpoint documentation file count (log scale) vs.\ agent PASS
@@ -75,8 +76,8 @@ Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) 
     documentation systematically yield lower PASS, driven by coverage gaps
     rather than server errors.}
   \label{fig:complexity}
-\end{figure}
-
+\end{figure*}
+\newpage
 % ------------------------------------------------------------
 \section{Synthesis Variance Study}
 \label{sec:apx:variance}
