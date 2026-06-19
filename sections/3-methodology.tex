@@ -146,7 +146,7 @@ served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
 \begin{table}[ht]
 \centering
 \scriptsize
-\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: total parameter count; $\approx$ indicates approximate counts when official numbers have not been disclosed by provider (n.d.). act.\ denotes activated parameters per token (mixture-of-experts architecture).}
+\caption{Synthesis models evaluated. \emph{Access}: API provider or local inference. \emph{Params}: (estimated) activated parameters per token (mixture-of-experts architecture), as available;.}
 \label{tab:models}
 \setlength{\tabcolsep}{2.7pt}
 \begin{tabular}{lllrr}
@@ -155,12 +155,12 @@ served via a dedicated vLLM inference server running on 2$\times$NVIDIA H100
 \midrule
 GPT-5.2              & OpenAI GPT-5    & Azure API            & $\approx$1.4T act.  & 400K   \\
 GPT-5.4              & OpenAI GPT-5    & Azure API            & $\approx$1T act.  & 1.05M  \\
-GPT-5.4-mini         & OpenAI GPT-5    & Azure API            & n.d.  & 400K  \\
+GPT-5.4-mini         & OpenAI GPT-5    & Azure API            & --  & 400K  \\
 Sonnet~4.6           & Anthropic Claude & GCP API             &  $\approx$130B act.  & 1M     \\
 Haiku~4.5            & Anthropic Claude & GCP API             & $\approx$21B act.  & 200K   \\
 Gemini~3.1~Pro       & Google Gemini   & GCP API              & $\approx$1.2T act.  & 1M     \\
-Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
-Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 80B (3B act.) & 262K   \\
+Qwen3-Coder-Next     & Qwen3           & vLLM (2$\times$H100) & 3B & 262K   \\
+Qwen3-Coder-Next-Base & Qwen3          & vLLM (2$\times$H100) & 3B & 262K   \\
 \bottomrule
 \end{tabular}
 % n.d. = not disclosed by provider
@@ -299,4 +299,4 @@ For each mutated synthesis run, we identify token positions where the original a
 \end{equation}
 where \emph{original} is the training-time parameter name and \emph{mutated} is the in-context replacement. A positive $\delta_\ell$ at the final layer indicates that parametric memory prevailed; a negative value indicates context-following.
 
-We define the \emph{flip layer} as the earliest layer $\ell^*$ at which the sign of $\delta_\ell$ matches the final outcome and does not subsequently reverse. This identifies the layer at which the dominant signal (parametric or contextual) first asserts control. We probe 13 of the 14 benchmark APIs (all with at least one unambiguous single-token mutation pair; eBay Commerce is excluded due to tokenisation overlap between the original and mutated names). Results are reported in Chapter~\ref{sec:mechanistic}.
+We define the \emph{flip layer} as the earliest layer $\ell^*$ at which the sign of $\delta_\ell$ matches the final outcome and does not subsequently reverse. This identifies the layer at which the dominant signal (parametric or contextual) first asserts control. We probe 13 of the 14 benchmark APIs (all with at least one unambiguous single-token mutation pair; eBay Commerce is excluded due to tokenisation overlap between the original and mutated names). 
