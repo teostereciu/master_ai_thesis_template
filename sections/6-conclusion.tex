@@ -11,80 +11,30 @@ agent task completion, and what role parametric knowledge plays in both.
 Below we answer each research question and qualify the answers with the
 relevant limitations of the study.
 
-\paragraph{RQ1: Can LLMs synthesize functional API tool servers from
-documentation alone?}
-Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$
-in the docs condition, and the dominant failure mode is coverage gap (omitted
-endpoints) rather than structural failure (broken or non-executable servers).
-This answer is qualified by generalizability: all APIs in the benchmark are
-REST-based with English documentation, and synthesis feasibility for larger
-or differently structured APIs remains to be established. Single-run
-evaluation also means some variance in these figures is unaccounted for.
+\paragraph{RQ1: Can LLMs synthesize functional API tool servers from documentation alone?}
+Yes, for most APIs tested. Eleven of fourteen APIs achieve SYNTH $\geq 75\%$ in the docs condition, and the dominant failure mode is coverage gap (omitted endpoints) rather than structural failure (broken or non-executable servers). This answer is qualified by generalizability: all APIs in the benchmark are
+REST-based with English documentation, and synthesis feasibility for larger or differently structured APIs remains to be established. Single-run synthesis and evaluation also means some variance in these figures is unaccounted for.
 
-\paragraph{RQ2: Do synthesized servers enable effective agent task completion,
-compared to human-authored references?}
-Yes, at a frontier-tier median PASS of 83\% in the docs condition, and synthesized servers
-match or exceed the two available human-authored references. On GitHub,
-no-docs synthesis achieves 83\% PASS (81--90\% across variance-study runs)
-against a community server baseline of 65\%; on Zulip, docs-condition
-synthesis scores 80\% against a baseline of 68\%. The qualification here is that agent performance is partially
-confounded by the fixed evaluation agent (Gemini~2.5~Pro); agent-limited
-failures identified in our benchmark may not reflect the same limitations
-with a different evaluator.
+\paragraph{RQ2: Do synthesized servers enable effective agent task completion, compared to human-authored references?}
+Yes, at a frontier-tier median PASS of 83\% in the docs condition, and synthesized servers match or exceed the two available human-authored references. On GitHub, no-docs synthesis achieves 83\% PASS (81--90\% across variance-study runs) against an official server baseline of 65\%; on Zulip, docs-condition synthesis scores 80\% against a baseline of 68\%. The qualification in this case is that agent performance is partially
+confounded by the fixed evaluation agent (Gemini~2.5~Pro); agent-limited failures identified in our benchmark may not reflect the same limitations with a different evaluator.
 
-\paragraph{RQ3: To what extent do synthesizers rely on parametric knowledge,
-and does this affect performance?}
-Substantially, and in a way that is API-dependent. High-familiarity APIs
-show near-zero HTTP mutation adherence, indicating synthesis models write
-almost entirely from memory. The performance consequence is non-monotonic:
-parametric reliance helps on GitHub (where model memory is accurate and
-complete) but does not on Stripe (where documentation provides additional
-coverage). This answer is limited by the fact that adherence is measured
-only for the primary synthesis model (GPT-5.2) and for a fixed set of
-4--6 mutated parameters per API; the pattern may differ for other models
-or mutation strategies.
+\paragraph{RQ3: To what extent do synthesizers rely on parametric knowledge, and does this affect performance?}
+Substantially, and in a way that is API-dependent. High-familiarity APIs show near-zero HTTP mutation adherence, indicating synthesis models write almost entirely from memory. The performance consequence is non-monotonic: parametric reliance helps on GitHub (where model memory is accurate and complete) but does not on Stripe (where documentation provides additional coverage). This answer is limited by the fact that adherence is measured for a fixed set of 4--6 mutated parameters per API; the pattern may differ for other models or mutation strategies.
 
-\paragraph{RQ4: How does documentation availability affect synthesis and
-agent performance?}
-The aggregate effect is smaller than expected: the no-docs condition median
-(88\%) meets or exceeds the docs condition median (83\%), driven by
-high-familiarity APIs where model memory substitutes for documentation.
-Documentation helps for less familiar APIs (Stripe, Zulip) and hurts for
-highly familiar ones (GitHub, Mastodon), suggesting the effect is mediated
-by training coverage rather than documentation quality per se. This finding
-is subject to the static-snapshot limitation: documentation was scraped at
-a single point in time, and results may differ for documentation that is
-more consistently current.
+\paragraph{RQ4: How does documentation availability affect synthesis and agent performance?}
+The aggregate effect is smaller than expected: the no-docs condition median (88\%) meets or exceeds the docs condition median (83\%), driven by high-familiarity APIs where model memory substitutes for documentation. Documentation helps for less familiar or more complex APIs (Stripe, Zulip) and hurts for highly familiar or simply-structured ones (GitHub, Mastodon), suggesting the effect is mediated by training coverage rather than documentation quality per se. This finding
+is subject to the static-snapshot limitation: documentation was scraped at a single point in time, and results may differ for documentation that is more consistently current or higher quality.
 
 \paragraph{RQ5: Does synthesis quality predict agent task performance?}
-Strongly: $r = 0.937$ ($p < 0.0001$, $n = 209$ across all models). SYNTH, assessable without
-running the evaluation agent, is a reliable proxy for PASS. This holds
-across APIs and conditions, with the main exceptions being cases where the
-evaluation agent compensates for synthesis gaps using its own domain
-knowledge (Spoonacular) or where the agent fails despite sufficient tools
-(agent-limited cases). The correlation is measured on our 14-API benchmark;
-whether it holds at this strength for a wider or different API distribution
-is unknown.
+Strongly: $r = 0.937$ ($p < 0.0001$, $n = 209$ across all models). SYNTH, assessable without running the evaluation agent, is a reliable proxy for PASS. This holds across APIs and conditions, with the main exceptions being cases where the
+evaluation agent compensates for synthesis gaps using its own domain knowledge (Spoonacular) or where the agent fails despite sufficient tools (agent-limited cases). The correlation is measured on our 14-API benchmark; whether it holds at this strength for a wider or different API distribution is unknown.
 
 \section*{Research Gap and Contribution}
 
-Prior work treats the tool layer as given. We have shown that synthesizing
-it automatically is feasible today for most practically relevant REST APIs,
-and that the primary bottleneck for large APIs is context-window coverage
-of documentation rather than a fundamental capability limit. The key novelty is the synthesis \emph{target}: a complete, protocol-compliant MCP server rather than individual tool stubs, which is what enables genuine end-to-end evaluation through live API execution. The SYNTH
-metric and the controlled ablation design --- isolating parametric knowledge
-from documentation grounding --- are methodological contributions that
-generalise beyond this benchmark to any evaluation of documentation-grounded
+Prior work treats the tool layer as given. We have shown that synthesizing it automatically is feasible today for most practically relevant REST APIs, and that the primary bottleneck for large APIs is context-window coverage of documentation rather than a fundamental capability limit. The key novelty is the synthesis \emph{target}: a complete, protocol-compliant MCP server rather than individual tool stubs, which is what enables genuine end-to-end evaluation through live API execution. The SYNTH metric and the controlled ablation design --- isolating parametric knowledge from documentation grounding --- are methodological contributions that generalise beyond this benchmark to any evaluation of documentation-grounded
 code generation. A preliminary mechanistic analysis (Chapter~\ref{sec:mechanistic}) grounds the parametric gravity phenomenon in transformer representations, connecting behavioural findings to the interpretability literature.
 
 \section*{Future Work}
 
-The coverage scaling problem for large APIs (Jira, eBay Sell) is the most
-direct target for follow-on work: decomposed synthesis by resource group,
-with per-chunk synthesis and assembly, is a natural approach the current
-benchmark motivates but cannot evaluate. A multi-agent evaluation sweep
-would disentangle synthesis quality from evaluation-agent-specific reasoning.
-Extending the probing analysis to frontier-scale open-weight models would
-test whether the layer-transition pattern is general. Finally, a live
-benchmark that re-runs synthesis as APIs evolve would capture the dynamic
-challenge that static snapshots cannot.
+The coverage scaling problem for large, lesser-known APIs (Jira, eBay Sell) is the most direct target for follow-on work: decomposed synthesis by resource group, with per-chunk synthesis and assembly, is a natural approach the current benchmark motivates but cannot evaluate. A multi-agent evaluation sweep would disentangle synthesis quality from evaluation-agent-specific reasoning. Extending the probing analysis to frontier-scale open-weight models would test whether the layer-transition pattern is general. Finally, a live benchmark that re-runs synthesis as APIs evolve would capture the dynamic challenge that static snapshots cannot.
