@@ -84,7 +84,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Thesis related entries
-\title{Parametric Gravity at the Tool Layer: LLM-Based MCP Server Synthesis from API Documentation}
+\title{Tools on Demand: Automated MCP Server Synthesis and Parametric Gravity in LLM-Driven API Integration}
 % \subtitle{A tale of computers}
 
 % Date on which your thesis is submitted
@@ -94,10 +94,11 @@
 \studentnumber{15743063}
 \period{2026/01/05 -- 2026/06/19}
 \credits{36 ECTS}
-\examiner{Dr Wilker Ferreira Aziz}
-\dailysupervisor{Dr Christian Herold}
+\examiner{Dr. Wilker Ferreira Aziz}
+\dailysupervisor{Dr. Christian Herold}
 \uvasupervisor{Baohao Liao}  % Only if different from daily supervisor, leave empty otherwise
-\addsupervisor{Dr Shahram Khadivi, Prof Dr Christoff Monz}  % Optional
+\addsupervisor{Dr. Shahram Khadivi,}  % Optional
+\addsndsupervisor{Prof. dr. Christoff Monz}
 
 \begin{document}
 \maketitle
@@ -105,12 +106,12 @@
 \frontmatter
         \chapter*{Abstract}
                 \begin{adjustwidth}{4cm}{4cm}
-                        Tool-use benchmarks assume that tools already exist. This thesis examines the step before: whether large language models (LLMs) can synthesize functional API tool servers from documentation, and whether those servers enable effective agent task completion. We introduce an end-to-end benchmark covering 14 REST APIs across five domains, in which a synthesis agent reads raw developer documentation and produces a complete MCP server --- a runnable, protocol-compliant collection of tools that an agent can discover and invoke directly, not merely individual function stubs --- a separate evaluation agent then attempts 13--25 natural-language tasks against it; and a third model judges each outcome.
-
-                        We evaluate three synthesis conditions---with full documentation, without any documentation, and with documentation whose core parameter names have been deliberately renamed to conflict with training-time knowledge---across eight synthesis models spanning three capability tiers. Two metrics are reported: PASS (agent task success rate) and SYNTH (synthesis sufficiency, assessed by an LLM judge on the server's tool list without running the evaluation agent).
-
-                        Our main findings are: (i)~synthesis is feasible for most APIs tested---eleven of fourteen achieve SYNTH~$\geq 75\%$ in the docs condition, with a frontier-tier median PASS of 83\%; (ii)~synthesized servers match or exceed human-authored reference implementations on GitHub and Zulip; (iii)~removing documentation does not degrade---and sometimes improves---agent performance on high-familiarity APIs, because model weights already encode correct implementations; (iv)~mutation adherence is near-zero for well-known public APIs (GitHub, Stripe, Shopify), confirming that parametric knowledge dominates in-context documentation for those APIs; and (v)~SYNTH and PASS are strongly correlated ($r = 0.937$, $p < 0.0001$, $n = 209$), making synthesis sufficiency a reliable and cheap proxy for downstream agent performance. A preliminary logit-lens probing study on an open-weight model localises parametric gravity to early-to-mid transformer layers, providing a mechanistic grounding for the behavioural findings.
-                \end{adjustwidth}
+                        AI agents are only as capable as the tools available to them, yet building those tools --- translating API documentation into callable, protocol-compliant interfaces --- remains a manual bottleneck that does not scale to the long tail of APIs agents need to be genuinely useful. This thesis asks whether large language models can replace that engineering step entirely.                                           We introduce an end-to-end benchmark in which a synthesis agent reads raw developer documentation for 14 REST APIs and produces a complete MCP server --- a runnable, deployable tool collection, not individual function stubs --- against which a separate evaluation agent attempts real tasks, with outcomes judged by a third model. Three synthesis conditions (with documentation, without documentation, and with deliberately renamed parameters conflicting with training-time knowledge) are evaluated across eight models spanning three capability tiers.
+                        
+                        The results challenge several assumptions. Synthesis succeeds broadly: eleven of fourteen APIs yield servers with sufficient tool coverage for their task sets, with a frontier-tier median agent pass rate of 83\%, and synthesized servers match or exceed human-authored references on GitHub and Zulip. Withholding documentation entirely does not hurt --- and sometimes helps --- because model weights already encode accurate implementations for well-known, mature APIs. For popular APIs such as GitHub and Stripe, parametric knowledge overrides in-context documentation even when that documentation explicitly conflicts with it, a phenomenon we term \emph{parametric gravity} and localise to early-to-mid transformer layers via logit-lens probing. Finally, how completely a synthesized server covers the required tool space strongly predicts downstream agent performance ($r = 0.937$, $p < 0.0001$, $n = 209$), providing a cheap pre-flight signal that can be assessed before any agent runs.
+                        
+                        Together, these findings suggest that automated tool synthesis is not a future prospect but a present capability --- one that could substantially reduce the engineering overhead standing between AI agents and the broader API ecosystem.
+\end{adjustwidth}
 
 \emergencystretch=3em %%%%%% ADDED THIS
 

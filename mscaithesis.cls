@@ -114,6 +114,7 @@
 \def\dailysupervisor#1{\gdef\@dailysupervisor{#1}}
 \def\uvasupervisor#1{\gdef\@uvasupervisor{#1}}
 \def\addsupervisor#1{\gdef\@addsupervisor{#1}}
+\def\addsndsupervisor#1{\gdef\@addsndsupervisor{#1}}
 \renewcommand{\maketitle}{
         \begin{titlepage}
                 \centering
@@ -142,7 +143,10 @@
                 \begin{minipage}[t]{.5\textwidth}
                         Supervisor: \@dailysupervisor \hfill\\
                         \ifdefempty{\@uvasupervisor}{}{University Supervisor: \@uvasupervisor \hfill\\}
-                        \ifdefempty{\@addsupervisor}{}{Additional Supervisors: \@addsupervisor \hfill\\}
+                        \ifdefempty{\@addsupervisor}{}{Additional Supervisors: \@addsupervisor
+                        \hfill\\}
+                        \ifdefempty{\@addsndsupervisor}{}{\phantom{Additional Supervisors:} \@addsndsupervisor
+                        \hfill\\}
 
 
                         ~\hfill Examiner: \@examiner
@@ -150,7 +154,19 @@
 
                 \vfill
                 \vspace{2cm}
-                \includegraphics[width=0.5\textwidth]{media/titlepage/uvalogo_g_instituut_voor_informatica.eps}
+                %\includegraphics[width=0.3\textwidth]{media/titlepage/eBayLogo-4Color-RGB.png}
+                %\vspace{2cm}
+                %\includegraphics[width=0.5\textwidth]{media/titlepage/uvalogo_g_instituut_voor_informatica.eps}
+                \begin{minipage}[c]{0.35\textwidth}      
+                    \centering         
+                    \includegraphics[width=\linewidth]{media/titlepage/eBayLogo-4Color-RGB.png}
+                \end{minipage}
+                %\hfill
+                \hspace{20pt}
+                \begin{minipage}[c]{0.5\textwidth}
+                    \centering
+                    \includegraphics[width=\linewidth]{media/titlepage/uvalogo_g_instituut_voor_informatica.eps}          
+                \end{minipage}
                 \vspace{1cm}
         \end{titlepage}
 
