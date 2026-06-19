@@ -5,7 +5,7 @@ This chapter reviews and positions the literature across five domains that toget
 
 \section{Tool Use and Tool Synthesis}
 \label{sec:related_work:tools}
-The ability of language models to call external functions has been studied extensively. Early work established that models can be prompted or fine-tuned to select tools and format arguments from natural-language instructions~\citep{schick2023toolformer,qin2023toolbench}. More recent evaluation suites have scaled this substantially: MCP-Universe~\citep{mcpuniverse2025} evaluates agents against eleven real-world MCP servers spanning six domains; MCP-Bench~\citep{mcpbench2025} scales this to 250 tools across twenty APIs and twenty evaluated models; and MCPAgentBench~\citep{mcpagentbench2024} benchmarks agent efficiency in tool selection and invocation within the
+The ability of language models to call external functions has been studied extensively. Early work established that models can be prompted or fine-tuned to select tools and format arguments from natural-language instructions~\citep{schick2023toolformer,qin2023toolbench,li2023apibank}. More recent evaluation suites have scaled this substantially: MCP-Universe~\citep{mcpuniverse2025} evaluates agents against eleven real-world MCP servers spanning six domains; MCP-Bench~\citep{mcpbench2025} scales this to 250 tools across twenty APIs and twenty evaluated models; and MCPAgentBench~\citep{mcpagentbench2024} benchmarks agent efficiency in tool selection and invocation within the
 Model Context Protocol (MCP) ecosystem. Common to all of these
 is the assumption that tools already exist: the benchmark provides a pre-built function library and evaluates how well the agent navigates it. Our work removes this assumption.
 

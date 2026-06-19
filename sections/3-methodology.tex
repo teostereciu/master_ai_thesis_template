@@ -10,7 +10,7 @@
 
 \section{Overview}
 
-Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API documentation and produces an MCP server; a separate evaluation agent attempts natural-language tasks against that server; an LLM judge scores each attempt. The three-stage design cleanly separates synthesis quality from agent reasoning ability, allowing failures to be attributed to the correct component. The process is fully automated and requires no human annotation beyond the initial task authoring. Figure~\ref{fig:pipeline} illustrates the pipeline. The benchmark code, synthesized servers, evaluation tasks, and raw results are publicly available.\footnote{\url{https://github.com/PLACEHOLDER/agent-tooling}}
+Our benchmark evaluates tool synthesis end-to-end: a synthesis agent reads API documentation and produces an MCP server; a separate evaluation agent attempts natural-language tasks against that server; an LLM judge scores each attempt. The three-stage design cleanly separates synthesis quality from agent reasoning ability, allowing failures to be attributed to the correct component. The process is fully automated and requires no human annotation beyond the initial task authoring. Figure~\ref{fig:pipeline} illustrates the pipeline. The benchmark code, synthesized servers, evaluation tasks, and raw results are publicly available.\footnote{\url{https://github.corp.ebay.com/tstereciu/agent-tooling}}
 
 
 
@@ -136,7 +136,7 @@ Synthesis resource usage varies substantially across conditions. GPT-5.2 docs-co
 
 \subsection{Synthesis Models}
 
-We evaluate eight synthesis models spanning four model families and two
+We evaluate eight synthesis models spanning four model families and three
 inference backends. Table~\ref{tab:models} summarises their key properties.
 GPT-5.2 serves as the primary baseline across all 14 APIs and all three conditions.
 GPT-5.4 and GPT-5.4-mini are evaluated as more recent OpenAI baselines; GPT-5.4-mini was evaluated on a restricted three-API set (GitHub, Stripe, Zulip) due to uniformly weak results, and is not included in the full 14-API evaluation. Sonnet~4.6 and Haiku~4.5 (both Anthropic Claude) offer a strong/efficient tradeoff within the same model family. Gemini~3.1~Pro provides a third model family. Qwen3-Coder-Next and its base variant Qwen3-Coder-Next-Base are
@@ -297,6 +297,6 @@ For each mutated synthesis run, we identify token positions where the original a
   \delta_\ell = \text{logit}_\ell(\text{original}) - \text{logit}_\ell(\text{mutated}),
   \label{eq:delta_l}
 \end{equation}
-where \emph{original} is the training-time parameter name and \emph{mutated} is the in-context replacement. A positive $\delta_\ell$ at the final layer indicates that parametric memory prevailed; a negative value indicates context-following.
+where \emph{original} is the training-time parameter name and \emph{mutated} is the in-context replacement (Equation~\ref{eq:delta_l}). A positive $\delta_\ell$ at the final layer indicates that parametric memory prevailed; a negative value indicates context-following.
 
-We define the \emph{flip layer} as the earliest layer $\ell^*$ at which the sign of $\delta_\ell$ matches the final outcome and does not subsequently reverse. This identifies the layer at which the dominant signal (parametric or contextual) first asserts control. We probe 13 of the 14 benchmark APIs (all with at least one unambiguous single-token mutation pair; eBay Commerce is excluded due to tokenisation overlap between the original and mutated names). 
+We define the \emph{flip layer} as the earliest layer $\ell^*$ at which the sign of $\delta_\ell$ matches the final outcome and does not subsequently reverse. This identifies the layer at which the dominant signal (parametric or contextual) first asserts control. We probe 13 of the 14 benchmark APIs (all with at least one unambiguous single-token mutation pair; Shopify is excluded due to tokenisation overlap between the original and mutated names). 
