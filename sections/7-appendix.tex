@@ -88,42 +88,44 @@ The no-docs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): S
 
 \begin{table}[htbp]
   \centering
-  \caption{Shopify docs variance (5 runs, GPT-5.2). Lines = server.py line count.}
+  \caption{Shopify docs variance (5 runs, GPT-5.2). Lines = server.py line count. Run~2 implements discounts only (optional endpoint subset).}
   \label{tab:apx:var_shopify_d}
   \small
-  \begin{tabular}{lrrrr}
+  \begin{tabular}{lrrr}
     \toprule
-    Run & Lines & PASS & SYNTH & Notes \\
+    Run & Lines & PASS & SYNTH \\
     \midrule
-    Reference & 552 & 87\% & 89\% & — \\
-    1 & 131 & 93\% & 94\% & — \\
-    2 & 143 & 93\% & 94\% & Optional (discounts only) \\
-    3 & 522 & 79\% & 83\% & — \\
-    4 & 538 & 75\% & 83\% & — \\
-    5 & 112 & 59\% & 61\% & — \\
+    Reference & 552 & 87\% & 89\% \\
+    1 & 131 & 93\% & 94\% \\
+    2 & 143 & 93\% & 94\% \\
+    3 & 522 & 79\% & 83\% \\
+    4 & 538 & 75\% & 83\% \\
+    5 & 112 & 59\% & 61\% \\
     \midrule
-    \multicolumn{2}{l}{Range} & 59--93\% & 61--94\% & $\sigma$(PASS)$\approx$13\,pp \\
+    \multicolumn{2}{l}{Range} & 59--93\% & 61--94\% \\
+    \multicolumn{2}{l}{} & \multicolumn{2}{l}{$\sigma$(PASS)$\approx$13\,pp} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
 \begin{table}[htbp]
   \centering
-  \caption{Shopify no-docs variance (5 runs, GPT-5.2).}
+  \caption{Shopify no-docs variance (5 runs, GPT-5.2). Run~5 was re-run after a VPN drop.}
   \label{tab:apx:var_shopify_nd}
   \small
-  \begin{tabular}{lrrrr}
+  \begin{tabular}{lrrr}
     \toprule
-    Run & Lines & PASS & SYNTH & Notes \\
+    Run & Lines & PASS & SYNTH \\
     \midrule
-    Reference & large & 92\% & 94\% & — \\
-    1 & 186 & 92\% & 94\% & — \\
-    2 & 230 & 94\% & 94\% & — \\
-    3 & 109 & 93\% & 94\% & — \\
-    4 & 115 & 80\% & 94\% & — \\
-    5 & 151 & 93\% & 94\% & VPN drop re-run \\
+    Reference & large & 92\% & 94\% \\
+    1 & 186 & 92\% & 94\% \\
+    2 & 230 & 94\% & 94\% \\
+    3 & 109 & 93\% & 94\% \\
+    4 & 115 & 80\% & 94\% \\
+    5 & 151 & 93\% & 94\% \\
     \midrule
-    \multicolumn{2}{l}{Range} & 80--94\% & 94\% & $\sigma$(SYNTH)=0 \\
+    \multicolumn{2}{l}{Range} & 80--94\% & 94\% \\
+    \multicolumn{2}{l}{} & \multicolumn{2}{l}{$\sigma$(SYNTH)=0} \\
     \bottomrule
   \end{tabular}
 \end{table}
