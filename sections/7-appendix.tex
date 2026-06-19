@@ -96,7 +96,6 @@ The no-docs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): S
     \toprule
     Run & Lines & PASS & SYNTH \\
     \midrule
-    Reference & 552 & 87\% & 89\% \\
     1 & 131 & 93\% & 94\% \\
     2 & 143 & 93\% & 94\% \\
     3 & 522 & 79\% & 83\% \\
@@ -118,7 +117,6 @@ The no-docs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): S
     \toprule
     Run & Lines & PASS & SYNTH \\
     \midrule
-    Reference & large & 92\% & 94\% \\
     1 & 186 & 92\% & 94\% \\
     2 & 230 & 94\% & 94\% \\
     3 & 109 & 93\% & 94\% \\
@@ -140,7 +138,6 @@ The no-docs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): S
     \toprule
     Run & Lines & PASS & SYNTH & HTTP / Iface \\
     \midrule
-    Reference & large & 62\% & 61\% & 0\% / 20\% \\
     1 & 142 & 67\% & 72\% & 0\% / 20\% \\
     2 & 121 & 0\% (crash) & --- & 0\% / 20\% \\
     3 & 172 & 92\% & 94\% & 0\% / 20\% \\
@@ -153,7 +150,7 @@ The no-docs condition is the most stable (Table~\ref{tab:apx:var_shopify_nd}): S
 \end{table}
 
 \paragraph{GitHub.}
-Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 runs produce stub servers with 1--5 tools instead of the 46--61 tools in valid runs. Valid runs score 62--67\%, tight with the human MCP reference (65\%). No-docs degeneracy rate drops to 0/3; all runs outperform the reference (81--90\%). Mutated is universally degenerate (7/7 runs, 0--6 tools); the mutation context consistently destabilises GitHub synthesis for this model.
+Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 runs produce stub servers with 1--5 tools instead of the 46--61 tools in valid runs. Valid runs score 62--67\%, tight with the human MCP reference (65\%). No-docs degeneracy rate drops to 0/3; all runs score 81--90\%, comfortably exceeding the human reference. Mutated is universally degenerate (7/7 runs, 0--6 tools); the mutation context consistently destabilises GitHub synthesis for this model.
 
 \begin{table}[htbp]
   \centering
@@ -166,7 +163,6 @@ Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 run
     \midrule
     — & Human ref & — & 65\% & 65\% & — \\
     \midrule
-    docs & Reference & 53 & 62\% & 61\% & — \\
     docs & 1 & 46 & 67\% & 70\% & — \\
     docs & 2 & 2 & --- & --- & Degenerate \\
     docs & 3 & 3 & --- & --- & Degenerate \\
@@ -174,7 +170,6 @@ Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 run
     docs & 5 & 61 & 64\% & 57\% & — \\
     docs & 6 & 1 & --- & --- & Degenerate \\
     \midrule
-    nodocs & Reference & — & 83\% & 87\% & — \\
     nodocs & 1 & 63 & 86\% & 87\% & — \\
     nodocs & 2 & 61 & 90\% & 91\% & — \\
     nodocs & 3 & 63 & 81\% & 83\% & — \\
@@ -183,7 +178,7 @@ Docs synthesis is highly degenerate (Table~\ref{tab:apx:var_github}): 4 of 6 run
 \end{table}
 
 \paragraph{Stripe.}
-Docs and no-docs each have 1/5 degeneracy (startup crash). Valid docs runs score 46--67\% (ref 72\%); the bottleneck is \verdict{agent\_reasoning} (8--14 failures per run), not tool coverage. No-docs valid runs score 38--62\% (ref 62\%), with lower SYNTH (57--73\%) reflecting weaker parametric knowledge of Stripe's API surface. Mutated shows the widest variance (20--69\% across 4 non-degenerate runs); adherence itself varies run-to-run (0--20\% HTTP), in contrast to Shopify's perfectly stable adherence. Table~\ref{tab:apx:var_stripe} summarises all three conditions.
+Docs and no-docs each have 1/5 degeneracy (startup crash). Valid docs runs score 46--67\%; the bottleneck is \verdict{agent\_reasoning} (8--14 failures per run), not tool coverage. No-docs valid runs score 38--62\%, with lower SYNTH (57--73\%) reflecting weaker parametric knowledge of Stripe's API surface. Mutated shows the widest variance (20--69\% across 4 non-degenerate runs); adherence itself varies run-to-run (0--20\% HTTP), in contrast to Shopify's perfectly stable adherence. Table~\ref{tab:apx:var_stripe} summarises all three conditions.
 
 \begin{table}[htbp]
   \centering
