@@ -22,48 +22,6 @@
 \end{figure}
 
 % ------------------------------------------------------------
-\section{GPT-5.2 SYNTH for No-Docs and Mutated Conditions}
-\label{sec:apx:full_results}
-% ------------------------------------------------------------
-
-Table~\ref{tab:apx:nodocs_mutated} reports PASS and SYNTH for the no-docs and mutated conditions using GPT-5.2 as the reference synthesizer. The docs-condition SYNTH is shown alongside GPT-5.2 PASS in Table~\ref{tab:pass_results} in the main text; full per-model SYNTH across all conditions is in Table~\ref{tab:apx:full_synth}.
-
-\begin{table}[htbp]
-  \centering
-  \caption{PASS and SYNTH (\%) for the no-docs and mutated conditions, GPT-5.2 reference model.
-    Rows in the same order as Table~\ref{tab:pass_results}.
-    \colorbox{red!12}{Red} = PASS below 50\%.
-    SYNTH = server synthesis sufficiency (fraction of task-relevant tools present).}
-  \label{tab:apx:nodocs_mutated}
-  \setlength{\tabcolsep}{5pt}
-  \small
-  \begin{tabular}{l rr rr}
-    \toprule
-    & \multicolumn{2}{c}{\textbf{No-docs}} & \multicolumn{2}{c}{\textbf{Mutated}} \\
-    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
-    \textbf{API} & \textbf{PASS} & \textbf{SYNTH} & \textbf{PASS} & \textbf{SYNTH} \\
-    \midrule
-    OpenWeatherMap & 86  & 83  & 100 & 100 \\
-    eBay Commerce  & 89  & 85  & 55  &  54 \\
-    Mastodon       & 100 & 100 & 100 & 100 \\
-    Zulip          & 60  &  48 &  62 &  64 \\
-    Spoonacular    & 90  &  75 &  78 &  75 \\
-    Shopify        & 92  &  94 &  62 &  61 \\
-    Alphavantage   & 90  &  89 &  88 &  89 \\
-    Confluence     & 93  &  95 &  91 &  95 \\
-    Notion         & 100 & 100 & 100 & 100 \\
-    eBay Buy       & 67  &  94 &  80 &  88 \\
-    GitHub         & 83  &  87 &  76 &  61 \\
-    Jira           & \cellcolor{red!12}25 & 44 & \cellcolor{red!12}50 & 56 \\
-    Stripe         & 62  &  68 &  57 &  73 \\
-    eBay Sell      & \cellcolor{red!12}50 & 50 & \cellcolor{red!12}43 & 43 \\
-    \midrule
-    \textit{Median} & \textit{88} & \textit{86} & \textit{77} & \textit{75} \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
-% ------------------------------------------------------------
 \section{Synthesis Variance Study}
 \label{sec:apx:variance}
 % ------------------------------------------------------------
@@ -283,7 +241,7 @@ Gemini~3~Flash is a reliable judge. Its scores are consistent with GPT-4.1 and G
 \label{sec:apx:full_synth}
 % ------------------------------------------------------------
 
-Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) for every synthesis model, API, and condition. SYNTH is assessed by the LLM judge on the synthesised server's tool list without running the evaluation agent; it measures what fraction of task-relevant tools are present. This table is the SYNTH analogue of the PASS table (Table~\ref{tab:apx:full_results}).
+Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) for every synthesis model, API, and condition. SYNTH is assessed by the LLM judge on the synthesised server's tool list without running the evaluation agent; it measures what fraction of task-relevant tools are present. The docs-condition SYNTH for GPT-5.2 is also shown inline in Table~\ref{tab:pass_results} in the main text.
 
 ``---'' indicates the condition was not run or synthesis crashed before any tools could be evaluated. A value of~0 indicates the server started but the judge found no task-relevant tools. Models that produced no valid servers in any condition (GPT-4.1, Gemini~2.5 Pro, Gemini~3.5 Flash) are omitted; their failure modes are documented in Section~\ref{sec:methodology}.
 
@@ -331,6 +289,6 @@ Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) 
   \raggedright\scriptsize
   Gemini~3.1 Pro Confluence docs: server produced 0 registered tools (import error); SYNTH undefined.
   Sonnet~4.6 and Haiku~4.5 Alphavantage: 25\,req/day API key exhausted; SYNTH from synthesis code inspection.
-  Qwen3-Next-Base and Qwen3-Next: frequent startup crashes reduce coverage; see Table~\ref{tab:apx:full_results}.
+  Qwen3-Next-Base and Qwen3-Next: frequent startup crashes reduce coverage; PASS results in Table~\ref{tab:pass_results}.
 \end{table}
 
