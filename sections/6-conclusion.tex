@@ -71,11 +71,11 @@ is unknown.
 Prior work treats the tool layer as given. We have shown that synthesizing
 it automatically is feasible today for most practically relevant REST APIs,
 and that the primary bottleneck for large APIs is context-window coverage
-of documentation rather than a fundamental capability limit. The SYNTH
+of documentation rather than a fundamental capability limit. The key novelty is the synthesis \emph{target}: a complete, protocol-compliant MCP server rather than individual tool stubs, which is what enables genuine end-to-end evaluation through live API execution. The SYNTH
 metric and the controlled ablation design --- isolating parametric knowledge
 from documentation grounding --- are methodological contributions that
 generalise beyond this benchmark to any evaluation of documentation-grounded
-code generation.
+code generation. A preliminary mechanistic analysis (Chapter~\ref{sec:mechanistic}) grounds the parametric gravity phenomenon in transformer representations, connecting behavioural findings to the interpretability literature.
 
 \section*{Future Work}
 

@@ -1,13 +1,5 @@
 \chapter{Related Work}
 \label{sec:related_work}
-% Your work needs to be grounded and compared to earlier work and the state-of-the-art. Start the section with announcing the research gap and also end with the research gap. Consider using hypotheses. 
-%Write about your related work here. Make clear to which key papers you will compare your eventual results. This can be done from the perspective of methods used, the task at hand and the addressed domain.
-
-% The related work section is not a a background section. If you want to explain techniques, it is possible to have a background section after the Related Work section. Background should only be added when it has benefit for an informed audience. It is not common to use a background section. 
-
-%Remember: a related works section is not a ``laundry list'' of references, cited for the sake of citing papers: they are the support and motivation for your research gap and research question that you are going to address.
-
-%If you stick with Use \verb|\cite{}| for reference that is part of the sentence, and \verb|\citep{}| for references in parenthesis. For example, \cite{viola1997alignment} is awesome. Also, this is a citation~\citep{viola1997alignment}.
 
 This section reviews and compares the literature across relevant domains to ground our methodology and findings.
 
@@ -24,11 +16,15 @@ Concurrent work has also begun to close this gap. ToolFactory~\citep{toolfactory
 setting where formal OpenAPI schemas are unavailable. Doc2Agent~\citep{doc2agent2025} scales a similar idea, demonstrating that LLMs can produce usable tool implementations from unstructured documentation across dozens of APIs --- the closest parallel to our synthesis pipeline. Where these works
 focus primarily on synthesis coverage, we additionally evaluate the synthesized servers end-to-end through agent task execution, measure documentation grounding, and systematically probe the effect of parametric knowledge through controlled ablations.
 
+Critically, both ToolFactory and Doc2Agent generate individual tool stubs or callable functions; neither produces a complete, deployable server exposing a typed discovery protocol that an agent can invoke at runtime. Our synthesis target is a full MCP server --- including authentication, multi-tool coordination, and protocol compliance --- which represents a more demanding and practically relevant integration target.
+
 A complementary challenge arises when APIs evolve after the synthesis stage. Recent work on evolving tool use~\citep{evolvingtoolsiclr2025} employs Monte Carlo Tree Search to adapt tool invocations when API signatures change at inference time, framing API evolution as a planning problem. This is
 distinct from our setting, where we synthesize the server once per API version, but it points to the broader challenge of keeping tool infrastructure current --- the problem that motivates automated synthesis in the first place.
 
 Related work has also explored automated client generation from formal API specifications such as OpenAPI schemas, but these approaches require structured machine-readable inputs. In practice, many APIs provide only unstructured documentation, or provide schemas that are incomplete or misaligned with actual server behaviour. Our benchmark specifically targets this less
 structured setting, using scraped Markdown documentation as the sole synthesis input, which is closer to the conditions a practitioner faces.
+
+Agent benchmarks such as WebArena~\citep{webarena2023}, OSWorld~\citep{osworld2024}, and GAIA~\citep{gaia2023} evaluate agents against fixed tool environments, taking the tool layer as given. A related line of work examines agents that generate and execute code to solve tasks~\citep{codeact2024}, but the generated code is typically a self-contained script rather than a persistent, reusable interface. We study a complementary question: can an agent produce tool infrastructure that other agents can then use?
 
 \section{Code Generation}
 
@@ -39,13 +35,6 @@ WAPIIBench~\citep{wapiibench2025} catalogues the error modes of LLM-generated AP
 observe in our synthesis evaluation. RAG-augmented API code
 generation~\citep{ragapidocs2025} shows that retrieving relevant documentation snippets at generation time reduces hallucinated parameters and improves execution success, suggesting that context grounding is a tractable intervention even for models with strong parametric priors. When LLMs Lag Behind~\citep{lagging2025} focuses specifically on faithfulness failures arising from training-cutoff drift --- cases where the model generates syntactically correct code that silently targets a deprecated API version, producing errors that neither compile-time nor unit-test evaluation would catch. Taken together,
 these works confirm that live API execution is a qualitatively different evaluation regime from static code correctness, and that documentation faithfulness is a first-class concern rather than a secondary one.
-
-\section{Autonomous Agents}
-
-The agent benchmarking landscape spans web navigation (WebArena;~\citeauthor{webarena2023},~\citeyear{webarena2023}), computer control (OSWorld;~\citeauthor{osworld2024},~\citeyear{osworld2024}), and general open-ended
-assistance (GAIA;~\citeauthor{gaia2023},~\citeyear{gaia2023}). These benchmarks treat the agent's capability to act as the object of study and abstract over the tool infrastructure. A related line of work examines agents that generate and execute code to solve tasks~\citep{codeact2024}, but the generated code is typically a
-self-contained script rather than a persistent, reusable interface. We study a complementary question: can an agent produce tool infrastructure that other agents can then use, and does that infrastructure remain reliable across diverse
-APIs and synthesis conditions?
 
 \section{In-Context Learning and Context Faithfulness}
 
@@ -95,39 +84,36 @@ residual stream at each layer to detect the point at which representations of mu
 
 \section{The Model Context Protocol}
 
-MCP~(\citeauthor{anthropic2024mcp}, \citeyear{anthropic2024mcp}) is an open standard that defines how agents discover and invoke tools exposed by external servers over a stdio transport. An MCP server exposes a \texttt{list\_tools()} endpoint that returns typed tool schemas and a \texttt{call\_tool()} endpoint for invocation. The protocol has seen rapid adoption across agent frameworks, making it a natural target for automated tool synthesis. Our benchmark uses MCP as the interface layer between the synthesized server and the evaluation agent.
-
-MCP-Universe~\citep{mcpuniverse2025} evaluates agents against a curated collection of real-world MCP servers across diverse domains, establishing baseline performance figures for tool use within the MCP ecosystem. Doc2Agent~\citep{doc2agent2025} goes a step further and synthesizes callable tool implementations from unstructured documentation at scale, demonstrating that automated tool generation is practically viable. Our work builds on this direction by
-introducing controlled ablations (no-docs, mutated) and grounding analysis, allowing us to separate the contribution of documentation from that of parametric knowledge --- a question neither MCP-Universe nor Doc2Agent addresses directly.
+MCP~(\citeauthor{anthropic2024mcp}, \citeyear{anthropic2024mcp}) is an open standard that defines how agents discover and invoke tools exposed by external servers over a stdio transport. An MCP server exposes a \texttt{list\_tools()} endpoint that returns typed tool schemas and a \texttt{call\_tool()} endpoint for invocation. The protocol has seen rapid adoption across agent frameworks, making it a natural target for automated tool synthesis. MCP-Universe~\citep{mcpuniverse2025} evaluates agents against existing MCP servers; our work instead generates those servers from scratch and asks whether the generated infrastructure is sufficient for agent task success.
 
 \begin{table}[h]
 \centering
 \scriptsize
-\caption{Positioning relative to prior work. \emph{Tool synth.}: executable tool creation from documentation. \emph{Doc faith.}: output grounded in provided documentation. \emph{Mech.\ analysis}: internal representation probing.}
+\caption{Positioning relative to prior work. \emph{Tool synth.}: executable tool creation from documentation. \emph{Full server}: complete deployable server (not individual stubs). \emph{Doc faith.}: output grounded in provided documentation. \emph{Mech.\ analysis}: internal representation probing.}
 \label{tab:related}
 \setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{lccccc}
+\begin{tabular}{lcccccc}
 \toprule
-& \textbf{Tool use} & \textbf{Tool synth.} & \textbf{Live API}
+& \textbf{Tool use} & \textbf{Tool synth.} & \textbf{Full server} & \textbf{Live API}
 & \textbf{Doc faith.} & \textbf{Mech.\ analysis} \\
 \midrule
-ToolBench        & \checkmark &            &            &            & \\
-API-Bank         & \checkmark &            &            &            & \\
-LATM             &            & \checkmark &            &            & \\
-HumanEval        &            & \checkmark &            &            & \\
-SWE-bench        &            & \checkmark &            &            & \\
-MCPAgentBench    & \checkmark &            &            &            & \\
-MCP-Universe     & \checkmark &            &            &            & \\
-GAIA / WebArena  & \checkmark &            &            &            & \\
-ToolFactory      &            & \checkmark &            & \checkmark & \\
-Doc2Agent        &            & \checkmark & \checkmark &            & \\
-WAPIIBench       & \checkmark &            & \checkmark & \checkmark & \\
-MCP-Bench        & \checkmark &            & \checkmark &            & \\
-\textbf{Ours}    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+ToolBench        & \checkmark &            &            &            &            & \\
+API-Bank         & \checkmark &            &            &            &            & \\
+LATM             &            & \checkmark &            &            &            & \\
+HumanEval        &            & \checkmark &            &            &            & \\
+SWE-bench        &            & \checkmark &            &            &            & \\
+MCPAgentBench    & \checkmark &            &            &            &            & \\
+MCP-Universe     & \checkmark &            &            &            &            & \\
+GAIA / WebArena  & \checkmark &            &            &            &            & \\
+ToolFactory      &            & \checkmark &            &            & \checkmark & \\
+Doc2Agent        &            & \checkmark &            & \checkmark &            & \\
+WAPIIBench       & \checkmark &            &            & \checkmark & \checkmark & \\
+MCP-Bench        & \checkmark &            &            & \checkmark &            & \\
+\textbf{Ours}    & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \section{Summary}
 
-Table~\ref{tab:related} summarises the positioning of our work relative to the benchmarks discussed above. The key distinguishing feature is that we evaluate the \emph{production} of tool infrastructure from documentation, combined with live API execution, rather than the \emph{use} of pre-existing tools or the generation of code evaluated against static tests.
+Table~\ref{tab:related} summarises the positioning of our work relative to the benchmarks discussed above. The key distinguishing features are: we evaluate the \emph{production} of complete, deployable tool servers (not individual stubs) from documentation combined with live API execution, and we isolate the contribution of parametric knowledge through controlled ablations --- capabilities absent from all prior work.

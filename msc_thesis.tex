@@ -105,7 +105,7 @@
 \frontmatter
         \chapter*{Abstract}
                 \begin{adjustwidth}{4cm}{4cm}
-                        Tool-use benchmarks assume that tools already exist. This thesis examines the step before: whether large language models (LLMs) can synthesize functional API tool servers from documentation, and whether those servers enable effective agent task completion. We introduce an end-to-end benchmark covering 14 REST APIs across five domains, in which a synthesis agent reads raw developer documentation and produces a runnable Model Context Protocol (MCP) server; a separate evaluation agent then attempts 13--25 natural-language tasks against it; and a third model judges each outcome.
+                        Tool-use benchmarks assume that tools already exist. This thesis examines the step before: whether large language models (LLMs) can synthesize functional API tool servers from documentation, and whether those servers enable effective agent task completion. We introduce an end-to-end benchmark covering 14 REST APIs across five domains, in which a synthesis agent reads raw developer documentation and produces a complete MCP server --- a runnable, protocol-compliant collection of tools that an agent can discover and invoke directly, not merely individual function stubs --- a separate evaluation agent then attempts 13--25 natural-language tasks against it; and a third model judges each outcome.
 
                         We evaluate three synthesis conditions---with full documentation, without any documentation, and with documentation whose core parameter names have been deliberately renamed to conflict with training-time knowledge---across eight synthesis models spanning three capability tiers. Two metrics are reported: PASS (agent task success rate) and SYNTH (synthesis sufficiency, assessed by an LLM judge on the server's tool list without running the evaluation agent).
 
@@ -130,6 +130,7 @@
         \include{sections/2-related-work}
         \include{sections/3-methodology}
         \include{sections/4-results}
+        \include{sections/5-mechanistic}
         \include{sections/5-discussion}
         \include{sections/6-conclusion}
 

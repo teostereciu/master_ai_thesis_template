@@ -6,14 +6,14 @@
 % Sometimes,  especially  if  you  have  quite  different experiments or research  questions,  it makes sense to interleave the experimental setup and the results sections, so the reader does not get lost. It is then helpful to structure clearly in (sub)subsections.
 
 
-This chapter presents results for the five research questions introduced before. Metrics (PASS, SYNTH) are defined in Section~\ref{sec:metrics}. Section~\ref{sec:rq1} establishes that synthesis is feasible for most APIs. Section~\ref{sec:rq2} shows that synthesized
+This chapter presents results for the five research questions introduced before. Two metrics are reported throughout: \textbf{PASS} (the fraction of task attempts judged as successful out of all scoreable attempts) and \textbf{SYNTH} (synthesis sufficiency, the fraction of tasks for which an LLM judge finds the synthesized server's tool list sufficient, assessed without running the evaluation agent). Both are defined formally in Section~\ref{sec:metrics}. Section~\ref{sec:rq1} establishes that synthesis is feasible for most APIs. Section~\ref{sec:rq2} shows that synthesized
 servers enable effective agent task completion and compares against
 human-authored references. Section~\ref{sec:rq3} characterises how
 synthesizers rely on parametric knowledge and when this affects downstream
 performance. Section~\ref{sec:rq4} examines the effect of documentation
 availability. Section~\ref{sec:rq5} quantifies the relationship between
-synthesis quality and agent pass rate.
-Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown across all eight synthesis models and three conditions; Full per-model SYNTH for all conditions is in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
+synthesis quality and agent pass rate. A mechanistic probing study connecting these behavioural patterns to transformer internals is presented in Chapter~\ref{sec:mechanistic}.
+Table~\ref{tab:pass_results} provides the full per-model, per-API breakdown across all eight synthesis models and three conditions; full per-model SYNTH for all conditions is in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
 
 % ------------------------------------------------------------
 \section{RQ1: Synthesis Feasibility}
