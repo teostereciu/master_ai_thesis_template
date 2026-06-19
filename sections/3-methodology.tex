@@ -177,7 +177,7 @@ instantiations of the context $C$ in Equation~\ref{eq:synthesis}:
 \begin{itemize}
   \item $C_{\text{docs}}$ \textbf{(with docs)}: the agent receives all
     scraped documentation files in addition to the task specification.
-  \item $C_{\emptyset}$ \textbf{(no docs)}: the agent receives only the
+  \item $C_{\emptyset}$ \textbf{(no-docs)}: the agent receives only the
     task specification, with no documentation. All tool implementations must
     come from parametric knowledge.
   \item $C_{\text{mut}}$ \textbf{(mutated docs)}: the agent receives the
@@ -340,3 +340,17 @@ denominator.
 agent, and is computed only for tasks where the judge returned a non-\verdict{unknown} verdict. When SYNTH is high but PASS is low, the bottleneck is agent reasoning; when both are low, the bottleneck is synthesis.
 
 Together, the two metrics place each API--condition data point in one of three regimes: \emph{synthesis-limited} (low SYNTH, low PASS), \emph{agent-limited} (high SYNTH, lower PASS), or \emph{ceiling} (high SYNTH, high PASS). The scatter plot of SYNTH against PASS (Section~\ref{sec:rq5}) visualises this decomposition across all 42 API--condition pairs in the primary evaluation.
+
+\subsection{Probing Study Design}
+\label{sec:probing_design}
+
+To complement the behavioural adherence analysis, we conduct a logit-lens probing study on an open-weight model to localise where in the forward pass parametric knowledge overrides in-context documentation. We use Qwen2.5-7B-Instruct (29 transformer layers), chosen because it is small enough to run inference with full residual-stream access on a single GPU, and because it exhibits the parametric gravity effect on a subset of APIs.
+
+For each mutated synthesis run, we identify token positions where the original and mutated parameter names are in direct lexical competition --- specifically, positions immediately following a keyword that would trigger the parameter name (e.g., a function argument list opening). We extract the residual stream state $\mathbf{h}_\ell$ at each layer $\ell \in \{0, \ldots, 28\}$ and project it through the model's unembedding matrix to obtain per-token logits. We then compute the logit difference:
+\begin{equation}
+  \delta_\ell = \text{logit}_\ell(\text{original}) - \text{logit}_\ell(\text{mutated}),
+  \label{eq:delta_l}
+\end{equation}
+where \emph{original} is the training-time parameter name and \emph{mutated} is the in-context replacement. A positive $\delta_\ell$ at the final layer indicates that parametric memory prevailed; a negative value indicates context-following.
+
+We define the \emph{flip layer} as the earliest layer $\ell^*$ at which the sign of $\delta_\ell$ matches the final outcome and does not subsequently reverse. This identifies the layer at which the dominant signal (parametric or contextual) first asserts control. We probe 13 of the 14 benchmark APIs (all with at least one unambiguous single-token mutation pair; eBay Commerce is excluded due to tokenisation overlap between the original and mutated names). Results are reported in Section~\ref{sec:discussion-probing}.

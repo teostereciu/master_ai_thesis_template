@@ -22,59 +22,11 @@
 \end{figure}
 
 % ------------------------------------------------------------
-\section{Full Per-Model Results Table}
+\section{GPT-5.2 SYNTH for No-Docs and Mutated Conditions}
 \label{sec:apx:full_results}
 % ------------------------------------------------------------
 
-Table~\ref{tab:apx:full_results} reports PASS (\%) for every synthesis model, API, and condition evaluated in this thesis. Models that failed to produce a runnable server are recorded as 0\%. ``---'' indicates the condition was never attempted. GPT-4.1, Gemini~2.5 Pro, and Gemini~3.5 Flash produced no valid servers across any condition and are omitted; their failure modes are documented in Section~\ref{sec:methodology}. Alphavantage results for Sonnet~4.6 and Haiku~4.5 are omitted due to API rate-limit exhaustion during evaluation (ENVIRONMENT errors on all tasks).
-
-\begin{table}[htbp]
-  \centering
-  \caption{Agent PASS (\%) across all synthesis models, APIs, and conditions.
-    0 = synthesis crash or complete tool-coverage failure.
-    \colorbox{red!12}{Red} = below 50\%. --- = not evaluated.
-    D = docs, N = no-docs, M = mutated.}
-  \label{tab:apx:full_results}
-  \setlength{\tabcolsep}{3pt}
-  \scriptsize
-  \begin{tabular}{l rrr rrr rrr rrr rrr rrr rrr rrr}
-    \toprule
-    & \multicolumn{3}{c}{\textbf{GPT-5.4-mini}}
-    & \multicolumn{3}{c}{\textbf{Qwen3-Next-Base}}
-    & \multicolumn{3}{c}{\textbf{Qwen3-Next}}
-    & \multicolumn{3}{c}{\textbf{Gem~3.1 Pro}}
-    & \multicolumn{3}{c}{\textbf{GPT-5.2}}
-    & \multicolumn{3}{c}{\textbf{GPT-5.4}}
-    & \multicolumn{3}{c}{\textbf{Haiku~4.5}}
-    & \multicolumn{3}{c}{\textbf{Sonnet~4.6}} \\
-    \cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}\cmidrule(lr){11-13}
-    \cmidrule(lr){14-16}\cmidrule(lr){17-19}\cmidrule(lr){20-22}\cmidrule(lr){23-25}
-    \textbf{API} & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M & D & N & M \\
-    \midrule
-    GitHub         & \cellcolor{red!12}38 & \cellcolor{red!12}32 & \cellcolor{red!12}30 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 58 & 60 & 57 & 78 & 71 & \cellcolor{red!12}36 & 62 & 83 & 76 & 58 & 89 & 73 & 95 & 90 & 86 & 90 & 100 & 100 \\
-    Stripe         & \cellcolor{red!12}14 & \cellcolor{red!12}0 & \cellcolor{red!12}19 & \cellcolor{red!12}0 & 56 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 62 & \cellcolor{red!12}0 & \cellcolor{red!12}47 & 50 & 59 & 72 & 62 & 57 & \cellcolor{red!12}8 & 62 & \cellcolor{red!12}12 & 57 & 75 & 86 & 77 & 100 & 100 \\
-    Zulip          & \cellcolor{red!12}40 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 64 & 76 & 84 & 62 & 80 & 60 & 62 & 90 & 85 & 71 & 55 & \cellcolor{red!12}36 & \cellcolor{red!12}26 & 100 & \cellcolor{red!12}43 & \cellcolor{red!12}0 \\
-    \midrule
-    Alphavantage   & --- & --- & --- & 92 & --- & --- & --- & --- & --- & 100 & 100 & 90 & 86 & 90 & 88 & 80 & 92 & 78 & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ & ---$^a$ \\
-    Confluence     & 83$^b$ & \cellcolor{red!12}40$^b$ & \cellcolor{red!12}0 & 64 & --- & --- & \cellcolor{red!12}39 & 100$^c$ & 50 & \cellcolor{red!12}0 & 100 & 100 & 92 & 93 & 91 & 69 & 100 & 85 & 80 & \cellcolor{red!12}33 & \cellcolor{red!12}33 & \cellcolor{red!12}0 & 94 & \cellcolor{red!12}47 \\
-    eBay Buy       & --- & --- & --- & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}12 & 80 & \cellcolor{red!12}6 & 90 & 67 & \cellcolor{red!12}0 & 73 & 67 & 80 & 69 & 92 & 100 & 80 & 67 & 100 & \cellcolor{red!12}0 & 79 & \cellcolor{red!12}33 \\
-    eBay Commerce  & --- & --- & --- & \cellcolor{red!12}45 & --- & --- & 100 & \cellcolor{red!12}0 & \cellcolor{red!12}11 & 83 & \cellcolor{red!12}44 & \cellcolor{red!12}45 & 100 & 89 & 55 & 88 & \cellcolor{red!12}40 & 62 & \cellcolor{red!12}30 & \cellcolor{red!12}10 & 50 & 100 & \cellcolor{red!12}0 & --- \\
-    eBay Sell      & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 100$^c$ & \cellcolor{red!12}0 & \cellcolor{red!12}0 & \cellcolor{red!12}38 & \cellcolor{red!12}8 & \cellcolor{red!12}23 & \cellcolor{red!12}38 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & \cellcolor{red!12}45 & \cellcolor{red!12}44 & \cellcolor{red!12}17 & \cellcolor{red!12}9 & \cellcolor{red!12}36 & \cellcolor{red!12}0 & 73 & --- \\
-    Jira           & --- & --- & --- & --- & --- & --- & 71 & \cellcolor{red!12}0 & \cellcolor{red!12}42 & 58 & \cellcolor{red!12}44 & \cellcolor{red!12}31 & 50 & \cellcolor{red!12}25 & 50 & 57 & 50 & 57 & 62 & \cellcolor{red!12}7 & 64 & 73 & 58 & 79 \\
-    Mastodon       & --- & --- & --- & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & 87 & 80 & 54 & 100 & 92 & 87 & 100 & 100 & 100 & 91 & 90 & 100 & 93 & \cellcolor{red!12}40 & 86 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 92 \\
-    Notion         & --- & --- & --- & --- & \cellcolor{red!12}0 & --- & 69 & \cellcolor{red!12}5 & \cellcolor{red!12}0 & 94 & 94 & 100 & 78 & 100 & 100 & 62 & 100 & \cellcolor{red!12}0 & 56 & \cellcolor{red!12}5 & 50 & 100 & 87 & 85 \\
-    OpenWeatherMap & --- & --- & --- & --- & --- & --- & 100 & 86 & 100 & 85 & 90 & 95 & 100 & 86 & 100 & 100 & 95 & 100 & 95 & 65 & 60 & \cellcolor{red!12}0 & 100 & \cellcolor{red!12}0 \\
-    Shopify        & --- & --- & --- & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & 94 & 82 & 67 & 80 & 70 & 93 & 87 & 92 & 62 & 83 & 92 & 53 & 93 & 75 & 94 & 100 & \cellcolor{red!12}0 & --- \\
-    Spoonacular    & --- & --- & --- & --- & 60 & --- & --- & --- & --- & 83 & 91 & 90 & 100 & 90 & 78 & 80 & 82 & 60 & 93 & 79 & 86 & 93 & \cellcolor{red!12}0 & 92 \\
-    \bottomrule
-  \end{tabular}
-  \par\smallskip
-  \raggedright\scriptsize
-  Qwen3-Next-Base = Qwen3-Coder-Next-Base; Qwen3-Next = Qwen3-Coder-Next.
-  $^a$ Rate-limited; shared 25\,req/day key exhausted.
-  $^b$ GPT-5.4-mini full matrix aborted after 26/112 evals; only confluence nodocs/mutated returned non-zero.
-  $^c$ Tiny scoreable N ($\leq$3 due to ENVIRONMENT errors); treat with caution.
-\end{table}
+Table~\ref{tab:apx:nodocs_mutated} reports PASS and SYNTH for the no-docs and mutated conditions using GPT-5.2 as the reference synthesizer. The docs-condition SYNTH is shown alongside GPT-5.2 PASS in Table~\ref{tab:pass_results} in the main text; full per-model SYNTH across all conditions is in Table~\ref{tab:apx:full_synth}.
 
 \begin{table}[htbp]
   \centering
