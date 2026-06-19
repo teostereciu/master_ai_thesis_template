@@ -53,7 +53,7 @@ real documentation sources. For the primary GPT-5.2 docs condition, every
 grounding entry (100\% coverage). Citation accuracy --- whether the cited
 file plausibly describes the tool --- is 86--100\% across datasets; GitHub's
 86\% reflects a small number of tools citing multi-operation documents only
-loosely related to the specific endpoint. This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub nodocs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
+loosely related to the specific endpoint. This rules out the possibility that high SYNTH scores are driven entirely by tools whose implementations are unmoored from any documentation --- though it does not verify that each tool correctly implements what its cited document describes. Even in the no-docs condition, SYNTH remains high for well-known APIs (GitHub no-docs SYNTH=87\%), suggesting that parametric knowledge can partially substitute for documentation at the synthesis stage --- a finding developed further in Section~\ref{sec:rq3}.
 
 Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API and condition alongside SYNTH for the docs condition, placed adjacent to the GPT-5.2 columns for direct comparison. Full per-model, per-condition SYNTH values are in Table~\ref{tab:apx:full_synth} (Appendix~\ref{sec:apx:full_synth}).
 
@@ -131,7 +131,7 @@ Table~\ref{tab:pass_results} reports agent PASS (Equation~\ref{eq:pass}) per API
 
 \textbf{Do synthesized servers enable effective agent task completion, compared to human-authored references?}
 
-Figure~\ref{fig:strip} shows the distribution of PASS across APIs and conditions. Across the frontier tier, the median PASS is 83\% in the docs condition, 88\% in the no-docs condition, and 77\% in the mutated condition (see \textit{Tier med.} rows in Table~\ref{tab:pass_results}). The distribution has a long tail of high performers (OpenWeatherMap and Mastodon near 100\% across all three conditions for frontier models; Confluence and Notion above 90\% for frontier docs and no-docs conditions) and a persistent floor group (eBay Sell and Jira below 50\% across most models and conditions).
+Figure~\ref{fig:strip} shows the distribution of PASS across APIs and conditions. Across the frontier tier, the median PASS is 83\% in the docs condition, 88\% in the no-docs condition, and 77\% in the mutated condition (see \textit{Med.} row in Table~\ref{tab:pass_results}, frontier columns). The distribution has a long tail of high performers (OpenWeatherMap and Mastodon near 100\% across all three conditions for frontier models; Confluence and Notion above 90\% for frontier docs and no-docs conditions) and a persistent floor group (eBay Sell and Jira below 50\% across most models and conditions).
 
 The variance across APIs is explained by two distinct mechanisms. For the floor group, SYNTH is also low: Jira SYNTH=44--56\%, eBay Sell SYNTH=43\%. These are synthesis failures that manifest as agent failures --- when the required tools are absent, the agent cannot compensate. For APIs with moderate PASS but higher SYNTH (Stripe: SYNTH=77\%, frontier PASS=8--100\% with GPT-5.4 as low outlier due to broken tool stubs), the bottleneck shifts to agent reasoning on complex multi-step tasks. Figure~\ref{fig:scatter} makes this distinction visible: points near the diagonal are synthesis-limited; points below it are agent-limited.
 
@@ -184,7 +184,7 @@ The mechanism behind this is that the effect of parametric reliance depends on w
 \textbf{How does documentation availability affect synthesis and agent
 performance?}
 
-For the frontier tier, the condition medians are: docs~83\%, no-docs~88\%, mutated~77\% (Table~\ref{tab:pass_results}, \textit{Tier med.} row; Figure~\ref{fig:strip} shows the full per-API distribution). The no-docs median meets or exceeds the docs median, indicating that removing documentation does not on average degrade agent performance. This aggregate result conceals meaningful per-API variation, visible in Figure~\ref{fig:docs_effect}.
+For the frontier tier, the condition medians are: docs~83\%, no-docs~88\%, mutated~77\% (Table~\ref{tab:pass_results}, \textit{Med.} row, frontier columns; Figure~\ref{fig:strip} shows the full per-API distribution). The no-docs median meets or exceeds the docs median, indicating that removing documentation does not on average degrade agent performance. This aggregate result conceals meaningful per-API variation, visible in Figure~\ref{fig:docs_effect}.
 
 \begin{figure}[htbp]
   \centering
