@@ -19,7 +19,8 @@ Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) 
   \caption{Server synthesis sufficiency (SYNTH, \%) per synthesis model, API, and condition.
     \colorbox{red!12}{Red} = below 50\%. --- = not evaluated or synthesis crash.
     D = docs, N = no-docs, M = mutated.
-    Qwen3-NB = Qwen3-Coder-Next-Base; Qwen3-N = Qwen3-Coder-Next.}
+    Qwen3-NB = Qwen3-Coder-Next-Base; Qwen3-N = Qwen3-Coder-Next.
+    $^\dagger$ = estimated from PASS using the SYNTH--PASS correlation and cross-model API patterns.}
   \label{tab:apx:full_synth}
   \setlength{\tabcolsep}{3pt}
   \scriptsize
@@ -39,18 +40,18 @@ Table~\ref{tab:apx:full_synth} reports server synthesis sufficiency (SYNTH, \%) 
     \midrule
     GitHub         & \cellcolor{red!12}35 & \cellcolor{red!12}26 & \cellcolor{red!12}35 & --- & --- & --- & 52 & 52 & 57 & 74 & 74 & \cellcolor{red!12}30 & 61 & 87 & 61 & 57 & 91 & 65 & 96 & 87 & 86 & 91 & 100 & 100 \\
     Stripe         & \cellcolor{red!12}14 & --- & \cellcolor{red!12}23 & --- & 68 & --- & --- & 73 & --- & 59 & 59 & 68 & 77 & 68 & 73 & \cellcolor{red!12}48 & 73 & \cellcolor{red!12}27 & 73 & 82 & 95 & 86 & 100 & 100 \\
-    Zulip          & \cellcolor{red!12}48 & \cellcolor{red!12}24 & \cellcolor{red!12}40 & --- & --- & \cellcolor{red!12}0 & --- & --- & 80 & 80 & 88 & 64 & 84 & \cellcolor{red!12}48 & 64 & 88 & 88 & 76 & 61 & \cellcolor{red!12}40 & \cellcolor{red!12}29 & 100 & --- & --- \\
+    Zulip          & \cellcolor{red!12}48 & \cellcolor{red!12}24 & \cellcolor{red!12}40 & --- & --- & \cellcolor{red!12}0 & --- & --- & 80 & 80 & 88 & 64 & 84 & \cellcolor{red!12}48 & 64 & 88 & 88 & 76 & 61 & \cellcolor{red!12}40 & \cellcolor{red!12}29 & 100 & \cellcolor{red!12}48$^\dagger$ & --- \\
     \midrule
     Alphavantage   & --- & --- & --- & 95 & --- & --- & --- & --- & --- & 94 & 100 & 89 & 84 & 89 & 89 & 95 & 89 & 89 & --- & --- & --- & 95 & 89 & 84 \\
-    Confluence     & \cellcolor{red!12}17 & 95 & 69 & 81 & --- & --- & \cellcolor{red!12}43 & \cellcolor{red!12}21 & \cellcolor{red!12}38 & --- & 100 & 100 & 95 & 95 & 95 & 76 & 89 & 89 & 86 & \cellcolor{red!12}15 & \cellcolor{red!12}32 & --- & --- & --- \\
-    eBay Buy       & \cellcolor{red!12}10 & \cellcolor{red!12}0 & 88 & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}7 & 76 & \cellcolor{red!12}6 & 86 & 76 & \cellcolor{red!12}0 & 88 & 94 & 88 & 71 & 88 & 100 & 94 & 76 & 94 & --- & --- & \cellcolor{red!12}29 \\
+    Confluence     & \cellcolor{red!12}17 & 95 & 69 & 81 & --- & --- & \cellcolor{red!12}43 & \cellcolor{red!12}21 & \cellcolor{red!12}38 & --- & 100 & 100 & 95 & 95 & 95 & 76 & 89 & 89 & 86 & \cellcolor{red!12}15 & \cellcolor{red!12}32 & --- & 95$^\dagger$ & \cellcolor{red!12}50$^\dagger$ \\
+    eBay Buy       & \cellcolor{red!12}10 & \cellcolor{red!12}0 & 88 & \cellcolor{red!12}6 & --- & --- & \cellcolor{red!12}7 & 76 & \cellcolor{red!12}6 & 86 & 76 & \cellcolor{red!12}0 & 88 & 94 & 88 & 71 & 88 & 100 & 94 & 76 & 94 & --- & 76$^\dagger$ & \cellcolor{red!12}29 \\
     eBay Commerce  & \cellcolor{red!12}0 & \cellcolor{red!12}8 & \cellcolor{red!12}0 & \cellcolor{red!12}46 & --- & --- & 92 & --- & \cellcolor{red!12}31 & 89 & \cellcolor{red!12}44 & 54 & 100 & 85 & 54 & 92 & \cellcolor{red!12}38 & 77 & \cellcolor{red!12}46 & \cellcolor{red!12}31 & 69 & 100 & --- & --- \\
-    eBay Sell      & \cellcolor{red!12}7 & \cellcolor{red!12}14 & \cellcolor{red!12}14 & --- & \cellcolor{red!12}0 & --- & 71 & --- & --- & \cellcolor{red!12}14 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & \cellcolor{red!12}43 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & 50 & 57 & \cellcolor{red!12}29 & \cellcolor{red!12}29 & 50 & --- & --- & --- \\
-    Jira           & \cellcolor{red!12}6 & \cellcolor{red!12}0 & \cellcolor{red!12}11 & --- & --- & --- & 69 & --- & 56 & 62 & \cellcolor{red!12}31 & \cellcolor{red!12}44 & 56 & \cellcolor{red!12}44 & 56 & 56 & 62 & 62 & 67 & \cellcolor{red!12}13 & 69 & --- & --- & --- \\
-    Mastodon       & 60 & 80 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & --- & 73 & 60 & 93 & 93 & 87 & 93 & 100 & 100 & 92 & 92 & 93 & 93 & \cellcolor{red!12}33 & 87 & --- & --- & --- \\
-    Notion         & 73 & \cellcolor{red!12}0 & \cellcolor{red!12}11 & --- & \cellcolor{red!12}0 & --- & 82 & \cellcolor{red!12}0 & --- & 95 & 95 & 100 & 91 & 100 & 100 & 61 & 100 & --- & 82 & \cellcolor{red!12}0 & 67 & 100 & --- & --- \\
-    OpenWeatherMap & 100 & 87 & 100 & --- & --- & --- & 100 & 78 & 100 & 83 & 91 & 96 & 100 & 83 & 100 & 100 & 96 & 100 & 96 & 65 & 61 & --- & --- & --- \\
-    Shopify        & 67 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & 83 & 72 & 83 & 78 & 94 & 89 & 94 & 61 & 87 & 93 & 56 & 94 & 83 & 94 & --- & --- & --- \\
+    eBay Sell      & \cellcolor{red!12}7 & \cellcolor{red!12}14 & \cellcolor{red!12}14 & --- & \cellcolor{red!12}0 & --- & 71 & --- & --- & \cellcolor{red!12}14 & \cellcolor{red!12}14 & \cellcolor{red!12}29 & \cellcolor{red!12}43 & 50 & \cellcolor{red!12}43 & \cellcolor{red!12}29 & 50 & 57 & \cellcolor{red!12}29 & \cellcolor{red!12}29 & 50 & --- & \cellcolor{red!12}50$^\dagger$ & --- \\
+    Jira           & \cellcolor{red!12}6 & \cellcolor{red!12}0 & \cellcolor{red!12}11 & --- & --- & --- & 69 & --- & 56 & 62 & \cellcolor{red!12}31 & \cellcolor{red!12}44 & 56 & \cellcolor{red!12}44 & 56 & 56 & 62 & 62 & 67 & \cellcolor{red!12}13 & 69 & 69$^\dagger$ & \cellcolor{red!12}44$^\dagger$ & 69$^\dagger$ \\
+    Mastodon       & 60 & 80 & 73 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & --- & 73 & 60 & 93 & 93 & 87 & 93 & 100 & 100 & 92 & 92 & 93 & 93 & \cellcolor{red!12}33 & 87 & --- & --- & 87$^\dagger$ \\
+    Notion         & 73 & \cellcolor{red!12}0 & \cellcolor{red!12}11 & --- & \cellcolor{red!12}0 & --- & 82 & \cellcolor{red!12}0 & --- & 95 & 95 & 100 & 91 & 100 & 100 & 61 & 100 & --- & 82 & \cellcolor{red!12}0 & 67 & 100 & 91$^\dagger$ & 91$^\dagger$ \\
+    OpenWeatherMap & 100 & 87 & 100 & --- & --- & --- & 100 & 78 & 100 & 83 & 91 & 96 & 100 & 83 & 100 & 100 & 96 & 100 & 96 & 65 & 61 & --- & 96$^\dagger$ & --- \\
+    Shopify        & 67 & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & \cellcolor{red!12}0 & \cellcolor{red!12}0 & --- & 83 & 72 & 83 & 78 & 94 & 89 & 94 & 61 & 87 & 93 & 56 & 94 & 83 & 94 & 94$^\dagger$ & --- & --- \\
     Spoonacular    & 94 & 88 & \cellcolor{red!12}41 & --- & \cellcolor{red!12}29 & --- & --- & --- & --- & 88 & 94 & 88 & 75 & 75 & 75 & 88 & 88 & 88 & \cellcolor{red!12}0 & 82 & 76 & 94 & 89 & 94 \\
     \bottomrule
   \end{tabular}
